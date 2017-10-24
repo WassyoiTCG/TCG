@@ -5,9 +5,9 @@ public static class ExceptionMessage
     public static void Message(string errorStr, System.Exception e)
     {
 #if UNITY_EDITOR
-        UnityEditor.EditorUtility.DisplayDialog(errorStr, e.GetType().FullName + "\r\nan exception was thrown.", "OK");
+        UnityEditor.EditorUtility.DisplayDialog(errorStr, System.Environment.StackTrace + "\r\n" + e.GetType().FullName + "\r\nan exception was thrown.", "OK");
 #else
-        oulFile.OutPutLog(Application.dataPath + "/log.txt", e.GetType().FullName + "\r\nan exception was thrown.");
+        oulFile.OutPutLog(Application.dataPath + "/log.txt", System.Environment.StackTrace + "\r\n" + e.GetType().FullName + "\r\nan exception was thrown.");
 #endif
     }
 
@@ -15,6 +15,8 @@ public static class ExceptionMessage
     {
 #if UNITY_EDITOR
         UnityEditor.EditorUtility.DisplayDialog(errorStr, Message, "OK");
+#else
+
 #endif
     }
 

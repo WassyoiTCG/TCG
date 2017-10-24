@@ -23,18 +23,20 @@ public static class oulInput
     //===============================================
     static Vector3 prevPos = Vector3.zero;
     static float holdTime = 0;
-    static GameObject touchCollisionObject; // タップしたときにヒットしたオブジェクト
+    static GameObject touchCollision2DObject; // タップしたときにヒットしたオブジェクト
+    static GameObject touchCollision3DObject; // タップしたときにヒットしたオブジェクト
 
     static bool isAndroid = Application.platform == RuntimePlatform.Android;
     static bool isIOS = Application.platform == RuntimePlatform.IPhonePlayer;
-    static bool isEditor = isEditor = !isAndroid && !isIOS;
+    static bool isEditor = !isAndroid && !isIOS;
 
     static public void Update()
     {
         switch (GetTouchState())
         {
             case TouchState.None:
-                touchCollisionObject = null;
+                touchCollision2DObject = null;
+                touchCollision3DObject = null;
                 break;
 
             case TouchState.Ended:
@@ -43,7 +45,8 @@ public static class oulInput
 
             case TouchState.Began:
                 holdTime = 0;
-                touchCollisionObject = Collision2D();
+                touchCollision2DObject = Collision2D();
+                touchCollision3DObject = Collision3D();
                 break;
 
             case TouchState.Stationary:
@@ -73,7 +76,7 @@ public static class oulInput
         var ret = new Vector3(114, 514, 810);   // Vector3.zeroだとなんか怖い
         if (isEditor)
         {
-            if (GetTouchState() != TouchState.None) ret = Input.mousePosition;
+            ret = Input.mousePosition;
         }
         else
         {
@@ -115,15 +118,27 @@ public static class oulInput
         Collider2D col = Physics2D.OverlapPoint(GetPosition());
         return col ? col.gameObject : null;
     }
+    static public GameObject Collision3D()
+    {
+        RaycastHit hit;
+        Ray ray = Camera.main.ScreenPointToRay(GetPosition(0, false));
+        Collider col = Physics.Raycast(ray, out hit, 500.0f) ? hit.collider : null;
+        return col ? col.gameObject : null;
+    }
 
-    static public GameObject GetTapObject()
+    static public GameObject GetTapObject2D()
     {
         // 離されているかつ、タッチした瞬間のオブジェクトと離した瞬間のオブジェクトが同じだったらそのオブジェクトを返す
-        return (GetTouchState() == TouchState.Ended && touchCollisionObject == Collision2D()) ? touchCollisionObject : null;
+        return (GetTouchState() == TouchState.Ended && touchCollision2DObject == Collision2D()) ? touchCollision2DObject : null;
     }
-    static public bool isTapObject(GameObject target)
+    static public GameObject GetTapObject3D()
     {
-        // 離されているかつ、タッチした瞬間のオブジェクトと離した瞬間のオブジェクトと引数のオブジェクトが同じ
-        return (GetTapObject() == target);
+        // 離されているかつ、タッチした瞬間のオブジェクトと離した瞬間のオブジェクトが同じだったらそのオブジェクトを返す
+        return (GetTouchState() == TouchState.Ended && touchCollision3DObject == Collision3D()) ? touchCollision3DObject : null;
     }
+    //static public bool isTapObject(GameObject target)
+    //{
+    //    // 離されているかつ、タッチした瞬間のオブジェクトと離した瞬間のオブジェクトと引数のオブジェクトが同じ
+    //    return (GetTapObject() == target);
+    //}
 }

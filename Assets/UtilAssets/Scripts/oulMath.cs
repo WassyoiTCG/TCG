@@ -15,9 +15,9 @@ public static class oulMath
     // ベジエ計算
     static public Vector3 Bezier(Vector3[] p, float t)
     {
-        var numPoint = p.Length;
-        var b = t;
-        var a = 1 - b;
+        int numPoint = p.Length;
+        float b = t;
+        float a = 1 - b;
 
         /*				//		参考資料		//
         //ベジェ曲線↓　まず　　最初と中間　　　　次に　　　　中間と最後
@@ -38,7 +38,7 @@ public static class oulMath
         // 中間
         for (int i = 1; i < numPoint - 1; i++)    // -1なのは終点を省くから
         {
-            var mult = b;
+            float mult = b;
             for (int j = 1; j < numPoint - 1; j++)
             {
                 mult *= (j >= i) ? a : b;
@@ -146,8 +146,117 @@ public static class oulMath
         return true;
     }
 
+    // 線とボックスの交点、ヒット判定
+    static public bool LineVsBox(BoxCollider box, Vector3 linePosition, Vector3 lineDirection, out Vector3 intersectionPoint)
+    {
+        //Vector3 e = sphere.center - linePosition;
+        //float a = Vector3.Dot(e, lineDirection);
+        //float t0 = a - Mathf.Sqrt(sphere.radius * sphere.radius - e.magnitude + a * a);
+        //intersectionPoint = linePosition + lineDirection * t0;
+
+        intersectionPoint = Vector3.zero;
+
+        Vector3 width = box.size * box.transform.localScale.x;
+        Vector3 boxMax = width / 2;
+        Vector3 boxMin = -boxMax;
+
+        //Vector3 p = box.transform.position + box.center;
+        //p.x = p.x - linePosition.x;
+        //p.y = p.y - linePosition.y;
+        //p.z = p.z - linePosition.z;
+        
+        // 線をボックスの空間に
+        Matrix4x4 invMat = Matrix4x4.Inverse(box.transform.localToWorldMatrix);
+        linePosition = invMat * linePosition;
+        invMat.SetRow(3, new Vector4(0, 0, 0, 1));
+        lineDirection = invMat * lineDirection;
+
+        float[] p = new float[3];
+        p[0] = linePosition.x;
+        p[1] = linePosition.y;
+        p[2] = linePosition.z;
+        float[] d = new float[3];
+        d[0] = lineDirection.x;
+        d[1] = lineDirection.y;
+        d[2] = lineDirection.z;
+        float[] max = new float[3];
+        max[0] = width.x / 2;
+        max[1] = width.y / 2;
+        max[2] = width.z / 2;
+        float[] min = new float[3];
+        min[0] = -max[0];
+        min[1] = -max[1];
+        min[2] = -max[2];
+
+        float t = float.MinValue, t_max = float.MaxValue;
+
+        for(int i=0;i<3;i++)
+        {
+            if (Mathf.Abs(d[i]) >= Mathf.Epsilon)
+                continue;
+            if (p[i] < min[i] || p[i] > max[i])
+                return false;   // 交差していない
+
+            // スラブとの距離を算出
+            // t1が近スラブ、t2が遠スラブとの距離
+            float odd = 1.0f / d[i];
+            float t1 = (min[i] - p[i]) * odd;
+            float t2 = (max[i] - p[i]) * odd;
+            if(t1 > t2)
+            {
+                float tmp = t1;
+                t1 = t2;
+                t2 = tmp;
+            }
+            if (t1 > t)
+                t = t1;
+            if (t2 < t_max)
+                t_max = t2;
+
+            // スラブ交差チェック
+            if (t >= t_max)
+                return false;
+        }
+
+        // ここまで来たら交差している
+
+        // 交点
+        intersectionPoint = linePosition + t * lineDirection;
+
+        return true;
+    }
+
     static public Vector3 LerpVector(Vector3 a, Vector3 b, float t)
     {
         return a * (1 - t) + b * t;
+    }
+
+    static public Vector3 ScreenToWorldPlate(Vector3 screenPos, Vector3 plateNormal, float shift)
+    {
+        // スクリーン上からのプロジェクションのNearとFarを求める
+        //Vector3 NearPosition = Math::ScreenToWorld(screenPos, 0.0f);
+        //Vector3 FarPosition = Math::ScreenToWorld(screenPos, 1.0f);
+        Vector3 nearPosition = Camera.main.ScreenToWorldPoint(screenPos);
+
+        // Unityの力で単位ベクトルを作る
+        Vector3 direction = Camera.main.ScreenPointToRay(screenPos).direction;
+
+        /*	線と平面による交点判定
+        AXの長さ: XBの長さ = PAとNの内積 : PBとNの内積
+        ※内積はマイナス値になる場合があるので、絶対値を使ってください。
+
+        交点X = A + ベクトルAB * (PAとNの内積 / (PAとNの内積 + PBとNの内積))
+        */
+
+        const float dist = 65535;    // とりあえずでかい値(交点をとるため、あまり小さいと平面に届かない)
+
+        Vector3 PA = nearPosition - (plateNormal * shift);
+        Vector3 PB = (nearPosition + direction * dist) - (plateNormal * shift);
+        float XB = Mathf.Abs(Vector3.Dot(PA, plateNormal));
+
+        float pa_n = Mathf.Abs(Vector3.Dot(PA, plateNormal));
+        float pb_n = Mathf.Abs(Vector3.Dot(PB, plateNormal));
+
+        return (nearPosition + ((nearPosition + direction * dist) - nearPosition) * (pa_n / (pa_n + pb_n)));
     }
 }

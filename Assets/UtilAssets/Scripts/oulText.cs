@@ -74,7 +74,7 @@ public class oulText : MonoBehaviour
     {
         GUI.Label(
             new Rect(0.0f, 0.0f, Screen.width, Screen.height),
-            "FPS: " + fps + "  FixedUpdate: " + fixedFps + "\n" + debugString);
+            "FPS: " + fps + "  FixedUpdate: " + fixedFps + "\n" + oulInput.GetPosition(0, false) + debugString);
 
         GUI.Label(
         new Rect(240.0f, 0.0f, Screen.width, Screen.height),

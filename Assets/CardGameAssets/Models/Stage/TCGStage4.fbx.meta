@@ -1,0 +1,175 @@
+fileFormatVersion: 2
+guid: 6add751cfd59d12469e0fdae09eabe8a
+timeCreated: 1508820438
+licenseType: Free
+ModelImporter:
+  serializedVersion: 21
+  fileIDToRecycleName:
+    100000: cube
+    100002: cube1
+    100004: cube2
+    100006: cube3
+    100008: cube4
+    100010: cube5
+    100012: cube6
+    100014: cube7
+    100016: cube8
+    100018: grid
+    100020: polymsh
+    100022: polymsh_extracted2
+    100024: polymsh_extracted3
+    100026: sphere
+    100028: sphere1
+    100030: sphere2
+    100032: sphere3
+    100034: sphere4
+    100036: //RootNode
+    400000: cube
+    400002: cube1
+    400004: cube2
+    400006: cube3
+    400008: cube4
+    400010: cube5
+    400012: cube6
+    400014: cube7
+    400016: cube8
+    400018: grid
+    400020: polymsh
+    400022: polymsh_extracted2
+    400024: polymsh_extracted3
+    400026: sphere
+    400028: sphere1
+    400030: sphere2
+    400032: sphere3
+    400034: sphere4
+    400036: //RootNode
+    2300000: cube
+    2300002: cube1
+    2300004: cube2
+    2300006: cube3
+    2300008: cube4
+    2300010: cube5
+    2300012: cube6
+    2300014: cube7
+    2300016: cube8
+    2300018: grid
+    2300020: polymsh
+    2300022: polymsh_extracted2
+    2300024: polymsh_extracted3
+    2300026: sphere
+    2300028: sphere1
+    2300030: sphere2
+    2300032: sphere3
+    2300034: sphere4
+    3300000: cube
+    3300002: cube1
+    3300004: cube2
+    3300006: cube3
+    3300008: cube4
+    3300010: cube5
+    3300012: cube6
+    3300014: cube7
+    3300016: cube8
+    3300018: grid
+    3300020: polymsh
+    3300022: polymsh_extracted2
+    3300024: polymsh_extracted3
+    3300026: sphere
+    3300028: sphere1
+    3300030: sphere2
+    3300032: sphere3
+    3300034: sphere4
+    4300000: grid
+    4300002: sphere
+    4300004: cube
+    4300006: cube1
+    4300008: cube2
+    4300010: sphere1
+    4300012: sphere2
+    4300014: sphere3
+    4300016: polymsh
+    4300018: cube3
+    4300020: polymsh_extracted2
+    4300022: polymsh_extracted3
+    4300024: cube4
+    4300026: sphere4
+    4300028: cube5
+    4300030: cube6
+    4300032: cube7
+    4300034: cube8
+    9500000: //RootNode
+  materials:
+    importMaterials: 1
+    materialName: 0
+    materialSearch: 1
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    resampleCurves: 1
+    optimizeGameObjects: 0
+    motionNodeName: 
+    rigImportErrors: 
+    rigImportWarnings: 
+    animationImportErrors: 
+    animationImportWarnings: 
+    animationRetargetingWarnings: 
+    animationDoRetargetingWarnings: 0
+    animationCompression: 1
+    animationRotationError: 0.5
+    animationPositionError: 0.5
+    animationScaleError: 0.5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    extraUserProperties: []
+    clipAnimations: []
+    isReadable: 1
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 1
+    meshCompression: 0
+    addColliders: 0
+    importVisibility: 1
+    importBlendShapes: 1
+    importCameras: 1
+    importLights: 1
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    optimizeMeshForGPU: 1
+    keepQuads: 0
+    weldVertices: 1
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVPackMargin: 4
+    useFileScale: 1
+  tangentSpace:
+    normalSmoothAngle: 60
+    normalImportMode: 0
+    tangentImportMode: 3
+    normalCalculationMode: 4
+  importAnimation: 0
+  copyAvatar: 0
+  humanDescription:
+    serializedVersion: 2
+    human: []
+    skeleton: []
+    armTwist: 0.5
+    foreArmTwist: 0.5
+    upperLegTwist: 0.5
+    legTwist: 0.5
+    armStretch: 0.05
+    legStretch: 0.05
+    feetSpacing: 0
+    rootMotionBoneName: 
+    rootMotionBoneRotation: {x: 0, y: 0, z: 0, w: 1}
+    hasTranslationDoF: 0
+    hasExtraRoot: 1
+    skeletonHasParents: 1
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  animationType: 0
+  humanoidOversampling: 1
+  additionalBone: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
