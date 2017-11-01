@@ -162,19 +162,19 @@ public class SceneMain : MonoBehaviour
     {
         switch (message.messageType)
         {
-            case MessageType.NetPlay:
-                // ロビー開始
-                //uiManager.AppearLobby();
-                networkManager.gameObject.SetActive(true);
-                offlinePlayers.SetActive(false);
-                state = State.Matching;
-                return;
+            //case MessageType.NetPlay:
+            //    // ロビー開始
+            //    //uiManager.AppearLobby();
+            //    networkManager.gameObject.SetActive(true);
+            //    offlinePlayers.SetActive(false);
+            //    state = State.Matching;
+            //    return;
 
-            case MessageType.OfflinePlay:
-                networkManager.gameObject.SetActive(false);
-                offlinePlayers.SetActive(true);
-                state = State.Start;
-                return;
+            //case MessageType.OfflinePlay:
+            //    networkManager.gameObject.SetActive(false);
+            //    offlinePlayers.SetActive(true);
+            //    state = State.Start;
+            //    return;
 
             case MessageType.SyncPoint:
                 {

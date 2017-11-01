@@ -9,28 +9,28 @@ public class ButtonManager : MonoBehaviour
     public oulNetwork networkManager;
     public UIManager uiManager;
 
-    public void OnClickNetPlay()
-    {
-        // ネットフラグOFF
-        MessageManager.isNetwork = false;
-        MessageManager.Dispatch(myPlayerID, MessageType.NetPlay, null);
+    //public void OnClickNetPlay()
+    //{
+    //    // ネットフラグOFF
+    //    MessageManager.isNetwork = false;
+    //    MessageManager.Dispatch(myPlayerID, MessageType.NetPlay, null);
 
-        // ネットフラグON
-        MessageManager.isNetwork = true;
-        // ボタン非表示
-        uiManager.DisAppearNetOrOffline();
-    }
+    //    // ネットフラグON
+    //    MessageManager.isNetwork = true;
+    //    // ボタン非表示
+    //    uiManager.DisAppearNetOrOffline();
+    //}
 
-    public void OnClickOfflinePlay()
-    {
-        // ネットフラグOFF
-        MessageManager.isNetwork = false;
+    //public void OnClickOfflinePlay()
+    //{
+    //    // ネットフラグOFF
+    //    MessageManager.isNetwork = false;
 
-        MessageManager.Dispatch(myPlayerID, MessageType.OfflinePlay, null);
+    //    MessageManager.Dispatch(myPlayerID, MessageType., null);
 
-        // ボタン非表示
-        uiManager.DisAppearNetOrOffline();
-    }
+    //    // ボタン非表示
+    //    uiManager.DisAppearNetOrOffline();
+    //}
 
     public void OnClickHostGame()
     {

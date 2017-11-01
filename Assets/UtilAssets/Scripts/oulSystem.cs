@@ -5,7 +5,7 @@ using UnityEngine;
 public class oulSystem : MonoBehaviour
 {
     [Range(10, 60)]
-    public int frameRate = 30;
+    public int frameRate = 60;
 
     [Range(0, 1)]
     public float timeScale = 1;
@@ -34,6 +34,8 @@ public class oulSystem : MonoBehaviour
         // カメラコンポーネントを取得します
         cam = Camera.main;
         UpdateAspect();
+
+        PlayerDataManager.Load();
     }
 
     // Use this for initialization
@@ -45,6 +47,17 @@ public class oulSystem : MonoBehaviour
     // Update is called once per frame
     void Update ()
     {
+        // throw処理
+        if(Input.GetKey(KeyCode.LeftShift))
+        {
+            //Debug.Log("キテルグマ");
+            Application.targetFrameRate = 15;
+        }
+        else  //(Input.GetKeyUp(KeyCode.LeftShift))
+        {
+            Application.targetFrameRate = 60;
+        }
+
         // 入力更新(staticクラス(MonoBehaviour非継承)なので、手動でUpdateを呼ぶ)
         oulInput.Update();
 
