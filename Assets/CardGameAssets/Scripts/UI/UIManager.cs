@@ -5,42 +5,42 @@ using UnityEngine.UI;
 
 public class UIManager : MonoBehaviour
 {
-    int myScore;        // 自分のスコア
-    float lerpMyScore;  // 補間用スコア
-    int cpuScore;       // CPUのスコア
-    float lerpCPUScore; // 補間用スコア
+    public int myScore { get; private set; }    // 自分のスコア
+    float lerpMyScore;                          // 補間用スコア
+    public int cpuScore { get; private set; }   // CPUのスコア
+    float lerpCPUScore;                         // 補間用スコア
 
-    public int finishScore = 280;   // ゲームが決着するスコア
-    public float setLimitTime = 60; // ストライカーセットする制限時間
-    float timer;                    // 時間用変数
+    public int finishScore = 250;   // ゲームが決着するスコア
 
+    public GameObject SetStrikerOKButton;
+    public GameObject SetStrikerPassButton;
+    GameObject activeSetStrikerButton;
+    public Sprite spriteSetStrikerON;               // ストライカーセットON
+    public Sprite spriteSetStrikerOFF;              // ストライカーセットOFF
+    public Sprite spriteSetStrikerPassON;           // パスON
+    public Sprite spriteSetStrikerPassOFF;          // パスOFF
+
+    public Text limitTimeText;
     public Image eventTimeGauge;    // イベント時間ゲージ
 
-    public Text myScoreText;
+    public Number myScoreNumber;
     public Image myScoreGauge;
-    public Text cpuScoreText;
+    public Number cpuScoreNumber;
     public Image cpuScoreGauge;
 
-    public GameObject netOrOffline;         // ネットかオフラインかの選択
+    public Number myHandCountNumber, myYamahudaCountNumber, myBochiCountNumber, myTsuihouCountNumber;
+    public Number cpuHandCountNumber, cpuYamahudaCountNumber, cpuBochiCountNumber, cpuTsuihouCountNumber;
+
+    //public GameObject netOrOffline;         // ネットかオフラインかの選択
     public GameObject lobby;                // ロビー
     public GameObject matchingWait;         // マッチング大気中
     public GameObject mainUI;               // メイン画面のUI
     public GameObject firstDrawButtons;     // 最初のドローのボタン
-    public GameObject strikerOKButton;      // ストライカーセット完了のボタン
 
-
+    public BattleCardInfomation battleCardInfomation;
 
     void Update()
     {
-        // 時間減算処理
-        if(timer > 0)
-        {
-            if ((timer -= Time.deltaTime) < 0) timer = 0;
-
-            // UIのゲージ設定
-            var timeRate = timer / setLimitTime;
-        }
-
         // 補間処理
         lerpMyScore = Mathf.Lerp(lerpMyScore, (float)myScore, 0.5f);
         lerpCPUScore = Mathf.Lerp(lerpCPUScore, (float)cpuScore, 0.5f);
@@ -54,19 +54,14 @@ public class UIManager : MonoBehaviour
         cpuScoreGauge.fillAmount = rate;
     }
 
-    public void TimerSet()
-    {
-        timer = setLimitTime;
-    }
-
-    public void AppearNetOrOffline()
-    {
-        netOrOffline.SetActive(true);
-    }
-    public void DisAppearNetOrOffline()
-    {
-        netOrOffline.SetActive(false);
-    }
+    //public void AppearNetOrOffline()
+    //{
+    //    netOrOffline.SetActive(true);
+    //}
+    //public void DisAppearNetOrOffline()
+    //{
+    //    netOrOffline.SetActive(false);
+    //}
 
     public void AppearLobby()
     {
@@ -89,6 +84,13 @@ public class UIManager : MonoBehaviour
     public void AppearMainUI()
     {
         mainUI.SetActive(true);
+        this.enabled = true;
+    }
+
+    public void DisAppearMainUI()
+    {
+        mainUI.SetActive(false);
+        this.enabled = false;
     }
 
     public void AppearFirstDraw()
@@ -100,28 +102,122 @@ public class UIManager : MonoBehaviour
         firstDrawButtons.SetActive(false);
     }
 
-    public void AppearStrikerOK()
+    public void AppearBattleCardInfomation(CardData cardData)
     {
-        strikerOKButton.SetActive(true);
-    }
-    public void DisAppearStrikerOK()
-    {
-        strikerOKButton.SetActive(false);
+        // インフォメーション表示
+        battleCardInfomation.Action(cardData);
     }
 
-    public void AddScore(bool isMyPlayer, int score)
+    public void DisAppearBattleCardInfomation()
     {
-        if(isMyPlayer)
+        // インフォメーション非表示
+        battleCardInfomation.Stop();
+    }
+
+
+    public void AppearStrikerOK(bool isHaveStriker)
+    {
+        if (isHaveStriker)
         {
-            myScore += score;
-            myScoreText.text = myScore.ToString();
-
+            activeSetStrikerButton = SetStrikerOKButton;
+            // 画像はOFFの状態
+            activeSetStrikerButton.GetComponent<Image>().sprite = spriteSetStrikerOFF;
+            SetStrikerPassButton.SetActive(false);
         }
         else
         {
-            cpuScore += score;
-            cpuScoreText.text = cpuScore.ToString();
-
+            activeSetStrikerButton = SetStrikerPassButton;
+            // 画像はOFFの状態
+            activeSetStrikerButton.GetComponent<Image>().sprite = spriteSetStrikerPassOFF;
+            SetStrikerOKButton.SetActive(false);
         }
+
+        activeSetStrikerButton.SetActive(true);
+        // ボタン機能無効
+        activeSetStrikerButton.GetComponent<Button>().enabled = false;              
+    }
+    public void EnableSetStrikerButton()
+    {
+        // ゴリA列車
+        if (SetStrikerOKButton.gameObject.activeInHierarchy)
+        {
+            // 画像差し替え
+            activeSetStrikerButton.GetComponent<Image>().sprite = spriteSetStrikerON;
+        }
+        else
+        {
+            // 画像差し替え
+            activeSetStrikerButton.GetComponent<Image>().sprite = spriteSetStrikerPassON;
+        }
+        // ボタン機能有効
+        activeSetStrikerButton.GetComponent<Button>().enabled = true;
+    }
+    public void DisableSetStrikerButton()
+    {
+        // ゴリA列車
+        if (SetStrikerOKButton.gameObject.activeInHierarchy)
+        {
+            // 画像差し替え
+            activeSetStrikerButton.GetComponent<Image>().sprite = spriteSetStrikerOFF;
+        }
+        else
+        {
+            // 画像差し替え
+            activeSetStrikerButton.GetComponent<Image>().sprite = spriteSetStrikerPassOFF;
+        }
+        // ボタン機能有効
+        activeSetStrikerButton.GetComponent<Button>().enabled = false;
+    }
+
+    // 手札山札墓地追放UIの更新
+    public void UpdateDeckUI(DeckManager deckManager, bool isMyPlayer)
+    {
+        var numHand = deckManager.GetNumHand();
+        var numYamahuda = deckManager.GetNumYamahuda();
+        var numBochi = deckManager.GetNumBochi();
+        var numTsuihou = deckManager.GetNumTsuihou();
+
+        if (isMyPlayer)
+        {
+            // UIテキストの変更
+            myHandCountNumber.SetNumber(numHand);
+            myYamahudaCountNumber.SetNumber(numYamahuda);
+            myBochiCountNumber.SetNumber(numBochi);
+            myTsuihouCountNumber.SetNumber(numTsuihou);
+            //myHandCountText.text = "x" + numHand.ToString();
+            //myYamahudaCountText.text = "x" + numYamahuda.ToString();
+            //myBochiCountText.text = "x" + numBochi.ToString();
+            //myTsuihouCountText.text = "x" + numTsuihou.ToString();
+        }
+        else
+        {
+            // UIテキストの変更
+            //cpuHandCountText.text = "x" + numHand.ToString();
+            //cpuYamahudaCountText.text = "x" + numYamahuda.ToString();
+            //cpuBochiCountText.text = "x" + numBochi.ToString();
+            //cpuTsuihouCountText.text = "x" + numTsuihou.ToString();
+            cpuHandCountNumber.SetNumber(numHand);
+            cpuYamahudaCountNumber.SetNumber(numYamahuda);
+            cpuBochiCountNumber.SetNumber(numBochi);
+            cpuTsuihouCountNumber.SetNumber(numTsuihou);
+        }
+    }
+
+    public bool AddScore(bool isMyPlayer, int score)
+    {
+        if(isMyPlayer)
+        {
+            myScore = Mathf.Min(myScore + score, finishScore);
+            myScoreNumber.SetNumber(myScore);
+            if (myScore >= finishScore) return true;
+        }
+        else
+        {
+            cpuScore = Mathf.Min(cpuScore + score, finishScore);
+            cpuScoreNumber.SetNumber(cpuScore);
+            if (cpuScore >= finishScore) return true;
+        }
+
+        return false;
     }
 }

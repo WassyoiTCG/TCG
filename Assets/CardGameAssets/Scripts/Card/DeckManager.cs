@@ -15,14 +15,14 @@ public class DeckManager
     List<CardData> hand = new List<CardData>();         // 手札
     Queue<CardData> yamahuda = new Queue<CardData>();   // 山札
     Queue<CardData> bochi = new Queue<CardData>();      // 墓地
-    Queue<CardData> tuihou = new Queue<CardData>();     // 追放
+    Queue<CardData> tsuihou = new Queue<CardData>();     // 追放
 
     Player player;
     CardObjectManager cardObjectManager;
 
     // フィールドにあるカード
-    CardData fieldStrikerCard;
-    CardData fieldEventCard;
+    public CardData fieldStrikerCard { get; private set; }
+    public CardData fieldEventCard { get; private set; }
 
     void Clear()
     {
@@ -30,7 +30,7 @@ public class DeckManager
         hand.Clear();
         yamahuda.Clear();
         bochi.Clear();
-        tuihou.Clear();
+        tsuihou.Clear();
     }
 
     public void Sync(SyncDeckInfo syncData)
@@ -54,7 +54,7 @@ public class DeckManager
         foreach (int tuihouID in syncData.tuihou)
         {
             if (tuihouID == -1) break;
-            tuihou.Enqueue(CardDataBase.GetCardData(tuihouID));
+            tsuihou.Enqueue(CardDataBase.GetCardData(tuihouID));
         }
 
         // その情報をもとにカードオブジェクト更新
@@ -163,7 +163,8 @@ public class DeckManager
             fieldEventCard = null;
         }
         // カードオブジェクト更新
-        cardObjectManager.UpdateHand(hand, player);
+        cardObjectManager.TurnEnd();
+        //cardObjectManager.UpdateHand(hand, player);
     }
 
     public CardData GetHandCard(int handNo)
@@ -185,25 +186,7 @@ public class DeckManager
 
     public CardData GetTuihouCard(int tuihouNo)
     {
-        return tuihou.ToArray()[tuihouNo];
-    }
-
-    public void VanishHand()
-    {
-        // 手札から消す
-        if (fieldStrikerCard != null)
-        {
-            hand.Remove(fieldStrikerCard);
-            fieldStrikerCard = null;
-        }
-        if (fieldEventCard != null)
-        {
-            hand.Remove(fieldEventCard);
-            fieldEventCard = null;
-        }
-
-        // カードオブジェクト更新
-        cardObjectManager.UpdateHand(hand, player);
+        return tsuihou.ToArray()[tuihouNo];
     }
 
     public void FieldSet(int handNo)
@@ -225,13 +208,39 @@ public class DeckManager
                 fieldStrikerCard = card;
                 break;
 
-            case CardType.Event:
-                // フィールドにおいてるストライカーのカード
-                fieldEventCard = card;
-                break;
+            //case CardType.Event:
+            //    // フィールドにおいてるストライカーのカード
+            //    fieldEventCard = card;
+            //    break;
         }
 
-        cardObjectManager.FieldSet(handNo, player);
+        cardObjectManager.FieldSet(handNo, player.isMyPlayer);
+       
+        // ★★★手札から消す
+        hand.Remove(card);
+
+        cardObjectManager.UpdateHand(hand, player);
+    }
+
+    public void BackToHand(BackToHandInfo info)
+    {
+        switch((CardType)info.iCardType)
+        {
+            case CardType.Fighter:
+            case CardType.AbilityFighter:
+            case CardType.Joker:
+                // 一番後ろに
+                hand.Add(fieldStrikerCard);
+                fieldStrikerCard = null;
+                break;
+
+            case CardType.Support:
+            case CardType.Connect:
+            case CardType.Intercept:
+
+                break;
+        }
+        cardObjectManager.BackToHand(hand, player);
     }
 
     void Shuffle(ref Queue<CardData> deck)
@@ -253,13 +262,21 @@ public class DeckManager
 
     void Tuihou()
     {
-        if (bochi.Count > 0) tuihou.Enqueue(bochi.Dequeue());
+        if (bochi.Count > 0) tsuihou.Enqueue(bochi.Dequeue());
     }
 
     public int GetNumHand() { return hand.Count; }
     public int GetNumYamahuda() { return yamahuda.Count; }
     public int GetNumBochi() { return bochi.Count; }
-    public int GetNumTuihou() { return tuihou.Count; }
+    public int GetNumTsuihou() { return tsuihou.Count; }
 
-    public CardData GetFieldStrikerCard() { return fieldStrikerCard; }
+    public bool isHaveStrikerCard()
+    {
+        // 1枚でもストライカーカードを持っているならtrue
+        foreach(CardData card in hand)
+        {
+            if (card.isStrikerCard()) return true;
+        }
+        return false;
+    }
 }

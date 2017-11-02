@@ -52,6 +52,45 @@ public static class oulMath
         return ret;
     }
 
+    static public float Bezierf(float[] f, float t)
+    {
+        int numPoint = f.Length;
+        float b = t;
+        float a = 1 - b;
+
+        /*				//		参考資料		//
+        //ベジェ曲線↓　まず　　最初と中間　　　　次に　　　　中間と最後
+        pos->x = a*a*a* p1.x + 3 * a*a*b*p2.x + 3 * a*b*b*p2.x + b*b*b*p3.x;
+        pos->y = a*a*a* p1.y + 3 * a*a*b*p2.y + 3 * a*b*b*p2.y + b*b*b*p3.y;
+        pos->z = a*a*a* p1.z + 3 * a*a*b*p2.z + 3 * a*b*b*p2.z + b*b*b*p3.z;
+        */
+
+        // 2点間の直線の場合、ベジエ計算をするとおかしくなるので、割合による直線の計算にする
+        if (numPoint == 2)
+        {
+            return f[0] * a + f[1] * b;
+        }
+
+        // 始点
+        var ret = f[0] * Mathf.Pow(a, numPoint);
+
+        // 中間
+        for (int i = 1; i < numPoint - 1; i++)    // -1なのは終点を省くから
+        {
+            float mult = b;
+            for (int j = 1; j < numPoint - 1; j++)
+            {
+                mult *= (j >= i) ? a : b;
+            }
+            ret += f[i] * (numPoint * mult);
+        }
+
+        // 終点
+        ret += f[numPoint - 1] * Mathf.Pow(b, numPoint);
+
+        return ret;
+    }
+
     // 線と球の交点、ヒット判定
     static public bool LineVsSphere(SphereCollider sphere, Vector3 linePosition, Vector3 lineDirection, out Vector3 intersectionPoint)
     {

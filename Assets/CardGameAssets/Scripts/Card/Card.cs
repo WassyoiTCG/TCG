@@ -19,21 +19,34 @@ public class Card : MonoBehaviour
     public MeshRenderer cardSleeveRenderer;
     public MeshRenderer cardImageRenderer;
 
-    public bool isSet;  // セットされているフラグ
-    public bool isHold; // 掴んでるフラグ
+    public bool isMyPlayerSide;
+    public bool isSetField = false;
 
     public Vector3 handPosition;    // 手札の座標保存用
+    public Vector3 nextPosition;    // なんか補間とかで使う
 
     public Transform cashTransform;
 
     public CardData cardData { get; private set; }
 
-    private void Awake()
+    public BaseEntityStateMachine<Card> stateMachine { get; private set; }
+
+    public CardObjectState.OpenCardInfo openCardInfo = new CardObjectState.OpenCardInfo();
+
+    void Awake()
     {
-        isSet = false;
-        isHold = false;
         //canvas = GetComponent<Canvas>();
         cashTransform = transform;
+
+        // ステート初期化
+        stateMachine = new BaseEntityStateMachine<Card>(this);
+        stateMachine.ChangeState(CardObjectState.None.GetInstance());
+    }
+
+    void Update()
+    {
+        // ステート更新
+        stateMachine.Update();
     }
 
     public void SetOrder(int no)
@@ -46,8 +59,9 @@ public class Card : MonoBehaviour
         canvas.sortingOrder = no;
     }
 
-    public void SetCardData(CardData data)
+    public void SetCardData(CardData data, bool isMyPlayer)
     {
+        isMyPlayerSide = isMyPlayer;
         cardData = data;
 
         // カード名
@@ -78,10 +92,10 @@ public class Card : MonoBehaviour
                 powerNumber.SetNumber(0);
                 break;
 
-            case CardType.Event:
-                //fighterPowerFrame.SetActive(false);
-                powerNumber.SetNumber(data.power);
-                break;
+            //case CardType.Event:
+            //    //fighterPowerFrame.SetActive(false);
+            //    powerNumber.SetNumber(data.power);
+            //    break;
         }
     }
 
@@ -97,6 +111,12 @@ public class Card : MonoBehaviour
             fighterPowerFrame.gameObject.SetActive(false);
             canvas.gameObject.SetActive(false);
         }
+    }
+
+    public void Open()
+    {
+        // ステートてぇんじ
+        stateMachine.ChangeState(CardObjectState.Open.GetInstance());
     }
 
     // カードを出す

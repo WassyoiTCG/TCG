@@ -3,6 +3,8 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2015
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TCG", "TCG.csproj", "{FCA22F1F-187F-0CC6-1D3F-ADA05FEF1B65}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TCG.Editor", "TCG.Editor.csproj", "{D14D9A66-549C-8F15-98E4-2D5E5F7ED642}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -13,6 +15,10 @@ Global
 		{FCA22F1F-187F-0CC6-1D3F-ADA05FEF1B65}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FCA22F1F-187F-0CC6-1D3F-ADA05FEF1B65}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FCA22F1F-187F-0CC6-1D3F-ADA05FEF1B65}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D14D9A66-549C-8F15-98E4-2D5E5F7ED642}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D14D9A66-549C-8F15-98E4-2D5E5F7ED642}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D14D9A66-549C-8F15-98E4-2D5E5F7ED642}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D14D9A66-549C-8F15-98E4-2D5E5F7ED642}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

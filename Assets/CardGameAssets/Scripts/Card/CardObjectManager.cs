@@ -30,13 +30,25 @@ public class CardObjectManager : MonoBehaviour
         for (int i=0;i< handCards.Length;i++)
         {
             handCards[i] = Instantiate(cardPrefab, transform);
+            handCards[i].name = "HandCard" + i;
+            handCards[i].gameObject.SetActive(false);
         }
 
         // 山札カード
         for (int i=0;i< yamahudaCards.Length;i++)
         {
             yamahudaCards[i] = Instantiate(cardPrefab, transform);
+            yamahudaCards[i].name = "Yamahuda" + i;
+            yamahudaCards[i].gameObject.SetActive(false);
         }
+
+        // フィールドカード
+        fieldStrikerCard = Instantiate(cardPrefab, transform);
+        fieldStrikerCard.name = "FieldStrikerCard";
+        fieldStrikerCard.gameObject.SetActive(false);
+        fieldEventCard = Instantiate(cardPrefab, transform);
+        fieldEventCard.name = "FieldEventCard";
+        fieldEventCard.gameObject.SetActive(false);
     }
 	
 	// Update is called once per frame
@@ -56,7 +68,7 @@ public class CardObjectManager : MonoBehaviour
                 // カード表示
                 handCards[i].gameObject.SetActive(true);
                 // カード情報設定
-                handCards[i].SetCardData(hand[i]);
+                handCards[i].SetCardData(hand[i], player.isMyPlayer);
             }
             else
             {
@@ -66,11 +78,11 @@ public class CardObjectManager : MonoBehaviour
         }
 
         // 位置更新
-        UpdateHandPosition(player);
+        UpdateHandPosition();
     }
 
     // 手札の位置更新
-    void UpdateHandPosition(Player player)
+    void UpdateHandPosition()
     {
         for(int i = 0; i < maxHand; i++)
         {
@@ -81,35 +93,36 @@ public class CardObjectManager : MonoBehaviour
             // 表
             card.SetUraomote(true);
             // 描画順
-            card.SetOrder(i + 1);
-            // 位置設定
-            var position = Vector3.zero;
-            var shift = handShift;
-            var dir = handCardDir;
-            var angle = card.cashTransform.localEulerAngles;
-            angle.y = 180;
-            position.x = -5 + ((float)i / maxHand) * 20;
-            position.z = -20.0f;
-            // 逆サイド処理
-            if (player.isMyPlayer == false)
-            {
-                position.x = -position.x;
-                position.z = -position.z;
-                //angle.y = 0;
-                shift.z = -shift.z;
-                dir.z = -dir.z;
-            }
+            card.SetOrder(i);
 
-            // 位置補正
-            //position.x += dir.x * (i * 1.0f);
-            //position.y += dir.z * (i * 1.0f);
-            position += shift;
-            // 角度補正
-            angle.x = Mathf.Atan2(dir.y, dir.z) * Mathf.Rad2Deg;
-
-            card.cashTransform.localPosition = position;
-            card.cashTransform.localEulerAngles = angle;
+            MakeHandTransform(i, card);
         }
+    }
+
+    public void MakeHandTransform(int handNo, Card card)
+    {
+        var position = Vector3.zero;
+        var shift = handShift;
+        var dir = handCardDir;
+        var angle = Vector3.zero;
+        angle.y = 180;
+        position.x = -7 + ((float)handNo / maxHand) * 20;
+        position.z = -20.0f;
+
+        // 逆サイド処理
+        if (card.isMyPlayerSide == false)
+        {
+            position.x = -position.x;
+            position.z = -position.z;
+            shift.z = -shift.z;
+            dir.z = -dir.z;
+        }
+        position += shift + (handNo * 0.01f * shift);
+        // 角度補正
+        angle.x = Mathf.Atan2(dir.y, dir.z) * Mathf.Rad2Deg;
+
+        card.cashTransform.localPosition = position;
+        card.cashTransform.localEulerAngles = angle;
     }
 
     public void UpdateYamahuda(Queue<CardData> yamahuda, Player player)
@@ -123,7 +136,7 @@ public class CardObjectManager : MonoBehaviour
                 // カード表示
                 yamahudaCards[i].gameObject.SetActive(true);
                 // カード情報設定
-                yamahudaCards[i].SetCardData(array[i]);
+                yamahudaCards[i].SetCardData(array[i], player.isMyPlayer);
             }
             else
             {
@@ -132,15 +145,15 @@ public class CardObjectManager : MonoBehaviour
             }
         }
 
-        UpdateYamahudaPosition(player);
+        UpdateYamahudaPosition();
     }
 
-    void UpdateYamahudaPosition(Player player)
+    void UpdateYamahudaPosition()
     {
         for (int i = 0; i < maxYamahuda; i++)
         {
             var card = yamahudaCards[i];
-            if (!card.isActiveAndEnabled) break;
+            if (!card.gameObject.activeInHierarchy) break;
 
             // 裏
             card.SetUraomote(false);
@@ -153,7 +166,7 @@ public class CardObjectManager : MonoBehaviour
             angle.z = 180;
             position.y = i * 0.25f;
             // 逆サイド処理
-            if (player.isMyPlayer == false)
+            if (card.isMyPlayerSide == false)
             {
                 position.x = -position.x;
                 position.z = -position.z;
@@ -166,7 +179,7 @@ public class CardObjectManager : MonoBehaviour
         }
     }
 
-    public void FieldSet(int handNo, Player player)
+    public void FieldSet(int handNo, bool isMyPlayer)
     {
         var type = handCards[handNo].cardData.cardType;
         var card = handCards[handNo];
@@ -174,12 +187,10 @@ public class CardObjectManager : MonoBehaviour
         // 最下層にする
         card.SetOrder(0);
 
-        // セットフラグ
-        card.isSet = true;
-
         var position = Vector3.zero;
         var angle = card.cashTransform.localEulerAngles;
         angle.x = 0;
+        angle.z = 180;
 
         switch (type)
         {
@@ -188,38 +199,91 @@ public class CardObjectManager : MonoBehaviour
             case CardType.Joker:
                 {
                     // フィールドにおいてるストライカーのカード
-                    fieldStrikerCard = card;
+                    //fieldStrikerCard = card;
+                    fieldStrikerCard.gameObject.SetActive(true);
+                    fieldStrikerCard.SetCardData(card.cardData, isMyPlayer);
                     // カードを指定の位置にセット
                     position = strikerField;
                     // 逆サイド処理
-                    if (player.isMyPlayer == false)
+                    if (isMyPlayer == false)
                     {
                         position.x = -position.x;
                         position.z = -position.z;
-                        angle.z = 180;
                     }
-                    fieldStrikerCard.cashTransform.localPosition = position;
+                    //fieldStrikerCard.cashTransform.localPosition = position;
+                    fieldStrikerCard.nextPosition = position;
                     fieldStrikerCard.cashTransform.localEulerAngles = angle;
+
+                    // セットのステートにさせる
+                    fieldStrikerCard.stateMachine.ChangeState(CardObjectState.Set.GetInstance());
                 }
                 break;
         
-            case CardType.Event:
-                // フィールドにおいてるストライカーのカード
-                fieldEventCard = card;
-                // カードを指定の位置にセット
-                position = eventField;
-                // 逆サイド処理
-                if (player.isMyPlayer == false)
-                {
-                    position.x = -position.x;
-                    position.z = -position.z;
-                    angle.z = 180;
-                }
-                fieldEventCard.cashTransform.localPosition = position;
-                fieldEventCard.cashTransform.localPosition = angle;
-                break;
+            //case CardType.Event:
+            //    // フィールドにおいてるストライカーのカード
+            //    fieldEventCard = card;
+            //    // カードを指定の位置にセット
+            //    position = eventField;
+            //    // 逆サイド処理
+            //    if (isMyPlayer == false)
+            //    {
+            //        position.x = -position.x;
+            //        position.z = -position.z;
+            //        angle.z = 180;
+            //    }
+            //    fieldEventCard.cashTransform.localPosition = position;
+            //    fieldEventCard.cashTransform.localPosition = angle;
+
+            //    // 裏にする
+            //    fieldEventCard.SetUraomote(false);
+            //    break;
         }
+    }
 
+    public void BackToHand(List<CardData> hand, Player player)
+    {
+        // カード非表示
+        fieldStrikerCard.gameObject.SetActive(false);
+        UpdateHand(hand, player);
+    }
 
+    public void ReFieldSetStriker(bool isMyPlayer)
+    {
+        if(fieldStrikerCard.gameObject.activeInHierarchy)
+        {
+            var position = Vector3.zero;
+            var angle = fieldStrikerCard.cashTransform.localEulerAngles;
+            angle.x = 0;
+            angle.z = 180;
+
+            // カードを指定の位置にセット
+            position = strikerField;
+            // 逆サイド処理
+            if (isMyPlayer == false)
+            {
+                position.x = -position.x;
+                position.z = -position.z;
+            }
+            fieldStrikerCard.nextPosition = position;
+            fieldStrikerCard.cashTransform.localEulerAngles = angle;
+
+            // セットのステートにさせる
+            fieldStrikerCard.stateMachine.ChangeState(CardObjectState.Set.GetInstance());
+        }
+    }
+
+    public void TurnEnd()
+    {
+        fieldStrikerCard.gameObject.SetActive(false);
+        fieldEventCard.gameObject.SetActive(false);
+    }
+
+    public bool isSetEndStriker()
+    {
+        if(fieldStrikerCard != null)
+        {
+            return fieldStrikerCard.isSetField;
+        }
+        return false;
     }
 }

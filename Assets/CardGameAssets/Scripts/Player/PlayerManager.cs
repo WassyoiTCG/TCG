@@ -17,9 +17,6 @@ public class PlayerManager : MonoBehaviour
     //public Player myPlayer;         // 自分
     //public Player opponentPlayer;   // 対戦相手プレイヤー
 
-    public Text myHandCountText, myYamahudaCountText, myBochiCountText, myTsuihouCountText;
-    public Text cpuHandCountText, cpuYamahudaCountText, cpuBochiCountText, cpuTsuihouCountText;
-
     public bool isPlayesStandbyOK()
     {
         bool allOK = true;
@@ -35,6 +32,14 @@ public class PlayerManager : MonoBehaviour
             if (player.isMyPlayer) return player.playerID;
 
         return -1;
+    }
+
+    public Player GetMyPlayer()
+    {
+        foreach (Player player in players)
+            if (player.isMyPlayer) return player;
+
+        return null;
     }
 
     public void SetState(PlayerState state)
@@ -81,14 +86,16 @@ public class PlayerManager : MonoBehaviour
     {
         bool allOK = true;
         foreach (Player player in players)
-            if (!player.isSetStrikerEnd) allOK = false;
+            if (!player.isSetStrikerOK()) allOK = false;
         return allOK;
     }
 
-    // マリガン
+    public void OpenStriker()
+    {
+        foreach (Player player in players)
+            player.OpenStriker();
+    }
 
-
-    // カード設置
     public bool HandleMessage(MessageInfo message)
     {
         // switchにすると構造体受け取りでバグる
@@ -104,7 +111,18 @@ public class PlayerManager : MonoBehaviour
         }
         if(message.messageType == MessageType.SetStrikerOK)
         {
-            players[message.fromPlayerID].SetStrikerOK();
+            players[message.fromPlayerID].isPushedJunbiKanryo = true;
+            // ボタン非表示
+            if (players[message.fromPlayerID].isMyPlayer && players[message.fromPlayerID].isSetStriker())
+                uiManager.DisableSetStrikerButton();
+            return true;
+        }
+        if (message.messageType == MessageType.SetStrikerPass)
+        {
+            players[message.fromPlayerID].isPushedJunbiKanryo = true;
+            // ボタン非表示
+            if (players[message.fromPlayerID].isMyPlayer && players[message.fromPlayerID].isSetStriker())
+                uiManager.DisableSetStrikerButton();
             return true;
         }
         if (message.messageType == MessageType.SetCard)
@@ -124,13 +142,31 @@ public class PlayerManager : MonoBehaviour
             players[message.fromPlayerID].SetCard(setCardInfo);
             // ボタン表示
             if (players[message.fromPlayerID].isMyPlayer && players[message.fromPlayerID].isSetStriker())
-                uiManager.AppearStrikerOK();
+                uiManager.EnableSetStrikerButton();
+            return true;
+        }
+        if(message.messageType == MessageType.BackToHand)
+        {
+            if (message.exInfo == null)
+                return false;
+
+            // byte[]→構造体
+            BackToHandInfo backToHandInfo = new BackToHandInfo();
+            IntPtr ptr = Marshal.AllocHGlobal(Marshal.SizeOf(backToHandInfo));
+            Marshal.Copy(message.exInfo, 0, ptr, Marshal.SizeOf(backToHandInfo));
+            backToHandInfo = (BackToHandInfo)Marshal.PtrToStructure(ptr, backToHandInfo.GetType());
+            Marshal.FreeHGlobal(ptr);
+
+            players[message.fromPlayerID].BackToHand(backToHandInfo);
+
+            // ボタン非表示
+            if (players[message.fromPlayerID].isMyPlayer && players[message.fromPlayerID].isSetStriker())
+                uiManager.DisableSetStrikerButton();
+
             return true;
         }
         if(message.messageType == MessageType.SyncDeck)
-        {
-
-
+        { 
             if (message.exInfo == null)
                 return false;
 
@@ -152,27 +188,17 @@ public class PlayerManager : MonoBehaviour
             //    syncDeckInfo.yamahuda[7] + "," +
             //    syncDeckInfo.yamahuda[8]);
 
+            var isMyPlayer = players[message.fromPlayerID].isMyPlayer;
+
             // 発信元は同期する必要なし
-            if (!players[message.fromPlayerID].isMyPlayer)
+            if (!isMyPlayer)
             {
                 // 手札山札同期
                 players[message.fromPlayerID].SyncDeck(syncDeckInfo);
-
-                // UIテキストの変更
-                cpuHandCountText.text = "x" + players[message.fromPlayerID].deckManager.GetNumHand().ToString();
-                cpuYamahudaCountText.text = "x" + players[message.fromPlayerID].deckManager.GetNumYamahuda().ToString();
-                cpuBochiCountText.text = "x" + players[message.fromPlayerID].deckManager.GetNumBochi().ToString();
-                cpuTsuihouCountText.text = "x" + players[message.fromPlayerID].deckManager.GetNumTuihou().ToString();
             }
 
-            else
-            {
-                // UIテキストの変更
-                myHandCountText.text = "x" + players[message.fromPlayerID].deckManager.GetNumHand().ToString();
-                myYamahudaCountText.text = "x" + players[message.fromPlayerID].deckManager.GetNumYamahuda().ToString();
-                myBochiCountText.text = "x" + players[message.fromPlayerID].deckManager.GetNumBochi().ToString();
-                myTsuihouCountText.text = "x" + players[message.fromPlayerID].deckManager.GetNumTuihou().ToString();
-            }
+            // UIテキストの変更
+            uiManager.UpdateDeckUI(players[message.fromPlayerID].deckManager, isMyPlayer);
 
             return true;
         }
@@ -180,17 +206,29 @@ public class PlayerManager : MonoBehaviour
         return false;
     }
 
-    public bool StrikerBattle(int score)
+    public int StrikerBattle()
     {
         var card0 = players[0].GetFieldStrikerCard();
         var card1 = players[1].GetFieldStrikerCard();
         var winnerPlayerID = -1;
 
+        // パス判定
+        if(card0 == null)
+        {
+            if (card1 == null) return -1;
+
+            winnerPlayerID = 0;
+        }
+        else if(card1 == null)
+        {
+            winnerPlayerID = 1;
+        }
+
         // ジョーカー判定
-        if (card0.cardType == CardType.Joker)
+        else if (card0.cardType == CardType.Joker)
         {
             // 相打ち処理
-            if (card1.cardType == CardType.Joker) return false;
+            if (card1.cardType == CardType.Joker) return -1;
 
             if (card1.power == 10)
                 winnerPlayerID = 0;
@@ -210,7 +248,7 @@ public class PlayerManager : MonoBehaviour
         }
         else
         {   // 相打ち処理
-            if (card0.power == card1.power) return false;
+            if (card0.power == card1.power) return -1;
 
             if (card0.power > card1.power)
                 winnerPlayerID = 0;
@@ -219,8 +257,6 @@ public class PlayerManager : MonoBehaviour
                 winnerPlayerID = 1;
         }
 
-        uiManager.AddScore(players[winnerPlayerID].isMyPlayer, score);
-
-        return true;
+        return winnerPlayerID;
     }
 }

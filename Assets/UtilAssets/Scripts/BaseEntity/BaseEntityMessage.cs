@@ -39,15 +39,16 @@ public struct PointInfo
     public int[] points;
 }
 
-public struct BackToHandInfo
-{
-    public int orgHandNo;	// もともと何番目のカードだったか
-}
-
 public struct SetCardInfo
 {
     public int handNo;  // 手札の何番目のカードがセットされたか
 }
+
+public struct BackToHandInfo
+{
+    public int iCardType;
+}
+
 
 public struct MessageInfo
 {

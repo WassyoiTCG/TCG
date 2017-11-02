@@ -7,8 +7,9 @@ public class Number : MonoBehaviour
 {
     public enum SortingType
     {
-        Right,
-        Center
+        Right,  // 右づめ
+        Center, // 中央ぞろえ
+        Left,   // 左詰め
     }
     public SortingType sortingType;
 
@@ -35,29 +36,28 @@ public class Number : MonoBehaviour
 
     Transform cashTransform;
     bool isStart = false;
+    bool isSpriteRenderer = true;
     readonly int dotFlag = -1;
-
-    void Awake()
-    {
-        objectPoller = GetComponent<ObjectPoller>();
-
-        cashTransform = transform;
-    }
 
     void Start()
     {
         if (isStart) return;
+        isStart = true;
+
+        objectPoller = GetComponent<ObjectPoller>();
+
+        cashTransform = transform;
 
         // 初期ナンバー設定
         SetNumber(startNumber);
         // カラー設定
         SetColor(color);
-
-        isStart = true;
     }
 
     public void SetNumber(int number, bool topZero = true)
     {
+        if (!isStart) Start();
+
         //アクティブだった数字オブジェクトを非アクティブに
         for (int i = 0; i < cashTransform.childCount; i++)
         {
@@ -75,6 +75,8 @@ public class Number : MonoBehaviour
 
     public void SetNumber(float number, int syousuten, bool topZero = true)
     {
+        if (!isStart) Start();
+
         //アクティブだった数字オブジェクトを非アクティブに
         for (int i = 0; i < cashTransform.childCount; i++)
         {
@@ -206,21 +208,37 @@ public class Number : MonoBehaviour
         var numberImage = objectPoller.GetPoolObject().transform;
         if (sortingType == SortingType.Right || numberCount == 1)
             numberImage.localPosition = new Vector2(-width * i, 0);
+        else if (sortingType == SortingType.Left)
+            numberImage.localPosition = new Vector2(width * i, 0);
         else if (sortingType == SortingType.Center)
-        {
             numberImage.localPosition = new Vector2(-width * i + (numberCount * width / 2) - (width / 2), 0);
-        }
         numberImage.localScale = new Vector2(scale, scale);
         var spriteRenderer = numberImage.GetComponent<SpriteRenderer>();
-        // .分岐
-        if (numbers[i] == dotFlag) spriteRenderer.sprite = dot;
-        // 普通の数字
-        else spriteRenderer.sprite = isHead ? headMarks[(int)headMark] : numimage[numbers[i]];
-        spriteRenderer.color = color;
-        spriteRenderer.sortingOrder = orderInLayer;
-
-        // 初期化フラグオフ
-        isStart = true;
+        if (spriteRenderer != null)
+        {
+            // .分岐
+            if (numbers[i] == dotFlag) spriteRenderer.sprite = dot;
+            // 普通の数字
+            else spriteRenderer.sprite = isHead ? headMarks[(int)headMark] : numimage[numbers[i]];
+            spriteRenderer.color = color;
+            spriteRenderer.sortingOrder = orderInLayer;
+            isSpriteRenderer = true;
+            return;
+        }
+        var image = numberImage.GetComponent<Image>();
+        if(image != null)
+        {
+            // .分岐
+            if (numbers[i] == dotFlag) image.sprite = dot;
+            // 普通の数字
+            else image.sprite = isHead ? headMarks[(int)headMark] : numimage[numbers[i]];
+            image.color = color;
+            //image.sortingOrder = orderInLayer;
+            isSpriteRenderer = false;
+            // 画像サイズ
+            var rectTransform = (RectTransform)numberImage;
+            rectTransform.sizeDelta = new Vector2(image.preferredWidth, image.preferredHeight);
+        }
     }
 
     public void SetTime(float time)
@@ -259,7 +277,9 @@ public class Number : MonoBehaviour
             if (!obj) continue;
             if (0 <= obj.name.LastIndexOf("Clone"))
             {
-                obj.GetComponent<SpriteRenderer>().color = color;
+                if (isSpriteRenderer)
+                    obj.GetComponent<SpriteRenderer>().color = color;
+                else obj.GetComponent<Image>().color = color;
             }
         }
     }
@@ -274,7 +294,9 @@ public class Number : MonoBehaviour
             if (!obj) continue;
             if (0 <= obj.name.LastIndexOf("Clone"))
             {
-                obj.GetComponent<SpriteRenderer>().color = color;
+                if (isSpriteRenderer)
+                    obj.GetComponent<SpriteRenderer>().color = color;
+                else obj.GetComponent<Image>().color = color;
             }
         }
     }

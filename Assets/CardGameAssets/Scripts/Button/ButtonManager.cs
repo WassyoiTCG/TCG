@@ -26,7 +26,7 @@ public class ButtonManager : MonoBehaviour
     //    // ネットフラグOFF
     //    MessageManager.isNetwork = false;
 
-    //    MessageManager.Dispatch(myPlayerID, MessageType., null);
+    //    MessageManager.Dispatch(myPlayerID, MessageType.OfflinePlay, null);
 
     //    // ボタン非表示
     //    uiManager.DisAppearNetOrOffline();
@@ -72,11 +72,21 @@ public class ButtonManager : MonoBehaviour
         uiManager.DisAppearFirstDraw();
     }
 
+    // 準備完了ボタン押したとき
     public void OnClickSetStrikerOK()
     {
         MessageManager.Dispatch(myPlayerID, MessageType.SetStrikerOK, null);
+        Debug.Log("ストライカーセットボタンキテルグマ");
 
-        // ボタン非表示
-        uiManager.DisAppearStrikerOK();
+        // 別のところでもこのメッセージを送るので、非表示処理はここでしない
+
+    }
+
+    public void OnClickSetStrikerPass()
+    {
+        MessageManager.Dispatch(myPlayerID, MessageType.SetStrikerPass, null);
+
+        // 別のところでもこのメッセージを送るので、非表示処理はここでしない
+
     }
 }

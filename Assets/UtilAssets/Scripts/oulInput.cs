@@ -22,7 +22,7 @@ public static class oulInput
     //	メンバ変数
     //===============================================
     static Vector3 prevPos = Vector3.zero;
-    static float holdTime = 0;
+    static float holdTime = 0;                // オブジェクトをタップしている時間
     static GameObject touchCollision2DObject; // タップしたときにヒットしたオブジェクト
     static GameObject touchCollision3DObject; // タップしたときにヒットしたオブジェクト
 
@@ -126,15 +126,15 @@ public static class oulInput
         return col ? col.gameObject : null;
     }
 
-    static public GameObject GetTapObject2D()
+    static public GameObject GetTapObject2D(float time)
     {
-        // 離されているかつ、タッチした瞬間のオブジェクトと離した瞬間のオブジェクトが同じだったらそのオブジェクトを返す
-        return (GetTouchState() == TouchState.Ended && touchCollision2DObject == Collision2D()) ? touchCollision2DObject : null;
+        // 離されているかつ、タッチした瞬間のオブジェクトと離した瞬間のオブジェクトが同じで時間以内に話してたらだったらそのオブジェクトを返す
+        return (GetTouchState() == TouchState.Ended && touchCollision2DObject == Collision2D() && holdTime < time) ? touchCollision2DObject : null;
     }
-    static public GameObject GetTapObject3D()
+    static public GameObject GetTapObject3D(float time)
     {
         // 離されているかつ、タッチした瞬間のオブジェクトと離した瞬間のオブジェクトが同じだったらそのオブジェクトを返す
-        return (GetTouchState() == TouchState.Ended && touchCollision3DObject == Collision3D()) ? touchCollision3DObject : null;
+        return (GetTouchState() == TouchState.Ended && touchCollision3DObject == Collision3D() && holdTime < time) ? touchCollision3DObject : null;
     }
     //static public bool isTapObject(GameObject target)
     //{

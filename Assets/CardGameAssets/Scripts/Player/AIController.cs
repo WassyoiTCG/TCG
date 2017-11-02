@@ -45,6 +45,6 @@ public class AIController : MonoBehaviour
         Debug.Log("CPU:" + r + "番目のカードをセットしました");
 
         // セット完了
-        myPlayer.SetStrikerOK();
+        myPlayer.isPushedJunbiKanryo = true;
     }
 }

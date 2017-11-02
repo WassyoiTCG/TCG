@@ -29,16 +29,15 @@ public class Player : MonoBehaviour
     //public List<Card> hand { get; private set; }
 
     public CardObjectManager cardObjectManager;
-    PlayerManager playerManager;     // プレイヤー管理する人の実体
+    public PlayerManager playerManager { get; private set; }     // プレイヤー管理する人の実体
 
     readonly int firstDrawCount = 7;                            // 最初のドローする枚数
-
 
     public int playerID;    // ネット的なID
     public bool isMyPlayer; // 自分が操作しているプレイヤーかどうか
 
     public bool isFirstDrawEnd;
-    public bool isSetStrikerEnd;
+    public bool isPushedJunbiKanryo;
 
 	// Use this for initialization
 	void Start ()
@@ -68,7 +67,7 @@ public class Player : MonoBehaviour
 
         // その他
         isFirstDrawEnd = false;
-        isSetStrikerEnd = false;
+        isPushedJunbiKanryo = false;
 
         // プレイヤーマネージャーに追加
         playerManager = GameObject.Find("PlayerManager").GetComponent<PlayerManager>();
@@ -134,7 +133,7 @@ public class Player : MonoBehaviour
             case PlayerState.Draw:
                 break;
             case PlayerState.SetStriker:
-                isSetStrikerEnd = false;
+                isPushedJunbiKanryo = false;
                 break;
             case PlayerState.BeforeOpen:
                 break;
@@ -144,6 +143,8 @@ public class Player : MonoBehaviour
                 break;
             case PlayerState.TurnEnd:
                 deckManager.TurnEnd();
+                // UI更新
+                playerManager.uiManager.UpdateDeckUI(deckManager, isMyPlayer);
                 break;
             default:
                 break;
@@ -178,7 +179,7 @@ public class Player : MonoBehaviour
         SendSyncDeckInfo();
     }
 
-    void SendSyncDeckInfo()
+    public void SendSyncDeckInfo()
     {
         // ネットワーク状態なら自分で相手のデッキ情報を送信するべきではない。
         if(MessageManager.isNetwork)
@@ -222,7 +223,7 @@ public class Player : MonoBehaviour
         }
 
         // 追放同期
-        num = deckManager.GetNumTuihou();
+        num = deckManager.GetNumTsuihou();
         if (num == 0) exInfo.tuihou[0] = -1;
         else if (num < 15) exInfo.tuihou[num] = -1;
         for (int i = 0; i < num; i++)
@@ -243,40 +244,39 @@ public class Player : MonoBehaviour
     {
         // 1枚ドロー
         deckManager.Draw(1);
+
+        // UI更新
+        playerManager.uiManager.UpdateDeckUI(deckManager, isMyPlayer);
     }
 
     public void SetCard(SetCardInfo info)
     {
         deckManager.FieldSet(info.handNo);
+    }
 
-        //var card = deckManager.GetHandCard(info.handNo);
-        //var newPosition = Vector3.zero;
-        //switch(card.cardData.cardType)
-        //{
-        //    case CardType.Fighter:
-        //    case CardType.AbilityFighter:
-        //    case CardType.Joker:
-        //        newPosition = strikerField;
-        //        // フィールドにおいてるストライカーのカード
-        //        fieldStrikerCard = card;
-        //        // セットフラグoN
-        //        isSetStriker = true;
-        //        break;
-        //
-        //    case CardType.Event:
-        //        newPosition = eventField;
-        //        break;
-        //}
-        //
-        //// カードを指定の位置にセット
-        //card.cashTransform.localPosition = newPosition;
+    public void BackToHand(BackToHandInfo info)
+    {
+        deckManager.BackToHand(info);
     }
 
     public bool isSetStriker() { return deckManager.isSetStriker(); }
 
-    public void SetStrikerOK()
+
+    public bool isSetStrikerOK()
     {
-        isSetStrikerEnd = true;
+        return (isSetStriker() && cardObjectManager.isSetEndStriker() && isPushedJunbiKanryo);
+    }
+
+    public void SetStrikerTimeOver()
+    {
+        var controller = GetComponent<PlayerController>();
+        Debug.Assert(controller != null, "controller is null.");
+        controller.SetStrikerTimeOver();
+    }
+
+    public void OpenStriker()
+    {
+        cardObjectManager.fieldStrikerCard.Open();
     }
 
     // 手札や山札の情報のセット
@@ -288,6 +288,11 @@ public class Player : MonoBehaviour
 
     public CardData GetFieldStrikerCard()
     {
-        return deckManager.GetFieldStrikerCard();
+        return deckManager.fieldStrikerCard;
+    }
+
+    public bool isHaveStrikerCard()
+    {
+        return deckManager.isHaveStrikerCard();
     }
 }

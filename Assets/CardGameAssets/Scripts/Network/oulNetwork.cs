@@ -179,10 +179,10 @@ public static class MessageManager
     static public SceneMain sceneMain;    // ゲーム管理さん
     static public bool isNetwork;
 
-    public static void Start(SceneMain main)
+    public static void Start(SceneMain main, bool network)
     {
         sceneMain = main;
-        isNetwork = false;
+        isNetwork = network;
     }
 
     // ネットからの情報を受信

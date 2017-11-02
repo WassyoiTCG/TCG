@@ -14,12 +14,13 @@ public class TextLoader
         {
             //oulFile.OutPutLog(Application.dataPath + "/log.txt", fileName + "\r\n");
 
-            // これだと何故かexe実行の時だけSystem.ArgumentExceptionがでる。いみわかめすぎて腹立つ。死ね死ねクソめ
-            //using (StreamReader reader = new StreamReader(fileName, Encoding.GetEncoding("shift_jis")))
+            // これだと何故かexe実行の時だけSystem.ArgumentExceptionがでる。どうやらUnityはshift_jisをサポートしていないようだ
+            // http://answers.unity3d.com/questions/42955/codepage-1252-not-supported-works-in-editor-but-no.html
+            using (StreamReader reader = new StreamReader(fileName, Encoding.GetEncoding("shift_jis")))
 
             // テキストオープン
-            using (FileStream file = new FileStream(fileName, FileMode.Open, FileAccess.Read))
-            using (StreamReader reader = new StreamReader(file/*, Encoding.GetEncoding("shift_jis")*/))
+            //using (FileStream file = new FileStream(fileName, FileMode.Open, FileAccess.Read))
+            //using (StreamReader reader = new StreamReader(file/*, Encoding.GetEncoding("shift_jis")*/))
             {
                 // 全読み
                 fileBuf = reader.ReadToEnd().ToCharArray();

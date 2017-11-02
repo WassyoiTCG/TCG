@@ -9,10 +9,12 @@ public enum CardType
     Fighter,        // ファイター
     AbilityFighter, // 効果ありファイター
     Joker,          // ジョーカー
-    Event           // イベント
+    Support,        // スペル
+    Connect,        // オナーズクラスは糞
+    Intercept       // 速攻魔法
 }
 
-public enum EventType
+public enum CardEventType
 {
     Set,        // セット時
     BeforeOpen, // オープン前
@@ -106,7 +108,7 @@ public enum Rarelity
     UC, // アンコモン
     R,  // レア
     SR, // Sレア
-    L,  // レジェンド
+    LR, // レジェンドレア
 }
 
 public class FighterCard
@@ -123,10 +125,27 @@ public class JokerCard
 
 }
 
+
 public class EventCard
 {
-    public EventType[] eventTypes;  // イベントのタイプ(複数)
+
 }
+
+public class SupportCard : EventCard
+{
+
+}
+
+public class ConnectCard : EventCard
+{
+}
+
+public class InterceptCard : EventCard
+{
+
+}
+
+
 
 public class CardData
 {
@@ -136,16 +155,20 @@ public class CardData
     public Rarelity rarelity;   // レアリティ
     public string abilityText;  // 効果テキスト
     public string flavorText;   // フレーバーテキスト
-    public Texture image;        // 絵
+    public Texture image;       // 絵
     public int power;           // パワー
 
     // ★これのうちのどれか1つを持つ
     public FighterCard fighterCard;                 // ファイターカード
     public AbilityFighterCard abilityFighterCard;   // 効果ファイターカード
     public JokerCard jokerCard;                     // ジョーカーカード
-    public EventCard eventCard;                     // イベントカード
+    public SupportCard supportCard;                 // イベントカード
+    public ConnectCard connectCard;                 // オナーズクラスは糞。何度でも言う。
+    public InterceptCard interceptCard;             // インターセプト
 
     public FighterCard GetFighterCard() { if (cardType == CardType.Fighter) return fighterCard; else if (cardType == CardType.AbilityFighter) return abilityFighterCard; else return null; }
+    public EventCard GetEventCard() { if (cardType == CardType.Support) return supportCard; else if (cardType == CardType.Connect) return connectCard; else if (cardType == CardType.Intercept) return interceptCard; else return null; }
+    public bool isStrikerCard() { return (cardType == CardType.Fighter || cardType == CardType.AbilityFighter || cardType == CardType.Joker); }
 }
 
 public static class CardDataBase
@@ -247,13 +270,13 @@ public static class CardDataBase
             }
 
             // イベントなら
-            if (card.cardType == CardType.Event)
-            {
-                // イベントがソートONになってるか検索。ONになってたら入れる
-                foreach (int i in sortOnBitIndices)
-                    if (i == (int)SortType.Event) ret.Add(card);
-                continue;
-            }
+            //if (card.cardType == CardType.Event)
+            //{
+            //    // イベントがソートONになってるか検索。ONになってたら入れる
+            //    foreach (int i in sortOnBitIndices)
+            //        if (i == (int)SortType.Event) ret.Add(card);
+            //    continue;
+            //}
 
             // それ以外だとファイターしか残っていないはず
             FighterCard fighter = card.GetFighterCard();
@@ -343,8 +366,16 @@ public static class CardDataBase
                         cardDatas[i].jokerCard = new JokerCard();
                         break;
 
-                    case CardType.Event:
-                        cardDatas[i].eventCard = new EventCard();
+                    case CardType.Support:
+                        cardDatas[i].supportCard = new SupportCard();
+                        break;
+
+                    case CardType.Connect:
+                        cardDatas[i].connectCard = new ConnectCard();
+                        break;
+
+                    case CardType.Intercept:
+                        cardDatas[i].interceptCard = new InterceptCard();
                         break;
 
                     default:
@@ -424,16 +455,18 @@ public static class CardDataBase
                         // 効果
                         break;
 
-                    case CardType.Event:
+                    case CardType.Support:
+                    case CardType.Connect:
+                    case CardType.Intercept:
                         {
                             // イベントタイプ
                             //skip = loader.ReadString();
                             // イベントの個数
-                            int numEvent = loader.ReadInt();
-                            cardDatas[i].eventCard.eventTypes = new EventType[numEvent];
-                            // 個数に応じて読み込み
-                            for (int j = 0; j < numEvent; j++)
-                                cardDatas[i].eventCard.eventTypes[j] = (EventType)loader.ReadInt();
+                            //int numEvent = loader.ReadInt();
+                            //cardDatas[i].eventCard.eventTypes = new CardEventType[numEvent];
+                            //// 個数に応じて読み込み
+                            //for (int j = 0; j < numEvent; j++)
+                            //    cardDatas[i].eventCard.eventTypes[j] = (CardEventType)loader.ReadInt();
                             // 効果
                         }
                         break;
