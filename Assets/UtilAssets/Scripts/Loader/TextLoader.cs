@@ -76,7 +76,7 @@ public class TextLoader
     public int ReadInt()
     {
         // 数字まで進める
-        char[] goalChars = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
+        char[] goalChars = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '-' };
         if (!ToRead(goalChars, false)) return 0;
         // 空白か改行かタブか,か)まで
         char[] goalChars2 = { ' ', '\n', '\r', '\t', ',', ')' };
@@ -88,7 +88,7 @@ public class TextLoader
     public float ReadFloat()
     {
         // 数字まで進める
-        char[] goalChars = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
+        char[] goalChars = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '-' };
         if (!ToRead(goalChars, false)) return 0;
         // 空白か改行かタブか,か)まで
         char[] goalChars2 = { ' ', '\n', '\r', '\t', ',', ')' };

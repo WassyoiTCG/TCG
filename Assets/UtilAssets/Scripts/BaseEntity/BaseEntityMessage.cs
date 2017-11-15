@@ -7,6 +7,9 @@ public enum MessageType
     /* Menu */
     ClickMenuButton,
 
+    /* Deck */
+    ClickLineButton,
+
     /* Main */
     //NetPlay,        // ネット対戦プレイ選択
     //OfflinePlay,    // オフライン対戦プレイ選択
@@ -85,4 +88,14 @@ public struct MessageInfo
 public struct SelectMenuNo
 {
     public int selectNo;
+}
+
+//+-----------------------------------------------------------
+//  メニュー画面用
+//+-----------------------------------------------------------
+
+// ライン変更
+public struct ChangeLine
+{
+    public int iNextLine;
 }

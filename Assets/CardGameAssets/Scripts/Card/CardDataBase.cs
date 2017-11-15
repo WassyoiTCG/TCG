@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using UnityEngine;
 
+// (11/11) UnionでSupport・Connect・InterceptをEventでまとめたい。
 public enum CardType
 {
     Fighter,        // ファイター
@@ -145,6 +146,11 @@ public class InterceptCard : EventCard
 
 }
 
+// (11/14)(TODO)-1はカードが存在しない
+public enum IDType
+{
+    NONE = -1//  無し
+}
 
 
 public class CardData
@@ -168,12 +174,13 @@ public class CardData
 
     public FighterCard GetFighterCard() { if (cardType == CardType.Fighter) return fighterCard; else if (cardType == CardType.AbilityFighter) return abilityFighterCard; else return null; }
     public EventCard GetEventCard() { if (cardType == CardType.Support) return supportCard; else if (cardType == CardType.Connect) return connectCard; else if (cardType == CardType.Intercept) return interceptCard; else return null; }
-    public bool isStrikerCard() { return (cardType == CardType.Fighter || cardType == CardType.AbilityFighter || cardType == CardType.Joker); }
+    public bool isStrikerCard() { return (cardType == CardType.Fighter || cardType == CardType.AbilityFighter /*|| cardType == CardType.Joker*/); }
 }
 
 public static class CardDataBase
 {
     static CardData[] cardDatas;
+    static CardData missingCard;    // 欠番用のカード
 
     public static CardData[] GetCardList() { return cardDatas; }
 
@@ -186,6 +193,11 @@ public static class CardDataBase
         //    if (texture) m_aCardDatas[id].m_image = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
         //}
 
+        // けつばん
+        if(id == (int)IDType.NONE)
+        {
+            return missingCard;
+        }
         return cardDatas[id];
     }
 
@@ -214,9 +226,22 @@ public static class CardDataBase
 
     public static string[] SyuzokuString = new string[] { "戦士", "ナイト", "ソーサラー", "獣", "植物", "昆虫", "魚", "鳥", "アンデッド", "岩石", "マシン", "魔物", "ドラゴン", "精霊", "天使", "悪魔", "マスター" };
 
+    static bool isInit = false;
 
     public static void Start()
     {
+        if (isInit) return;
+        isInit = true;
+
+        missingCard = new CardData();
+        missingCard.id = -1;
+        missingCard.cardType = CardType.Joker;
+        missingCard.power = 334;
+        missingCard.abilityText = "効果:このメッセージが表示されたら製作者は消されてしまう。";
+        missingCard.flavorText = "宝箱から全てが始まった。";
+        missingCard.cardName = "欠番ニキ";
+        missingCard.image = Resources.Load<Sprite>("Sprites/MissingImage").texture;
+
         // ビットマスク初期化
         sortBitMask = new BitVector32(0);
         int numSortType = (int)SortType.End;

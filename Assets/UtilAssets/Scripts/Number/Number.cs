@@ -56,6 +56,9 @@ public class Number : MonoBehaviour
 
     public void SetNumber(int number, bool topZero = true)
     {
+        //  ゴリニキ降臨 Start関数は複製した時呼ばれてしまうのでstartNumberもかえる必要あり。
+        startNumber = number;
+
         if (!isStart) Start();
 
         //アクティブだった数字オブジェクトを非アクティブに
@@ -75,6 +78,7 @@ public class Number : MonoBehaviour
 
     public void SetNumber(float number, int syousuten, bool topZero = true)
     {
+
         if (!isStart) Start();
 
         //アクティブだった数字オブジェクトを非アクティブに

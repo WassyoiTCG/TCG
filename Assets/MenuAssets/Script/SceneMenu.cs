@@ -40,8 +40,12 @@ public class SceneMenu : MonoBehaviour {
     //public GameObject Canvas;
     //public GameObject Canvas;
 
+    public GameObject a;
     // Use this for initialization
     void Start () {
+
+        a.GetComponent<ScreenOutAppeared>().Action();
+
 
         MenuPlate = Canvas.transform.Find("MenuButton/MenuPlate").gameObject;
 
@@ -148,8 +152,9 @@ public class SceneMenu : MonoBehaviour {
     void Update () 
     {
         m_pStateMachine.globalState.Execute(this);
-        
+        m_pStateMachine.currentState.Execute(this);
 
+        a.GetComponent<ScreenOutAppeared>().SelfUpdate();
     }
 
 

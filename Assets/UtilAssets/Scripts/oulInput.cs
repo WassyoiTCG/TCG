@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public static class oulInput
 {
@@ -22,9 +23,11 @@ public static class oulInput
     //	メンバ変数
     //===============================================
     static Vector3 prevPos = Vector3.zero;
-    static float holdTime = 0;                // オブジェクトをタップしている時間
-    static GameObject touchCollision2DObject; // タップしたときにヒットしたオブジェクト
-    static GameObject touchCollision3DObject; // タップしたときにヒットしたオブジェクト
+    static float holdTime = 0;                          // オブジェクトをタップしている時間
+    static GameObject touchCollision2DObject;           // タップしたときにヒットしたオブジェクト
+    static GameObject touchCollision3DObject;           // タップしたときにヒットしたオブジェクト
+    static GameObject touchCollisionuGUIObject;         // タップした時にヒットしたオブジェクト
+    public static GameObject GetTouchuGUIObject() { return touchCollisionuGUIObject; }
 
     static bool isAndroid = Application.platform == RuntimePlatform.Android;
     static bool isIOS = Application.platform == RuntimePlatform.IPhonePlayer;
@@ -37,16 +40,26 @@ public static class oulInput
             case TouchState.None:
                 touchCollision2DObject = null;
                 touchCollision3DObject = null;
+                touchCollisionuGUIObject = null;
                 break;
 
             case TouchState.Ended:
             case TouchState.Canceled:
+
+            // (11/12)追加　離したら掴んでいる時間をリセット
+                holdTime = 0;
                 break;
 
             case TouchState.Began:
+            // エフェクトの処理
+            {
+                    Vector3 position = GetPosition();
+
+            }
                 holdTime = 0;
                 touchCollision2DObject = Collision2D();
                 touchCollision3DObject = Collision3D();
+                touchCollisionuGUIObject = CollisionuGUI();
                 break;
 
             case TouchState.Stationary:
@@ -125,7 +138,18 @@ public static class oulInput
         Collider col = Physics.Raycast(ray, out hit, 500.0f) ? hit.collider : null;
         return col ? col.gameObject : null;
     }
-
+    static public GameObject CollisionuGUI()
+    {
+        PointerEventData eventDataCurrentPosition = new PointerEventData(EventSystem.current);
+        eventDataCurrentPosition.position = GetPosition(0, false);
+        List<RaycastResult> results = new List<RaycastResult>();
+        EventSystem.current.RaycastAll(eventDataCurrentPosition, results);
+        if (results.Count > 0)
+        {
+            return results[0].gameObject;
+        }
+        else return null;
+    }
     static public GameObject GetTapObject2D(float time)
     {
         // 離されているかつ、タッチした瞬間のオブジェクトと離した瞬間のオブジェクトが同じで時間以内に話してたらだったらそのオブジェクトを返す
@@ -136,6 +160,7 @@ public static class oulInput
         // 離されているかつ、タッチした瞬間のオブジェクトと離した瞬間のオブジェクトが同じだったらそのオブジェクトを返す
         return (GetTouchState() == TouchState.Ended && touchCollision3DObject == Collision3D() && holdTime < time) ? touchCollision3DObject : null;
     }
+ 
     //static public bool isTapObject(GameObject target)
     //{
     //    // 離されているかつ、タッチした瞬間のオブジェクトと離した瞬間のオブジェクトと引数のオブジェクトが同じ
