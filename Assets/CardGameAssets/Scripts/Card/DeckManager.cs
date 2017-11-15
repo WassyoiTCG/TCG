@@ -84,6 +84,11 @@ public class DeckManager
         yamahuda.Enqueue(deckData.jorkerCard);
         // 山札シャッフル
         Shuffle(ref yamahuda);
+
+        fieldStrikerCard = null;
+        fieldEventCard = null;
+
+        cardObjectManager.Restart();
     }
 
     public void Draw(int maisuu)
@@ -179,15 +184,19 @@ public class DeckManager
         return yamahuda.ToArray()[yamahudaNo];
     }
 
-    public CardData GetBochiCard(int bothiNo)
+    public CardData GetCemeteryCard(int bothiNo)
     {
         return bochi.ToArray()[bothiNo];
     }
 
-    public CardData GetTuihouCard(int tuihouNo)
+    public CardData[] GetCemeteryCards() { return bochi.ToArray(); }
+
+    public CardData GetExpulsionCard(int tuihouNo)
     {
         return tsuihou.ToArray()[tuihouNo];
     }
+
+    public CardData[] GetExpulsionCards() { return tsuihou.ToArray(); }
 
     public void FieldSet(int handNo)
     {

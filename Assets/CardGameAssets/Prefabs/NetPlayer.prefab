@@ -19,7 +19,7 @@ GameObject:
   serializedVersion: 5
   m_Component:
   - component: {fileID: 4252146858140202}
-  - component: {fileID: 114968473633838236}
+  - component: {fileID: 114327160917170934}
   m_Layer: 0
   m_Name: CardObjectManager
   m_TagString: Untagged
@@ -79,7 +79,7 @@ MonoBehaviour:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1559075905372880}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: -1768714887, guid: 870353891bb340e2b2a9c8707e7419ba, type: 3}
   m_Name: 
@@ -105,7 +105,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d7e41ee92f3d4f24b9df0360d7ff2c68, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  battleCardInfomation: {fileID: 0}
+--- !u!114 &114327160917170934
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1063108157590802}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 404bbb85b19a49243af4e2363e7eb169, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cardPrefab: {fileID: 114100196248749878, guid: 6af55d116d982664891bdead15a54ec3,
+    type: 2}
+  handShift: {x: 0, y: 4.7, z: -5}
+  handCardDir: {x: 0, y: 0.573, z: 0.819}
 --- !u!114 &114383572890857824
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -151,23 +165,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   moveSpeed: 0.025
   move: {x: 0, y: 0, z: 0}
-  cardObjectManager: {fileID: 114968473633838236}
+  cardObjectManager: {fileID: 114327160917170934}
   playerID: 0
   isMyPlayer: 0
   isFirstDrawEnd: 0
+  isSynced: 0
   isPushedJunbiKanryo: 0
---- !u!114 &114968473633838236
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1063108157590802}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 404bbb85b19a49243af4e2363e7eb169, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  cardPrefab: {fileID: 114100196248749878, guid: 6af55d116d982664891bdead15a54ec3,
-    type: 2}
-  handShift: {x: 0, y: 12.8, z: -10}
-  handCardDir: {x: 0, y: 0.819, z: 0.573}
+  waitTimer: 0

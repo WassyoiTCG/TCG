@@ -22,7 +22,7 @@ public class CardObjectManager : MonoBehaviour
     readonly Vector3 eventField = new Vector3(0, 0, -10);       // イベントカードをセットする位置
 
     // Use this for initialization
-    void Start ()
+    void Awake()
     {
         // カードの実体を生成
 
@@ -78,11 +78,11 @@ public class CardObjectManager : MonoBehaviour
         }
 
         // 位置更新
-        UpdateHandPosition();
+        UpdateHandPosition(player);
     }
 
     // 手札の位置更新
-    void UpdateHandPosition()
+    void UpdateHandPosition(Player player)
     {
         for(int i = 0; i < maxHand; i++)
         {
@@ -95,27 +95,38 @@ public class CardObjectManager : MonoBehaviour
             // 描画順
             card.SetOrder(i);
 
-            MakeHandTransform(i, card);
+            MakeHandTransform(i, player.deckManager.GetNumHand(), card);
         }
     }
 
-    public void MakeHandTransform(int handNo, Card card)
+    public void MakeHandTransform(int handNo, int numHand, Card card)
     {
         var position = Vector3.zero;
         var shift = handShift;
         var dir = handCardDir;
         var angle = Vector3.zero;
         angle.y = 180;
-        position.x = -7 + ((float)handNo / maxHand) * 20;
+
+        const float width = 2;
+        position.x = width * handNo - (numHand * width / 2) + (width / 2);
         position.z = -20.0f;
 
         // 逆サイド処理
         if (card.isMyPlayerSide == false)
         {
+            card.SetUraomote(false);
+
             position.x = -position.x;
+            position.y = 1;
             position.z = -position.z;
             shift.z = -shift.z;
             dir.z = -dir.z;
+            angle.x = 180;
+
+            card.cashTransform.localPosition = position;
+            card.cashTransform.localEulerAngles = angle;
+
+            return;
         }
         position += shift + (handNo * 0.01f * shift);
         // 角度補正
@@ -285,5 +296,12 @@ public class CardObjectManager : MonoBehaviour
             return fieldStrikerCard.isSetField;
         }
         return false;
+    }
+
+    public void Restart()
+    {
+        // フィールドカード
+        fieldStrikerCard.gameObject.SetActive(false);
+        fieldEventCard.gameObject.SetActive(false);
     }
 }

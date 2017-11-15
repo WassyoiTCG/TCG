@@ -44,12 +44,12 @@ public class PlayerController : NetworkBehaviour
     // Use this for initialization
     void Start()
     {
+        Restart();
+
         cardSetOK = false;
         myPlayer = GetComponent<Player>();
 
-        holdHandNo = noHoldCard;
-
-        setFieldBorderY = Screen.height / 4;
+        setFieldBorderY = Screen.height / 6;
 
         //battleCardInfomation = GameObject.Find("BattleCardInfomation").GetComponent<BattleCardInfomation>();
 
@@ -69,9 +69,15 @@ public class PlayerController : NetworkBehaviour
             cameraAngle.y = 180;
         }
     }
+
+    public void Restart()
+    {
+        cardSetOK = false;
+        holdHandNo = noHoldCard;
+    }
 	
 	// Update is called once per frame
-	protected virtual void Update ()
+	void Update ()
     {
         switch (myPlayer.state)
         {
@@ -90,16 +96,40 @@ public class PlayerController : NetworkBehaviour
 
     void CardTapUpdate()
     {
-        // 押した瞬間
-        if(oulInput.GetTouchState() == oulInput.TouchState.Began)
+        // マウスがUIにポイントしていたら
+        if(UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject())
         {
+            return;
+        }
+
+        // 押した瞬間
+        if (oulInput.GetTouchState() == oulInput.TouchState.Began)
+        {
+            // UIには触れていない
             var touchObject = oulInput.Collision3D();
             if (touchObject)
             {
+                // 墓地オブジェクトかどうか
+                if (touchObject.tag == "Cemetery")
+                {
+                    if (touchObject.name == "myCemetery")
+                        myPlayer.playerManager.uiManager.cemeteryInfoUIManager.Appear(myPlayer.deckManager.GetCemeteryCards(), myPlayer.deckManager.GetExpulsionCards());
+                    else if (touchObject.name == "cpuCemetery")
+                    {
+                        var cpuPlayer = myPlayer.playerManager.GetCPUPlayer();
+                        myPlayer.playerManager.uiManager.cemeteryInfoUIManager.Appear(cpuPlayer.deckManager.GetCemeteryCards(), cpuPlayer.deckManager.GetExpulsionCards());
+                    }
+                    else Debug.LogError("墓地の名前が違う");
+                }
+                else
+                {
+                    myPlayer.playerManager.uiManager.cemeteryInfoUIManager.DisAppear();
+                }
                 // レイに触れたオブジェクトがカードかどうかチェック
                 if (touchObject.tag == "Card")
                 {
                     var card = touchObject.GetComponent<Card>();
+                    if (!card.uraomoteFlag) return;
 
                     // インフォメーション表示
                     myPlayer.playerManager.uiManager.AppearBattleCardInfomation(card.cardData);
@@ -109,13 +139,27 @@ public class PlayerController : NetworkBehaviour
                     // インフォメーション非表示
                     myPlayer.playerManager.uiManager.DisAppearBattleCardInfomation();
                 }
+
+
+            }
+            else
+            {
+                myPlayer.playerManager.uiManager.cemeteryInfoUIManager.DisAppear();
             }
         }
     }
 
     protected virtual void SetStrikerUpdate()
     {
-        //if (myPlayer.isSetStriker()) return;
+        if (myPlayer.isPushedJunbiKanryo)
+        {
+            // 1秒待ってまだ相手が設置してないのでUIをだす
+            if((myPlayer.waitTimer += Time.deltaTime) > 0.5f)
+            {
+                myPlayer.playerManager.uiManager.AppearWaitYouUI();
+            }
+            return;
+        }
 
         // カード掴んでたら
         if (holdHandNo != noHoldCard)
@@ -258,11 +302,14 @@ public class PlayerController : NetworkBehaviour
                 // レイに触れたオブジェクトがカードかどうかチェック
                 if (tapObject.tag == "Card")
                 {
+                    var card = tapObject.GetComponent<Card>();
+                    // 相手サイドは見れない
+                    if (!card.isMyPlayerSide) return;
+
                     var hand = myPlayer.cardObjectManager.GetHandCardObject();
                     var fieldCard = myPlayer.cardObjectManager.fieldStrikerCard;
-                    var card = tapObject.GetComponent<Card>();
 
-                    if(fieldCard.gameObject.activeInHierarchy)
+                    if (fieldCard.gameObject.activeInHierarchy)
                     {
                         if(card.cardData.id == fieldCard.cardData.id)
                         {
@@ -270,7 +317,8 @@ public class PlayerController : NetworkBehaviour
                             holdCard.SetUraomote(true);
                             // ゴリ
                             // 手札の一番後ろ
-                            myPlayer.cardObjectManager.MakeHandTransform(myPlayer.deckManager.GetNumHand(), holdCard);
+                            var numHand = myPlayer.deckManager.GetNumHand();
+                            myPlayer.cardObjectManager.MakeHandTransform(numHand, numHand + 1, holdCard);
                             orgHoldCardPosition = holdCard.cashTransform.localPosition;
                             // ここでレイピックでの座標更新
                             holdCard.cashTransform.localPosition = RaypickHand(oulInput.GetPosition(0, false));
@@ -281,6 +329,10 @@ public class PlayerController : NetworkBehaviour
                             return;
                         }
                     }
+
+                    // 裏になってるカードは見れない
+                    if (!card.uraomoteFlag) return;
+
                     for (int i = 0; i < hand.Length; i++)
                     {
                         if (card.cardData.id == hand[i].cardData.id)
@@ -290,7 +342,7 @@ public class PlayerController : NetworkBehaviour
                             holdHandNo = i;
                             // 掴んでる座標
                             orgHoldCardPosition = card.transform.localPosition;
-                            break;
+                            return;
                         }
                     }
                 }

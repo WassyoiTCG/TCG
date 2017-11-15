@@ -32,6 +32,16 @@ public class ButtonManager : MonoBehaviour
     //    uiManager.DisAppearNetOrOffline();
     //}
 
+    public void OnClickCemeteryButton()
+    {
+        uiManager.cemeteryInfoUIManager.ShowCemeteryInfo();
+    }
+
+    public void OnClickExpulsionButton()
+    {
+        uiManager.cemeteryInfoUIManager.ShowExplusionInfo();
+    }
+
     public void OnClickHostGame()
     {
         networkManager.StartHost();
@@ -88,5 +98,18 @@ public class ButtonManager : MonoBehaviour
 
         // 別のところでもこのメッセージを送るので、非表示処理はここでしない
 
+    }
+
+    public void OnClickRestart()
+    {
+        MessageManager.Dispatch(myPlayerID, MessageType.Restart, null);
+
+        uiManager.DisAppearEndGameUI();
+    }
+    public void OnClickEndButton()
+    {
+        MessageManager.Dispatch(myPlayerID, MessageType.EndGame, null);
+
+        uiManager.DisAppearEndGameUI();
     }
 }

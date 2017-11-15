@@ -70,8 +70,6 @@ public class SceneMain : MonoBehaviour
         // UI表示
         //uiManager.AppearNetOrOffline();
         uiManager.DisAppearMainUI();
-        // ターン初期化
-        turn = 0;
 	}
 	
 	// Update is called once per frame
@@ -97,10 +95,37 @@ public class SceneMain : MonoBehaviour
         }
         else if (myScore < cpuScore)
         {
-            pointText.text = "ルナの負けだよ";
+            pointText.text = "あなたの負け";
         }
         else pointText.text = "引き分け";
 
         stateMachine.ChangeState(SceneMainState.Finish.GetInstance());
+    }
+
+    public void Restart()
+    {
+        pointText.text = "";
+        pointManager.Start();
+        aikoPoint.Clear();
+
+        // ターン初期化
+        turn = 0;
+
+        // オンラインかそうでないかで分岐
+        if (isOnline)
+        {
+            stateMachine.ChangeState(SceneMainState.MatchingWait.GetInstance());
+        }
+        else
+        {
+            stateMachine.ChangeState(SceneMainState.BattleStart.GetInstance());
+        }
+        // プレイヤー初期化
+        playerManager.Restart();
+        // UI初期化
+        uiManager.Restart();
+        // ネットワーク初期化
+        networkManager.Restart();
+        MessageManager.Restart();
     }
 }

@@ -50,6 +50,14 @@ namespace SceneMainState
         {
             switch (message.messageType)
             {
+                case MessageType.Restart:
+                    pMain.Restart();
+                    break;
+
+                case MessageType.EndGame:
+                    Application.Quit();
+                    break;
+
                 case MessageType.SyncPoint:
                     {
                         if (message.exInfo == null)
@@ -90,11 +98,14 @@ namespace SceneMainState
                 pMain.uiManager.DisAppearMatchingWait();
                 Debug.Log("マッチング完了");
 
-                // (TODO)自分がホストならポイントデータを相手に送信
-                PointInfo exInfo = new PointInfo();
-                exInfo.points = new int[10];
-                exInfo.points = pMain.pointManager.randomIndexArray;
-                MessageManager.Dispatch(pMain.playerManager.GetMyPlayerID(), MessageType.SyncPoint, exInfo);
+                // 自分がホストならポイントデータを相手に送信
+                if (pMain.networkManager.isServer)
+                {
+                    PointInfo exInfo = new PointInfo();
+                    exInfo.points = new int[10];
+                    exInfo.points = pMain.pointManager.randomIndexArray;
+                    MessageManager.Dispatch(pMain.playerManager.GetMyPlayerID(), MessageType.SyncPoint, exInfo);
+                }
 
                 // ステートチェンジ
                 pMain.stateMachine.ChangeState(BattleStart.GetInstance());
@@ -228,8 +239,12 @@ namespace SceneMainState
 
         public override void Execute(SceneMain pMain)
         {
-            // 1ターン目もしくは3ターンごとに1枚引く
-            if (pMain.turn++ % 3 == 0)
+            if (pMain.turn == 0)
+            {
+                pMain.playerManager.Draw();
+            }
+            pMain.turn++;
+            if (pMain.turn % 3 == 0)
             {
                 pMain.playerManager.Draw();
             }
@@ -362,7 +377,7 @@ namespace SceneMainState
 
         public override void Execute(SceneMain pMain)
         {
-            if ((timer += Time.deltaTime) > 3)
+            if ((timer += Time.deltaTime) > 2)
             {
                 // ステートチェンジ
                 pMain.stateMachine.ChangeState(AfterStrikeOpen.GetInstance());
@@ -384,12 +399,12 @@ namespace SceneMainState
         static AfterStrikeOpen instance;
         public static AfterStrikeOpen GetInstance() { if (instance == null) { instance = new AfterStrikeOpen(); } return instance; }
 
-        float timer;
+        //float timer;
 
         public override void Enter(SceneMain pMain)
         {
             // 時間初期化
-            timer = 0;
+            //timer = 0;
         }
 
         public override void Execute(SceneMain pMain)
@@ -479,7 +494,12 @@ namespace SceneMainState
         public static Finish GetInstance() { if (instance == null) { instance = new Finish(); } return instance; }
 
         public override void Enter(SceneMain pMain)
-        { }
+        {
+            if(pMain.networkManager.isServer || !pMain.isOnline)
+            {
+                pMain.uiManager.AppearEndGameUI();
+            }
+        }
 
         public override void Execute(SceneMain pMain)
         { }

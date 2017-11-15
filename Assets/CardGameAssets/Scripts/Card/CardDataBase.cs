@@ -15,16 +15,16 @@ public enum CardType
     Intercept       // 速攻魔法
 }
 
-public enum CardEventType
-{
-    Set,        // セット時
-    BeforeOpen, // オープン前
-    AfterOpen   // オープン後
-}
+//public enum CardEventType
+//{
+//    Set,        // セット時
+//    BeforeOpen, // オープン前
+//    AfterOpen   // オープン後
+//}
 
 public enum FighterAbilityConditions
 {
-    NoneLimit,  // 条件なし
+    NoneLimit,  // 無条件
     Otakebi,    // 勝利の雄たけび
     Tsumeato,   // 爪痕
     Sousai,     // 相殺時
@@ -32,16 +32,18 @@ public enum FighterAbilityConditions
 
 public enum DifferenceRangeType
 {
-    In,     // x以内で
-    Out,    // x以上で
+    NoneLimit,  // 無条件
+    In,         // x以内で
+    Out,        // x以上で
 }
 
 
 public enum AbilityType
 {
-    GettingPoint,   // ポイント系
-    Hand,           // 手札系
-    ChangePower,    // パワーの変化
+    GettingPoint,       // ポイント系
+    ChangePower,        // パワーの変化
+    Hand,               // 手札系
+    Victory = 10,       // 無条件勝利
 }
 
 public enum AbilityTarget
@@ -116,6 +118,334 @@ public class FighterCard
 {
     public Syuzoku[] syuzokus;   // 種族(複数)
 }
+
+namespace Jouken
+{
+    public abstract class Base
+    {
+        protected AbilitiManager abilityManager;
+
+        public Base(AbilitiManager owner) { abilityManager = owner; }
+        public abstract bool CheckJouken();
+    }
+
+    // 条件なし
+    public class NoneLimit : Base
+    {
+        public NoneLimit(AbilitiManager owner) : base(owner) { }
+        public override bool CheckJouken() { return true; }
+    }
+
+    public class Otakebi : Base
+    {
+        DifferenceRangeType range;  // 条件タイプ
+        int difference;             // 条件の差
+
+        public Otakebi(AbilitiManager owner) : base(owner) { }
+        public override bool CheckJouken()
+        {
+            int myPower = 0 /*abilityManager.playerManager.GetPlayer(abilityManager.playerID).*/;
+            int youPower = 0;
+            bool ok = (myPower > youPower);    // 勝ってたらtrue
+            if (!ok) return false;
+
+            switch (range)
+            {
+                case DifferenceRangeType.NoneLimit:
+                    return true;
+                case DifferenceRangeType.In:
+                    return (myPower - youPower <= difference);
+                case DifferenceRangeType.Out:
+                    return (myPower - youPower >= difference);
+                default:
+                    Debug.LogError("勝利の雄たけびのswitch文でエラークマ");
+                    return false;
+            }
+        }
+    }
+
+    public class Tsumeato : Base
+    {
+        DifferenceRangeType range;  // 条件タイプ
+        int difference;             // 条件の差
+
+        public Tsumeato(AbilitiManager owner) : base(owner) { }
+        public override bool CheckJouken()
+        {
+            int myPower = 0;
+            int youPower = 0;
+            bool ok = (myPower < youPower);    // 負けてたらtrue
+            if (!ok) return false;
+
+            switch (range)
+            {
+                case DifferenceRangeType.NoneLimit:
+                    return true;
+                case DifferenceRangeType.In:
+                    return (youPower - myPower <= difference);
+                case DifferenceRangeType.Out:
+                    return (youPower - myPower >= difference);
+                default:
+                    Debug.LogError("爪痕のswitch文でエラークマ");
+                    return false;
+            }
+        }
+    }
+
+    public class Sousai : Base
+    {
+        public Sousai(AbilitiManager owner) : base(owner) { }
+
+        public override bool CheckJouken()
+        {
+            int myPower = 0;
+            int youPower = 0;
+            return (myPower == youPower);
+        }
+    }
+}
+
+namespace Kouka
+{
+    public abstract class Base
+    {
+        protected AbilitiManager abilityManager;
+
+        public Base(AbilitiManager owner) { abilityManager = owner; }
+
+        public abstract void Action();
+    }
+
+    public abstract class ValueChange : Base
+    {
+        protected int value;                   // 変化の値(パワーだったり、ポイントだったり)
+        //protected Arithmetic arithmetic;       // 足す引くかける割る
+
+        protected Func<int, int, int> enzankun;          // 演算ラムダ式
+
+        public ValueChange(AbilitiManager owner, int value, Arithmetic arithmetic) : base(owner)
+        {
+            this.value = value;
+            //this.arithmetic = arithmetic;
+
+            // 演算タイプに応じてラムダ関数登録
+            switch (arithmetic)
+            {
+                case Arithmetic.Addition:
+                    enzankun = (a, b) => { return a + b; };
+                    break;
+                case Arithmetic.Subtraction:
+                    enzankun = (a, b) => { return Mathf.Max(a - b, 0); };
+                    break;
+                case Arithmetic.Multiplication:
+                    enzankun = (a, b) => { return a * b; };
+                    break;
+                case Arithmetic.Division:
+                    enzankun = (a, b) => { return (b != 0) ? a / b : 0; };
+                    break;
+                default:
+                    Debug.LogWarning("演算enumでエラークマ");
+                    break;
+            }
+        }
+
+        public override abstract void Action();
+    }
+
+    // スコア系
+    public class Score : ValueChange
+    {
+        public Score(AbilitiManager owner, int value, Arithmetic arithmetic) : base(owner, value, arithmetic) { }
+
+        public override void Action()
+        {
+            var uiManager = abilityManager.playerManager.uiManager;
+            foreach(Player player in abilityManager.targetPlayers)
+            {
+                // 現在のスコアを取ってきて
+                var score = uiManager.GetScore(player.isMyPlayer);
+                // 演算して
+                score = enzankun(score, value);
+                // セット
+                uiManager.SetScore(player.isMyPlayer, score);
+            }
+        }
+    }
+
+    // パワー変化系
+    public class Power : ValueChange
+    {
+        public Power(AbilitiManager owner, int value, Arithmetic arithmetic) : base(owner, value, arithmetic) { }
+
+
+        public override void Action()
+        {
+            foreach (Player player in abilityManager.targetPlayers)
+            {
+                // 現在のパワーを取ってきて
+                var power = player.jissainoPower;
+                // 演算する
+                player.jissainoPower = enzankun(power, value);
+            }
+        }
+    }
+
+    // カード移動系系
+    public class Card : Base
+    {
+        public class Search
+        {
+            public Search()
+            {
+
+            }
+
+            bool Check(MaskData data, CardData card)
+            {
+                switch (data.maskType)
+                {
+                    case MaskType.Power:
+                        break;
+                    case MaskType.Syuzoku:
+                        break;
+                    case MaskType.Name:
+                        break;
+                    default:
+                        break;
+                }
+
+                return false;
+            }
+
+            public enum MaskType
+            {
+                Power,      // パワー
+                Syuzoku,    // 種族
+                Name,       // ボーイと名のつくなど
+            }
+            public struct MaskData
+            {
+                public MaskType maskType;  // タイプ
+                public string value;       // マスクに使う値
+            }
+            public MaskData[] maskDatas;
+
+            public void SearchCards(CardData[] cards)
+            {
+                //Queue<CardData> queue;
+
+                //foreach(CardData card in cards)
+                //{
+                //    if()
+                //}
+            }
+        }
+
+
+
+        public Card(AbilitiManager owner, From from, To to, AbilityTarget fromTarget, AbilityTarget toTarget) : base(owner)
+        {
+            this.fromTarget = fromTarget;
+            this.toTarget = toTarget;
+            fromType = from;
+            toType = to;
+        }
+
+        public AbilityTarget fromTarget;    // 対象
+        public AbilityTarget toTarget;      // 対象
+
+        public enum From
+        {
+            Hand,           // 手札から
+            Cemetery,       // 墓地から
+            Deck,           // 山札から
+            CemeteryOrDeck, // 墓地または山札から
+            NewCreate,      // 新たに生成
+        }
+        From fromType;
+
+        public enum To
+        {
+            Hand,       // 手札に
+            Cemetery,   // 墓地に
+            Deck,       // 山札に
+            Tsuihou,    // 追放
+        }
+        To toType;
+
+        public enum SearchType
+        {
+            None,   // 無造作
+            Saati,  // サーチ
+        }
+        SearchType searchType;
+
+
+        public override void Action()
+        {
+            Player fromPlayer;
+            Player toPlayer = abilityManager.GetPlayerByAbilitiTarget(toTarget);
+
+            if(fromType != From.NewCreate)
+                fromPlayer = abilityManager.GetPlayerByAbilitiTarget(fromTarget);
+
+            switch (fromType)
+            {
+                case From.Hand:
+                    break;
+                case From.Cemetery:
+                    break;
+                case From.Deck:
+                    break;
+                case From.CemeteryOrDeck:
+                    break;
+                case From.NewCreate:
+                    break;
+                default:
+                    Debug.LogError("FromTypeで想定されない値");
+                    return;
+            }
+        }
+    }
+}
+
+public class AbilitiManager
+{
+    // モンスターだけ
+    //public Jouken.Base jouken;             // 効果の条件委譲クラス
+    public Kouka.Base kouka;               // 効果委譲クラス
+
+    public int playerID;                    // この効果を発動しようとしているプレイヤーのID
+    public PlayerManager playerManager;
+    public Player myPlayer, youPlayer;      // 自分と相手のプレイヤーの実体
+    public Player[] targetPlayers;
+
+    public int value;                   // 変化の値(パワーだったり、ポイントだったり)
+    public Arithmetic arithmetic;       // 足す引くかける割る
+
+    public int siteiNumber;             // 数字指定系の保存用
+
+    public Player GetPlayerByAbilitiTarget(AbilityTarget target)
+    {
+        if (target == AbilityTarget.Me)
+        {
+            return myPlayer;
+        }
+        else if (target == AbilityTarget.You)
+        {
+            return youPlayer;
+        }
+        else
+        {
+            Debug.LogError("アビリティターゲットで想定されていない値");
+            return null;
+        }
+    }
+}
+
+
+
+
 public class AbilityFighterCard : FighterCard
 {
 

@@ -21,6 +21,7 @@ public class Card : MonoBehaviour
 
     public bool isMyPlayerSide;
     public bool isSetField = false;
+    public bool uraomoteFlag;               // 裏表
 
     public Vector3 handPosition;    // 手札の座標保存用
     public Vector3 nextPosition;    // なんか補間とかで使う
@@ -101,6 +102,7 @@ public class Card : MonoBehaviour
 
     public void SetUraomote(bool omote)
     {
+        uraomoteFlag = omote;
         if (omote)
         {
             fighterPowerFrame.gameObject.SetActive(true);

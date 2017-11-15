@@ -15,10 +15,12 @@ public class UIManager : MonoBehaviour
     public GameObject SetStrikerOKButton;
     public GameObject SetStrikerPassButton;
     GameObject activeSetStrikerButton;
-    public Sprite spriteSetStrikerON;               // ストライカーセットON
-    public Sprite spriteSetStrikerOFF;              // ストライカーセットOFF
-    public Sprite spriteSetStrikerPassON;           // パスON
-    public Sprite spriteSetStrikerPassOFF;          // パスOFF
+    public Sprite spriteSetStrikerON;           // ストライカーセットON
+    public Sprite spriteSetStrikerOFF;          // ストライカーセットOFF
+    public Sprite spriteSetStrikerPassON;       // パスON
+    public Sprite spriteSetStrikerPassOFF;      // パスOFF
+
+    public CemeteryInfomationUI cemeteryInfoUIManager;
 
     public Text limitTimeText;
     public Image eventTimeGauge;    // イベント時間ゲージ
@@ -36,8 +38,20 @@ public class UIManager : MonoBehaviour
     public GameObject matchingWait;         // マッチング大気中
     public GameObject mainUI;               // メイン画面のUI
     public GameObject firstDrawButtons;     // 最初のドローのボタン
+    public GameObject endGameUI;            // ゲーム終了時のUI
+    public GameObject waitYouUI;            // 相手待ちUI
 
     public BattleCardInfomation battleCardInfomation;
+
+    public GameObject connectingUI;
+
+    public void Restart()
+    {
+        myScore = 0;
+        myScoreNumber.SetNumber(myScore);
+        cpuScore = 0;
+        cpuScoreNumber.SetNumber(cpuScore);
+    }
 
     void Update()
     {
@@ -169,6 +183,7 @@ public class UIManager : MonoBehaviour
         activeSetStrikerButton.GetComponent<Button>().enabled = false;
     }
 
+
     // 手札山札墓地追放UIの更新
     public void UpdateDeckUI(DeckManager deckManager, bool isMyPlayer)
     {
@@ -219,5 +234,56 @@ public class UIManager : MonoBehaviour
         }
 
         return false;
+    }
+
+    public bool SetScore(bool isMyPlayer, int score)
+    {
+        if (isMyPlayer)
+        {
+            myScore = score;
+            myScoreNumber.SetNumber(myScore);
+            if (myScore >= finishScore) return true;
+        }
+        else
+        {
+            cpuScore = score;
+            cpuScoreNumber.SetNumber(cpuScore);
+            if (cpuScore >= finishScore) return true;
+        }
+
+        return false;
+    }
+
+    public int GetScore(bool isMyPlayer) { return isMyPlayer ? myScore : cpuScore; }
+
+
+    public void AppearEndGameUI()
+    {
+        endGameUI.SetActive(true);
+    }
+
+    public void DisAppearEndGameUI()
+    {
+        endGameUI.SetActive(false);
+    }
+
+    public void AppearWaitYouUI()
+    {
+        waitYouUI.SetActive(true);
+    }
+
+    public void DisAppearWaitYouUI()
+    {
+        waitYouUI.SetActive(false);
+    }
+
+    public void AppearConnectingUI()
+    {
+        connectingUI.SetActive(true);
+    }
+
+    public void DisAppearConnectingUI()
+    {
+        connectingUI.SetActive(false);
     }
 }

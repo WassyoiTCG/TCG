@@ -25,6 +25,8 @@ public class PlayerManager : MonoBehaviour
         return allOK;
     }
 
+    public Player GetPlayer(int id) { return players[id]; }
+
     // 自分が操作しているプレイヤーのIDを取得
     public int GetMyPlayerID()
     {
@@ -38,6 +40,22 @@ public class PlayerManager : MonoBehaviour
     {
         foreach (Player player in players)
             if (player.isMyPlayer) return player;
+
+        return null;
+    }
+
+    public Player GetCPUPlayer()
+    {
+        foreach (Player player in players)
+            if (!player.isMyPlayer) return player;
+
+        return null;
+    }
+
+    public Player GetCPUPlayerByID(int playerID)
+    {
+        foreach (Player player in players)
+            if (player.playerID != playerID) return player;
 
         return null;
     }
@@ -78,7 +96,7 @@ public class PlayerManager : MonoBehaviour
     {
         bool allOK = true;
         foreach (Player player in players)
-            if (!player.isFirstDrawEnd) allOK = false;
+            if (!player.isFirstDrawEnd || !player.isSynced) allOK = false;
         return allOK;
     }
 
@@ -111,17 +129,17 @@ public class PlayerManager : MonoBehaviour
         }
         if(message.messageType == MessageType.SetStrikerOK)
         {
-            players[message.fromPlayerID].isPushedJunbiKanryo = true;
+            players[message.fromPlayerID].JunbiKanryoON();
             // ボタン非表示
-            if (players[message.fromPlayerID].isMyPlayer && players[message.fromPlayerID].isSetStriker())
+            if (players[message.fromPlayerID].isMyPlayer)
                 uiManager.DisableSetStrikerButton();
             return true;
         }
         if (message.messageType == MessageType.SetStrikerPass)
         {
-            players[message.fromPlayerID].isPushedJunbiKanryo = true;
+            players[message.fromPlayerID].JunbiKanryoON();
             // ボタン非表示
-            if (players[message.fromPlayerID].isMyPlayer && players[message.fromPlayerID].isSetStriker())
+            if (players[message.fromPlayerID].isMyPlayer)
                 uiManager.DisableSetStrikerButton();
             return true;
         }
@@ -141,7 +159,7 @@ public class PlayerManager : MonoBehaviour
 
             players[message.fromPlayerID].SetCard(setCardInfo);
             // ボタン表示
-            if (players[message.fromPlayerID].isMyPlayer && players[message.fromPlayerID].isSetStriker())
+            if (players[message.fromPlayerID].isMyPlayer)
                 uiManager.EnableSetStrikerButton();
             return true;
         }
@@ -160,7 +178,7 @@ public class PlayerManager : MonoBehaviour
             players[message.fromPlayerID].BackToHand(backToHandInfo);
 
             // ボタン非表示
-            if (players[message.fromPlayerID].isMyPlayer && players[message.fromPlayerID].isSetStriker())
+            if (players[message.fromPlayerID].isMyPlayer)
                 uiManager.DisableSetStrikerButton();
 
             return true;
@@ -199,6 +217,9 @@ public class PlayerManager : MonoBehaviour
 
             // UIテキストの変更
             uiManager.UpdateDeckUI(players[message.fromPlayerID].deckManager, isMyPlayer);
+
+            // 同期フラグ
+            players[message.fromPlayerID].isSynced = true;
 
             return true;
         }
@@ -247,16 +268,26 @@ public class PlayerManager : MonoBehaviour
             
         }
         else
-        {   // 相打ち処理
-            if (card0.power == card1.power) return -1;
+        {
+            var power0 = players[0].jissainoPower;
+            var power1 = players[1].jissainoPower;
 
-            if (card0.power > card1.power)
+            // 相打ち処理
+            if (power0 == power1) return -1;
+
+            if (power0 > power1)
                 winnerPlayerID = 0;
             
-            else if(card1.power > card0.power)
+            else if(power1 > power0)
                 winnerPlayerID = 1;
         }
 
         return winnerPlayerID;
+    }
+
+    public void Restart()
+    {
+        foreach (Player player in players)
+            player.Restart();
     }
 }

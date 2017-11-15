@@ -4,6 +4,8 @@ using System.Runtime.InteropServices;
 
 public enum MessageType
 {
+    NoMessage,
+
     /* Menu */
     ClickMenuButton,
 
@@ -21,6 +23,11 @@ public enum MessageType
     SetStrikerPass, // ストライカーセットをパス
     Marigan,        // マリガン
     NoMarigan,      // マリガンなし
+    Restart,        // もう一度
+    EndGame,        // ゲーム終了
+
+    ReMessage,      // もっかいそのメッセージおくって
+    ReceiveOK,
 }
 
 // デッキ情報同期する用構造体(int型はカードのID)
@@ -35,6 +42,17 @@ public struct SyncDeckInfo
     [MarshalAs(UnmanagedType.ByValArray, SizeConst = 15)]
     public int[] tuihou;       // 追放
 }
+
+public struct ReceiveOKInfo
+{
+    public uint iMessageType;
+}
+
+public struct ReMessageInfo
+{
+    public int messageNumber;
+}
+
 
 public struct PointInfo
 {
@@ -57,6 +75,7 @@ public struct MessageInfo
 {
     public MessageType messageType;                 // メッセージのID
     public int fromPlayerID;                        // 誰が送ってきたか
+    public int number;                              // 何番目のメッセージか(これでとばしてしまったかどうかわかるかもしれない)
     [MarshalAs(UnmanagedType.ByValArray, SizeConst = 256)]
     public byte[] exInfo;                           // いつものinfo
     // exInfoのセット

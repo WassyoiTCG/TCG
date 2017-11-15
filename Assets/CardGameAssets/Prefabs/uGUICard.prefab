@@ -72,7 +72,7 @@ GameObject:
   - component: {fileID: 224330173130548278}
   - component: {fileID: 222712973543991204}
   - component: {fileID: 114112447064032916}
-  - component: {fileID: 114365228014188014}
+  - component: {fileID: 114634781009585904}
   m_Layer: 5
   m_Name: uGUICard
   m_TagString: Untagged
@@ -242,22 +242,6 @@ MonoBehaviour:
     - {fileID: 0}
     - {fileID: 0}
     - {fileID: 0}
---- !u!114 &114365228014188014
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1510330910714354}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 77363d0360e472645b0446df3754aca7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  mainTexture: {fileID: 0}
-  cardName: {fileID: 0}
-  powerFrame: {fileID: 0}
-  powerNumber: {fileID: 0}
-  syuzokuText: {fileID: 0}
 --- !u!114 &114375840573106448
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -285,6 +269,22 @@ MonoBehaviour:
   m_FillAmount: 1
   m_FillClockwise: 1
   m_FillOrigin: 0
+--- !u!114 &114634781009585904
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1510330910714354}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1aa239ebfd03a874d94bb0721c46f844, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mainTexture: {fileID: 114375840573106448}
+  cardName: {fileID: 114144404185563960}
+  powerFrame: {fileID: 1211548656749046}
+  powerNumber: {fileID: 114153822938871062}
+  syuzokuText: {fileID: 114690531213957248}
 --- !u!114 &114690531213957248
 MonoBehaviour:
   m_ObjectHideFlags: 1

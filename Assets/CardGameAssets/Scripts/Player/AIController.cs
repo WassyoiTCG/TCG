@@ -5,10 +5,17 @@ using UnityEngine;
 public class AIController : MonoBehaviour
 {
     Player myPlayer;                  // コントロールするプレイヤーの実体
+    bool isMarigan;
 
     void Start()
     {
         myPlayer = GetComponent<Player>();
+        Restart();
+    }
+
+    public void Restart()
+    {
+        isMarigan = false;
     }
 
     // Update is called once per frame
@@ -17,10 +24,11 @@ public class AIController : MonoBehaviour
         switch (myPlayer.state)
         {
             case PlayerState.FirstDraw:
-                if(!myPlayer.isFirstDrawEnd)
+                if(!isMarigan)
                 {
                     // 絶対マリガンしないマン
                     MessageManager.Dispatch(myPlayer.playerID, MessageType.NoMarigan, null);
+                    isMarigan = true;
                 }
                 break;
             case PlayerState.SetStriker:
@@ -45,6 +53,6 @@ public class AIController : MonoBehaviour
         Debug.Log("CPU:" + r + "番目のカードをセットしました");
 
         // セット完了
-        myPlayer.isPushedJunbiKanryo = true;
+        myPlayer.JunbiKanryoON();
     }
 }

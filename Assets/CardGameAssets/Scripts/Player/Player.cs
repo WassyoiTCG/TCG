@@ -21,7 +21,7 @@ public class Player : MonoBehaviour
     public float moveSpeed = 1;
 
     public Vector3 move;
-    Transform cashTransform;
+    //Transform cashTransform;
 
     public PlayerState state { get; private set; }                       // プレイヤーのステート
     public DeckData deckData = new DeckData();             // デッキの情報
@@ -37,10 +37,29 @@ public class Player : MonoBehaviour
     public bool isMyPlayer; // 自分が操作しているプレイヤーかどうか
 
     public bool isFirstDrawEnd;
-    public bool isPushedJunbiKanryo;
+    public bool isSynced;
+    public bool isPushedJunbiKanryo { get; private set; }
 
-	// Use this for initialization
-	void Start ()
+    public void JunbiKanryoON()
+    {
+        isPushedJunbiKanryo = true;
+        var striker = GetFieldStrikerCard();
+        if(striker != null)
+        {
+            jissainoPower = striker.power;
+        }
+    }
+    //public void JubikanryoOFF()
+    //{
+    //    isPushedJunbiKanryo = false;
+    //}
+
+    public float waitTimer;
+
+    public int jissainoPower;   // イベントとかでいろいろ演算した後の実際のパワー
+
+    // Use this for initialization
+    void Start ()
     {
         deckManager = new DeckManager();
         //hand = new List<Card>();
@@ -58,21 +77,41 @@ public class Player : MonoBehaviour
         deckData.fighterCards[8] = CardDataBase.GetCardData(8);
         deckData.fighterCards[9] = CardDataBase.GetCardData(9);
         deckData.jorkerCard = CardDataBase.GetCardData(10);
-        // デッキ管理さん初期化
-        deckManager.Start(this, cardObjectManager);
-        deckManager.Reset(deckData);
 
         // キャッシュ
-        cashTransform = transform;
+        //cashTransform = transform;
 
-        // その他
-        isFirstDrawEnd = false;
-        isPushedJunbiKanryo = false;
+        // 初期化
+        Restart();
 
         // プレイヤーマネージャーに追加
         playerManager = GameObject.Find("PlayerManager").GetComponent<PlayerManager>();
         playerID = playerManager.AddPlayer(this);
 	}
+
+    public void Restart()
+    {
+        // デッキ管理さん初期化
+        deckManager.Start(this, cardObjectManager);
+        deckManager.Reset(deckData);
+
+        var controller = GetComponent<PlayerController>();
+        if(controller)
+        {
+            controller.Restart();
+        }
+
+        var AI = GetComponent<AIController>();
+        if(AI)
+        {
+            AI.Restart();
+        }
+
+        // その他
+        isFirstDrawEnd = false;
+        isSynced = false;
+        isPushedJunbiKanryo = false;
+    }
 	
 	// Update is called once per frame
 	void Update ()
@@ -110,12 +149,15 @@ public class Player : MonoBehaviour
 
     public void ChangeState(PlayerState newState)
     {
-        //// Exit処理
-        //switch (state)
-        //{
-        //    case PlayerState.FirstDraw:
-        //        break;
-        //}
+        isSynced = false;
+
+        // Exit処理
+        switch (state)
+        {
+            case PlayerState.SetStriker:
+                playerManager.uiManager.DisAppearWaitYouUI();
+                break;
+        }
 
 
         state = newState;
@@ -133,7 +175,7 @@ public class Player : MonoBehaviour
             case PlayerState.Draw:
                 break;
             case PlayerState.SetStriker:
-                isPushedJunbiKanryo = false;
+                waitTimer = 0;
                 break;
             case PlayerState.BeforeOpen:
                 break;
@@ -142,6 +184,7 @@ public class Player : MonoBehaviour
             case PlayerState.AfterOpen:
                 break;
             case PlayerState.TurnEnd:
+                isPushedJunbiKanryo = false;
                 deckManager.TurnEnd();
                 // UI更新
                 playerManager.uiManager.UpdateDeckUI(deckManager, isMyPlayer);
@@ -219,7 +262,7 @@ public class Player : MonoBehaviour
         else if (num < 15) exInfo.bochi[num] = -1;
         for (int i = 0; i < num; i++)
         {
-            exInfo.bochi[i] = deckManager.GetBochiCard(i).id;
+            exInfo.bochi[i] = deckManager.GetCemeteryCard(i).id;
         }
 
         // 追放同期
@@ -228,7 +271,7 @@ public class Player : MonoBehaviour
         else if (num < 15) exInfo.tuihou[num] = -1;
         for (int i = 0; i < num; i++)
         {
-            exInfo.tuihou[i] = deckManager.GetTuihouCard(i).id;
+            exInfo.tuihou[i] = deckManager.GetExpulsionCard(i).id;
         }
 
         //Info1 exInfo;

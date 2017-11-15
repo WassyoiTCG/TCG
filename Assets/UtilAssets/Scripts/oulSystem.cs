@@ -10,7 +10,7 @@ public class oulSystem : MonoBehaviour
     [Range(0, 1)]
     public float timeScale = 1;
 
-    Camera cam;
+    //Camera cam;
     // 画面のサイズ
     public int windowWidth = 1600;
     public int windowHeight = 900;
@@ -32,7 +32,7 @@ public class oulSystem : MonoBehaviour
         Screen.SetResolution(windowWidth, windowHeight, false, 60);
 
         // カメラコンポーネントを取得します
-        cam = Camera.main;
+        //cam = Camera.main;
         UpdateAspect();
 
         PlayerDataManager.Load();
@@ -60,6 +60,9 @@ public class oulSystem : MonoBehaviour
 
         // 入力更新(staticクラス(MonoBehaviour非継承)なので、手動でUpdateを呼ぶ)
         oulInput.Update();
+
+		// (TODO)後で移す
+        MessageManager.Update();
 
         UpdateAspect();
 	}
