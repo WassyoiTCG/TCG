@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 //+---------------------------------------------------
 //  メニューステートマシン
@@ -139,11 +140,11 @@ namespace SceneDeckState
 
                             /*
 
-                            e.m_uGUICard.SetActive(true);
+                            e.m_uGraspCard.SetActive(true);
 
                             // インスタンスを繰り返すのはダメだと思ったので一つドラッグ用に作って
                             // それを繰り返し使用するようにする。
-                            e.m_uGUICard.GetComponent<uGUICard>().SetCardData(e.TouchCardObj.transform.GetComponent<uGUICard>().cardData);
+                            e.m_uGraspCard.GetComponent<uGUICard>().SetCardData(e.TouchCardObj.transform.GetComponent<uGUICard>().cardData);
 
                             */
 
@@ -175,7 +176,7 @@ namespace SceneDeckState
             if (oulInput.GetTouchState() == oulInput.TouchState.Ended)
             {
                 Debug.Log("えうれしあ2");
-                e.m_uGUICard.SetActive(false);
+                e.m_uGraspCard.SetActive(false);
                 e.SetCardTapFlag(false);// △カードタップフラグOFF
             }
 
@@ -196,17 +197,20 @@ namespace SceneDeckState
                     // カードタップフラグOFF
                     // インスタンスを繰り返すのはダメだと思ったので一つドラッグ用に作って
                     // それを繰り返し使用するようにする。
-                    e.m_uGUICard.SetActive(true);
-                    e.m_uGUICard.GetComponent<uGUICard>().SetCardData(e.TouchCardObj.transform.GetComponent<uGUICard>().cardData);
+                    e.m_uGraspCard.SetActive(true);
+                    e.m_uGraspCard.GetComponent<uGUICard>().SetCardData(e.TouchCardObj.transform.GetComponent<uGUICard>().cardData);
 
                     // 座標マウスに合わす
                     Vector3 pos = Input.mousePosition;
                     pos -= new Vector3(Screen.width / 2, Screen.height / 2, 0);
-                    e.m_uGUICard.transform.localPosition = pos;
+                    e.m_uGraspCard.transform.localPosition = pos;
 
 
                     e.SetCardTapFlag(false);// △カードタップフラグOFF
-                                            
+
+                    // 持つ演出
+                    e.m_uGraspCard.GetComponent<BoyonAppeared>().Action();
+
                     // デッキのカードかコレクションのカードかで分岐
                     if (e.TouchCardObj.transform.GetComponent<uGUICard>().GetMyDeck() == false)
                     {
@@ -225,7 +229,7 @@ namespace SceneDeckState
 
                 // あたらしくかーどおしたふらぐつくってここでTrueだったらってやる
                 // 押しっぱなし
-                float fTime = 1.0f;// ↓の基準の時間
+                float fTime = 0.5f;// ↓の基準の時間
                 if (oulInput.GetHoldTime() >= fTime)
                 {
                     GameObject CollPanel= oulInput.CollisionuGUI();
@@ -246,15 +250,18 @@ namespace SceneDeckState
                                 Debug.Log("押しっぱえうれしあ");
                                 // インスタンスを繰り返すのはダメだと思ったので一つドラッグ用に作って
                                 // それを繰り返し使用するようにする。
-                                e.m_uGUICard.SetActive(true);
-                                e.m_uGUICard.GetComponent<uGUICard>().SetCardData(e.TouchCardObj.transform.GetComponent<uGUICard>().cardData);
+                                e.m_uGraspCard.SetActive(true);
+                                e.m_uGraspCard.GetComponent<uGUICard>().SetCardData(e.TouchCardObj.transform.GetComponent<uGUICard>().cardData);
                               
                                  // 座標マウスに合わす
                                 Vector3 pos = Input.mousePosition;
                                 pos -= new Vector3(Screen.width / 2, Screen.height / 2, 0);
-                                e.m_uGUICard.transform.localPosition = pos;
+                                e.m_uGraspCard.transform.localPosition = pos;
 
                                 e.SetCardTapFlag(false);// △カードタップフラグOFF
+
+                                // 持つ演出
+                                e.m_uGraspCard.GetComponent<BoyonAppeared>().Action();
 
                                 // デッキのカードかコレクションのカードかで分岐
                                 if (e.TouchCardObj.transform.GetComponent<uGUICard>().GetMyDeck() == false)
@@ -339,9 +346,13 @@ namespace SceneDeckState
                    e.ChangeLine(info.iNextLine);
 
                     return true; // trueを返して終り
+                case MessageType.ClickBackButton:
 
+
+                    SceneManager.LoadScene("Menu");
+                    return true; // trueを返して終り
                 default:
-
+                    Debug.LogWarning("なにを送ったんや？");
                     break;
             }
 
@@ -363,6 +374,13 @@ namespace SceneDeckState
         {
 
             Debug.Log("CollectToDeckに来た列車");
+
+            // 矢印の演出
+            e.Arrow.transform.localPosition = e.Arrow.GetComponent<Shake>().GetOrgPos();
+            e.Arrow.GetComponent<Shake>().Action();
+
+            e.DeckPlateBoom.GetComponent<AlphaWave>().SetAlpha(e.DeckPlateBoom.GetComponent<AlphaWave>().GetOrgAlpha());
+            e.DeckPlateBoom.GetComponent<AlphaWave>().Action();
             return;
         }
 
@@ -371,30 +389,41 @@ namespace SceneDeckState
 
             //+---------------------------------------------------------------------------
             // 見えてたらマウスに追従
-            if (e.m_uGUICard.activeSelf == true)
+            if (e.m_uGraspCard.activeSelf == true)
             {
 
                 Vector3 pos = Input.mousePosition;
                 pos -= new Vector3(Screen.width / 2, Screen.height / 2, 0);
                 //pos -= new Vector3(-200, 0, 0);
 
-                e.m_uGUICard.transform.localPosition = pos;// oulInput.GetPosition(0, false);
+                e.m_uGraspCard.transform.localPosition = pos;// oulInput.GetPosition(0, false);
             }
 
             // 離したら描画しない
             if (oulInput.GetTouchState() == oulInput.TouchState.Ended)
             {
+                Debug.Log("離した列車ーCollectToDeck");
+
                 int DeckSideX = 800;
                 if (Input.mousePosition.x >= DeckSideX)
                 {
 
-                    Debug.Log("念願の構築。おめでとうーCollectToDeck");
-                    // ★★デッキ変更
-                    e.DeckSet();
+                    //Debug.Log("念願の構築。おめでとうーCollectToDeck");
+                    //// ★★デッキ変更
+                    //e.DeckSet();
+
+                    // 離す演出
+                    e.m_uGraspCard.GetComponent<BoyonAppeared>().Stop();
+                    e.m_pStateMachine.ChangeState(SceneDeckState.DeckSetting.GetInstance());
+                    return;
                 }
 
-                Debug.Log("離した列車ーCollectToDeck");
-                e.m_uGUICard.SetActive(false);
+               
+
+                // 離す演出
+                e.m_uGraspCard.GetComponent<BoyonAppeared>().Stop();
+                //e.m_uGraspCard.GetComponent<Ripple>().Action();
+                e.m_uGraspCard.SetActive(false);
 
                 // メインへ戻る
                 e.m_pStateMachine.ChangeState(SceneDeckState.Main.GetInstance());
@@ -406,6 +435,9 @@ namespace SceneDeckState
         public override void Exit(SceneDeck e)
         {
 
+            // 矢印の演出を止める
+            e.Arrow.GetComponent<Shake>().Stop();
+            e.DeckPlateBoom.GetComponent<AlphaWave>().Stop();
         }
 
         public override bool OnMessage(SceneDeck e, MessageInfo message)
@@ -416,6 +448,113 @@ namespace SceneDeckState
 
     }
 
+
+    //+-------------------------------------------
+    //  デッキへ入れる演出
+    //+-------------------------------------------
+    public class DeckSetting : BaseEntityState<SceneDeck>
+    {
+        static DeckSetting m_pInstance;
+        public static DeckSetting GetInstance() { if (m_pInstance == null) { m_pInstance = new DeckSetting(); } return m_pInstance; }
+
+        public override void Enter(SceneDeck e)
+        {
+
+            Debug.Log("DeckSettingに来た列車");
+            
+
+            Vector3 vNextPos = new Vector3(0,0,0); 
+            uGUICard GraspCard = e.m_uGraspCard.GetComponent<uGUICard>();
+
+            // 握ってるカードがファイターなら
+            if (GraspCard.cardData.cardType == CardType.Fighter)
+            {
+                // パワーと同じ場所の所へ書き換え
+                int iGraspCardPower = GraspCard.cardData.power;
+                vNextPos = e.m_aMyDeckCard[iGraspCardPower - 1].transform.localPosition;
+            }
+
+            // 握ってるカードがJOKERなら
+            if (GraspCard.cardData.cardType == CardType.Joker)
+            {
+                // エフェクトポジション
+                vNextPos = e.m_aMyDeckCard[PlayerDeckData.numStriker].transform.localPosition;
+            }
+
+            // 握ってるカードがイベントなら
+            if (GraspCard.cardData.cardType == CardType.Support ||
+                GraspCard.cardData.cardType == CardType.Connect ||
+                GraspCard.cardData.cardType == CardType.Intercept)
+            {
+                // イベントゾーンを書き換え
+                int iStartIndex = PlayerDeckData.numStriker + PlayerDeckData.numJoker;
+                // イベント
+                for (int i = 0; i < PlayerDeckData.numEvent; i++)
+                {
+                    // 空き枠を探す
+                    if (e.m_aMyDeckCard[iStartIndex + i].GetComponent<uGUICard>().cardData.id == (int)IDType.NONE)
+                    {
+
+                        vNextPos = e.m_aMyDeckCard[iStartIndex + i].transform.localPosition;
+                        break; // □一つ入れたらさいさいさいなら。
+                    }
+
+                    // 最後まで来てどこも枠が空いていなかったらReturn
+                    if (i == (PlayerDeckData.numEvent - 1))
+                    {
+                        Debug.Log(" イベント入れれなかったら出ていけぇ！(仮)-DeckSetting");
+                        // メインへ戻る
+                        e.m_pStateMachine.ChangeState(SceneDeckState.Main.GetInstance());
+                        return;
+                    }
+                }
+            }
+
+
+            // 演出
+            e.m_uGraspCard.GetComponent<ScreenOutAppeared>().SetNextPos(vNextPos);
+            e.m_uGraspCard.GetComponent<ScreenOutAppeared>().Action();
+            e.m_uGraspCard.GetComponent<ScaleAppeared>().Action();
+
+            return;
+        }
+
+        public override void Execute(SceneDeck e)
+        {
+
+            //+---------------------------------------------------------------------------
+
+            // 移動し終わったら
+            if (e.m_uGraspCard.GetComponent<ScreenOutAppeared>().IsEndFlag() == true)
+            {
+                Debug.Log("念願の構築。おめでとうーDeckSetting");
+                // ★★デッキ変更
+                e.DeckSet();
+                
+               
+                // メインへ戻る
+                e.m_pStateMachine.ChangeState(SceneDeckState.Main.GetInstance());
+                return;
+            }
+
+        }
+
+        public override void Exit(SceneDeck e)
+        {
+            //  持ってたカード消す
+            e.m_uGraspCard.GetComponent<ScreenOutAppeared>().Stop();
+            e.m_uGraspCard.GetComponent<ScaleAppeared>().Stop();
+            e.m_uGraspCard.SetActive(false);
+
+        }
+
+        public override bool OnMessage(SceneDeck e, MessageInfo message)
+        {
+
+            return false; // 何も引っかからなかった
+        }
+
+    }
 
     //+-------------------------------------------
     //  デッキからコレクションへ
@@ -436,14 +575,14 @@ namespace SceneDeckState
         {
             //+---------------------------------------------------------------------------
             // 見えてたらマウスに追従
-            if (e.m_uGUICard.activeSelf == true)
+            if (e.m_uGraspCard.activeSelf == true)
             {
 
                 Vector3 pos = Input.mousePosition;
                 pos -= new Vector3(Screen.width / 2, Screen.height / 2, 0);
                 //pos -= new Vector3(-200, 0, 0);
 
-                e.m_uGUICard.transform.localPosition = pos;// oulInput.GetPosition(0, false);
+                e.m_uGraspCard.transform.localPosition = pos;// oulInput.GetPosition(0, false);
             }
 
             // 離したら描画しない
@@ -460,7 +599,12 @@ namespace SceneDeckState
                 
 
                 Debug.Log("離した列車ーDeckToCollect");
-                e.m_uGUICard.SetActive(false);
+
+
+                // 離す演出
+                e.m_uGraspCard.GetComponent<BoyonAppeared>().Stop();
+                //e.m_uGraspCard.GetComponent<Ripple>().Action();
+                e.m_uGraspCard.SetActive(false);
 
                 // メインへ戻る
                 e.m_pStateMachine.ChangeState(SceneDeckState.Main.GetInstance());

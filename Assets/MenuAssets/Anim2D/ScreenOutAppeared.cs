@@ -88,9 +88,7 @@ public class ScreenOutAppeared : BaseAnim2D
     {
         base.Action();
 
-
         // m_fRate = 0.0f;
-
         // SetAlpha(0);
 
     }

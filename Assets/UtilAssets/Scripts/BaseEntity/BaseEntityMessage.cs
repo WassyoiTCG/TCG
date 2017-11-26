@@ -6,11 +6,15 @@ public enum MessageType
 {
     NoMessage,
 
+    ClickBackButton,
+    ClickAnyButton,  // なんか適当なボタン
     /* Menu */
     ClickMenuButton,
+    ClickSphereButton,
 
     /* Deck */
     ClickLineButton,
+  
 
     /* Main */
     //NetPlay,        // ネット対戦プレイ選択
@@ -104,7 +108,15 @@ public struct MessageInfo
 //+-----------------------------------------------------------
 //  メニュー画面用
 //+-----------------------------------------------------------
+public struct AnyButton
+{
+    public int Index;
+}
 public struct SelectMenuNo
+{
+    public int selectNo;
+}
+public struct SelectSphereNo
 {
     public int selectNo;
 }

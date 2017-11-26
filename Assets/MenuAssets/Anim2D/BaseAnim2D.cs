@@ -68,6 +68,9 @@ public abstract class BaseAnim2D : MonoBehaviour
         m_iCurrentFrame = 0; // 現在のフレーム初期化
     }
 
+    // エンドフラグ
+    public virtual bool IsEndFlag() { return m_bEndFlag; }
+
     // ディレイをプログラムでも設定できるように
     public virtual void SetDelayFrame(int iDelay)
     {
@@ -76,6 +79,13 @@ public abstract class BaseAnim2D : MonoBehaviour
     
     // 止める
     public virtual void Stop() { m_bActionFlag = false; }
+
+    // 演出を続ける
+    public virtual void KeepUp() {
+        gameObject.SetActive(true);
+        m_bActionFlag = true;
+        
+    }
 
     // アクションフラグが立っているかかつ遅延が切れてるかチェック
     protected bool ActionCheck()

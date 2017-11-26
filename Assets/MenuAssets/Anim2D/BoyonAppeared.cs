@@ -13,7 +13,7 @@ public class BoyonAppeared : BaseAnim2D
     [Range(0.1f, 10.0f)]
     public float fEndScale = 1.0f;
 
-    [Range(0.1f, 2.0f)]
+    [Range(0.01f, 2.0f)]
     public float fVelocity = 0.1f;
 
     [Range(0.1f, 1.0f)]
@@ -177,9 +177,18 @@ public class BoyonAppeared : BaseAnim2D
         // このクラスは描画も止める
         gameObject.SetActive(false);
 
-        eStep = STEP.END;
+       // eStep = STEP.END;
     }
 
 
-    
+    // 演出を続ける
+    //public override void KeepUp()
+    //{
+    //    gameObject.SetActive(true);
+    //    m_bActionFlag = true;
+
+    //    //eStep = STEP.END;
+
+    //}
+
 }

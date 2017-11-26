@@ -13,6 +13,7 @@ public class uGUICard : MonoBehaviour
     public Text syuzokuText;
     public GameObject panel;
     public GameObject DeckSetInfo;
+    public GameObject EventFullInfo;
 
     public CardData cardData;// (TODO)カードデータの情報いれるよ
 
@@ -39,16 +40,43 @@ public class uGUICard : MonoBehaviour
 
         panel.GetComponent<Image>().color = new Color(0, 0, 0, 0);
         DeckSetInfo.SetActive(false);
+        EventFullInfo.SetActive(false);
     }
+
+    public void EventFullInfo_On()
+    {
+        //if (isNotGrasp == false)
+        {
+            isNotGrasp = true;
+
+            panel.GetComponent<Image>().color = new Color(0, 0, 0, 0.5f);
+            EventFullInfo.SetActive(true);
+        }
+
+    }
+
+    public void EventFullInfo_Off()
+    {
+        isNotGrasp = false;
+
+        panel.GetComponent<Image>().color = new Color(0, 0, 0, 0);
+        EventFullInfo.SetActive(false);
+    }
+
 
     // Use this for initialization
     protected virtual void Awake()
     {
         DeckSetInfo.SetActive(false);
+        EventFullInfo.SetActive(false);
+
     }
 
     public void SetCardData(CardData data)
     {
+        // アクティブ 
+        gameObject.SetActive(true);
+
         cardData = data;
         // 欠番カード
         //if (data.id == (int)IDType.NONE)
@@ -82,6 +110,14 @@ public class uGUICard : MonoBehaviour
                 syuzokuText.text += " / " + CardDataBase.SyuzokuString[(int)striker.syuzokus[i]];
         }
         else syuzokuText.text = "";
+
+        // □えうれしあなら消す 
+        if (cardData.id == (int)IDType.NONE)
+        {
+            gameObject.SetActive(false);
+        }
+
+
     }
 
     // 無しのカードを入れる
@@ -91,6 +127,16 @@ public class uGUICard : MonoBehaviour
         // (11/14) -1を入れるとなしカードが欲しい　この関数いらん
         SetCardData(data);
 
+        // □えうれしあを消す 
+        gameObject.SetActive(false);
+
+    }
+
+    // 色全データ更新
+    public void AlphaSetUpdate()
+    {
+        //mainTexture.GetComponent<Image>().color = gameObject.GetComponent<Image>().color;
+        gameObject.GetComponent<CanvasGroup>().alpha = gameObject.GetComponent<Image>().color.a;
     }
 
 }

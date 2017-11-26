@@ -357,7 +357,6 @@ namespace SceneMenuState
             // 演出・描画を止める
             e.Info[(int)MENU_TYPE.BATTLE].GetComponent<ScreenOutAppeared>().Stop();
 
-
             // 球体
             e.MenuSphere[(int)MENU_SPHERE_TYPE.BATTLE].GetComponent<BoyonAppeared>().Stop();
             e.MenuSphere[(int)MENU_SPHERE_TYPE.NET_BATTLE].GetComponent<BoyonAppeared>().Stop();
@@ -613,6 +612,11 @@ namespace SceneMenuState
                     }
                     return true; // trueを返して終り
 
+
+                //case MessageType.ClickSphereButton:
+
+
+                //    break;
                 default:
 
                     break;
@@ -788,6 +792,93 @@ namespace SceneMenuState
         public override bool OnMessage(SceneMenu e, MessageInfo message)
         {
 
+            return false; // 何も引っかからなかった
+        }
+
+    }
+
+
+    //+-------------------------------------------
+    //  ネットバトル時次の質問
+    //+-------------------------------------------
+    public class NetBattleSecondSelect : BaseEntityState<SceneMenu>
+    {
+        static NetBattleSecondSelect m_pInstance;
+        public static NetBattleSecondSelect GetInstance()
+        {
+            if (m_pInstance == null) { m_pInstance = new NetBattleSecondSelect(); }
+            return m_pInstance;
+        }
+
+        public override void Enter(SceneMenu e)
+        {
+            //+------------------------------------
+            // 演出・描画を続ける
+            e.Info[(int)MENU_TYPE.BATTLE].GetComponent<ScreenOutAppeared>().KeepUp();
+            e.MenuSphere[(int)MENU_SPHERE_TYPE.BATTLE].GetComponent<BoyonAppeared>().KeepUp();
+            e.MenuSphere[(int)MENU_SPHERE_TYPE.NET_BATTLE].GetComponent<BoyonAppeared>().KeepUp();
+
+            // メニュー選択カーソル移動
+            e.NetBattleGroup.GetComponent<ScreenOutAppeared>().Action();
+
+            e.BlackPanel.SetActive(true);
+
+        }
+
+        public override void Execute(SceneMenu e)
+        {
+
+            e.NetBattleGroup.GetComponent<ScreenOutAppeared>().SelfUpdate();
+        }
+
+        public override void Exit(SceneMenu e)
+        {
+            e.NetBattleGroup.GetComponent<ScreenOutAppeared>().Stop();
+
+            e.BlackPanel.SetActive(false);
+
+        }
+
+        // ↓で使う
+        enum NET_BATTLE_TYPE { SERVER, CLIENT, END };
+        public override bool OnMessage(SceneMenu e, MessageInfo message)
+        {
+              
+            // メッセージタイプが一致している箇所に
+            switch (message.messageType)
+            {
+                case MessageType.ClickAnyButton:
+
+                    // byte[]→構造体
+                    AnyButton info = new AnyButton();
+                    IntPtr ptr = Marshal.AllocHGlobal(Marshal.SizeOf(info));
+                    Marshal.Copy(message.exInfo, 0, ptr, Marshal.SizeOf(info));
+                    info = (AnyButton)Marshal.PtrToStructure(ptr, info.GetType());
+                    Marshal.FreeHGlobal(ptr);
+                    //+-------------------------------------------------------------
+                    // ★選択したアイコンのタイプに変更
+                    switch ((NET_BATTLE_TYPE)info.Index)
+                    {
+                        case NET_BATTLE_TYPE.SERVER:
+                        
+                            break;
+                        case NET_BATTLE_TYPE.CLIENT:
+
+                            break;
+                        case NET_BATTLE_TYPE.END:
+                        default:
+                            //+-------------------------------------------------------------------
+                            // もどる
+                            e.m_pStateMachine.ChangeState(SceneMenuState.BattleSelect.GetInstance());
+                            break;
+                    }
+
+                    return true; // trueを返して終り
+
+                default:
+
+                    break;
+            }
             return false; // 何も引っかからなかった
         }
 

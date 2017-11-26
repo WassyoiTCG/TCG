@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class SceneMenu : MonoBehaviour {
 
@@ -40,12 +41,25 @@ public class SceneMenu : MonoBehaviour {
     //public GameObject Canvas;
     //public GameObject Canvas;
 
-    public GameObject a;
+    // 後ろ隠すよう
+    public GameObject BlackPanel;
+
+    public GameObject NetBattleGroup;
+
+    // シーンチェンジフラグ
+    private bool m_bSceneChange = false;
+
     // Use this for initialization
     void Start () {
 
-        a.GetComponent<ScreenOutAppeared>().Action();
+        m_bSceneChange = false;
+        //  a.GetComponent<ScreenOutAppeared>().Action();
 
+        BlackPanel = Canvas.transform.Find("BlackPanel").gameObject;
+        BlackPanel.SetActive(false);
+
+        NetBattleGroup = Canvas.transform.Find("NetBattleSecondSelect").gameObject;
+        NetBattleGroup.SetActive(false);
 
         MenuPlate = Canvas.transform.Find("MenuButton/MenuPlate").gameObject;
 
@@ -154,13 +168,37 @@ public class SceneMenu : MonoBehaviour {
         m_pStateMachine.globalState.Execute(this);
         m_pStateMachine.currentState.Execute(this);
 
-        a.GetComponent<ScreenOutAppeared>().SelfUpdate();
+        //a.GetComponent<ScreenOutAppeared>().SelfUpdate();
+    }
+
+    // なんかのボタン達に触れた時
+    public void ClickAnyButton(int no)
+    {
+        // シーンチェンジを行っていたら反応させない
+        if (m_bSceneChange) return;
+
+        AnyButton tagAny;
+
+        // セレクトナンバー設定
+        tagAny.Index = no;
+
+        // メッセージ作成
+        var message = new MessageInfo();
+        message.messageType = MessageType.ClickAnyButton;
+
+        // エクストラインフォに構造体を詰め込む
+        message.SetExtraInfo(tagAny);
+
+        HandleMessge(message);
     }
 
 
     // メニューボタン達に触れた時
     public void ClickMenuButton(int no)
     {
+        // シーンチェンジを行っていたら反応させない
+        if (m_bSceneChange) return;
+
         SelectMenuNo tagSelect;
 
         // セレクトナンバー設定
@@ -202,6 +240,15 @@ public class SceneMenu : MonoBehaviour {
     // スフィアボタンに触れた時
     public void ClickSphereButton(int no)
     {
+        // シーンチェンジを行っていたら反応させない
+        if (m_bSceneChange) return;
+
+
+
+        SelectSphereNo tagSelect;
+
+        // セレクトナンバー設定
+        tagSelect.selectNo = no;
 
         // ↑の引数によってデッキ選択画面をだしたり
         // シーンを移動する処理を行う
@@ -209,26 +256,53 @@ public class SceneMenu : MonoBehaviour {
         switch ((MENU_SPHERE_TYPE)no)
         {
             case MENU_SPHERE_TYPE.TOTORIAL:
+                 
+                //m_bSceneChange = true;
                 break;
             case MENU_SPHERE_TYPE.BATTLE:
+
+                //m_bSceneChange = true;
                 break;
             case MENU_SPHERE_TYPE.NET_BATTLE:
+                //+-------------------------------------------------------------------
+                // ステートを次の選択へ
+                m_pStateMachine.ChangeState(SceneMenuState.NetBattleSecondSelect.GetInstance());
                 break;
             case MENU_SPHERE_TYPE.DECK_CREATE:
+                m_bSceneChange = true;
+                SceneManager.LoadScene("Deck");
                 break;
             case MENU_SPHERE_TYPE.COLLECTION:
+
+                //m_bSceneChange = true;
                 break;
             case MENU_SPHERE_TYPE.SHOP:
+
+                //m_bSceneChange = true;
                 break;
             case MENU_SPHERE_TYPE.OPTION:
+
+                //m_bSceneChange = true;
                 break;
             case MENU_SPHERE_TYPE.END:
-                break;
             default:
+                Debug.LogWarning("ないです、");
                 break;
         }
 
+        //// メッセージ作成
+        //var message = new MessageInfo();
+        //message.messageType = MessageType.ClickSphereButton;
 
+        //// エクストラインフォに構造体を詰め込む
+        //message.SetExtraInfo(tagSelect);
+
+        //HandleMessge(message);
+
+
+        //+-------------------------------------------------------------------
+        // ステートをシーンチェンジへ
+        //m_pStateMachine.ChangeState(SceneMenuState.SceneChange.GetInstance());
 
     }
 
