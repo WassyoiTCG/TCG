@@ -68,10 +68,37 @@ public class PlayerController : NetworkBehaviour
             cameraPosition.z = -cameraPosition.z;
             cameraAngle.y = 180;
         }
+
+        // x番目のデッキを使用
+        var deckData = PlayerDataManager.GetPlayerData().GetDeckData(0);
+        // ストライカーか抜けてたらの処理
+        if(!deckData.isSetAllStriker())
+        {
+            deckData = new PlayerDeckData();
+            deckData.strikerCards[0] = 0;
+            deckData.strikerCards[1] = 1;
+            deckData.strikerCards[2] = 2;
+            deckData.strikerCards[3] = 3;
+            deckData.strikerCards[4] = 4;
+            deckData.strikerCards[5] = 5;
+            deckData.strikerCards[6] = 6;
+            deckData.strikerCards[7] = 7;
+            deckData.strikerCards[8] = 8;
+            deckData.strikerCards[9] = 9;
+            deckData.jorkerCard = 10;
+            deckData.eventCards[0] = (int)IDType.NONE;
+            deckData.eventCards[1] = (int)IDType.NONE;
+            deckData.eventCards[2] = (int)IDType.NONE;
+            deckData.eventCards[3] = (int)IDType.NONE;
+        }
+        myPlayer.deckData = deckData;
+        myPlayer.deckManager.SetDeckData(myPlayer.deckData);
     }
 
     public void Restart()
     {
+        if (!enabled) return;
+
         cardSetOK = false;
         holdHandNo = noHoldCard;
     }
@@ -79,15 +106,10 @@ public class PlayerController : NetworkBehaviour
 	// Update is called once per frame
 	void Update ()
     {
-        switch (myPlayer.state)
+        if (myPlayer.stateMachine.isInState(PlayerState.SetStriker.GetInstance()))
         {
-            case PlayerState.FirstDraw:
-
-                break;
-            case PlayerState.SetStriker:
-                CardTapUpdate();
-                SetStrikerUpdate();
-                break;
+            CardTapUpdate();
+            SetStrikerUpdate();
         }
 
         // カードタップ
@@ -177,14 +199,14 @@ public class PlayerController : NetworkBehaviour
                     // フィールドから掴んでたら
                     if (isFieldCardHold)
                     {
-                        holdCard.cashTransform.localPosition = orgHoldCardPosition;
+                        holdCard.cacheTransform.localPosition = orgHoldCardPosition;
                         // 描画順
                         holdCard.SetOrder(myPlayer.deckManager.GetNumHand());
                     }
                     // 手札から掴んでたら
                     else
                     {
-                        holdCard.cashTransform.localPosition = orgHoldCardPosition;
+                        holdCard.cacheTransform.localPosition = orgHoldCardPosition;
                         // 描画順
                         holdCard.SetOrder(holdHandNo);
                     }
@@ -267,6 +289,12 @@ public class PlayerController : NetworkBehaviour
         }
         else
         {
+            // マウスがUIにポイントしていたら
+            if (UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject())
+            {
+                return;
+            }
+
             // マウスクリックした瞬間
             if (oulInput.GetTouchState() == oulInput.TouchState.Began)
             {
@@ -309,7 +337,7 @@ public class PlayerController : NetworkBehaviour
                     var hand = myPlayer.cardObjectManager.GetHandCardObject();
                     var fieldCard = myPlayer.cardObjectManager.fieldStrikerCard;
 
-                    if (fieldCard.gameObject.activeInHierarchy)
+                    if (fieldCard != null/*.gameObject.activeInHierarchy*/)
                     {
                         if(card.cardData.id == fieldCard.cardData.id)
                         {
@@ -319,13 +347,17 @@ public class PlayerController : NetworkBehaviour
                             // 手札の一番後ろ
                             var numHand = myPlayer.deckManager.GetNumHand();
                             myPlayer.cardObjectManager.MakeHandTransform(numHand, numHand + 1, holdCard);
-                            orgHoldCardPosition = holdCard.cashTransform.localPosition;
+                            orgHoldCardPosition = holdCard.cacheTransform.localPosition;
                             // ここでレイピックでの座標更新
-                            holdCard.cashTransform.localPosition = RaypickHand(oulInput.GetPosition(0, false));
+                            holdCard.cacheTransform.localPosition = RaypickHand(oulInput.GetPosition(0, false));
+                            //holdCard.cacheTransform.localPosition = orgHoldCardPosition;
                             isFieldCardHold = true;
                             holdHandNo = fieldStrikerHoldNo;
                             // 描画順をめっちゃ前にする
                             holdCard.SetOrder(114);
+
+                            // めり込みバグ修正
+                            holdCard.ChangeState(CardObjectState.None.GetInstance());
                             return;
                         }
                     }

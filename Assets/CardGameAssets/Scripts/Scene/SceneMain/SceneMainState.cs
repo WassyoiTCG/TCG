@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 /*
@@ -55,7 +56,9 @@ namespace SceneMainState
                     break;
 
                 case MessageType.EndGame:
-                    Application.Quit();
+                    //Application.Quit();
+                    // メニューに戻る
+                    SceneManager.LoadScene("Menu");
                     break;
 
                 case MessageType.SyncPoint:
@@ -65,10 +68,11 @@ namespace SceneMainState
 
                         // byte[]→構造体
                         PointInfo pointInfo = new PointInfo();
-                        IntPtr ptr = Marshal.AllocHGlobal(Marshal.SizeOf(pointInfo));
-                        Marshal.Copy(message.exInfo, 0, ptr, Marshal.SizeOf(pointInfo));
-                        pointInfo = (PointInfo)Marshal.PtrToStructure(ptr, pointInfo.GetType());
-                        Marshal.FreeHGlobal(ptr);
+                        //IntPtr ptr = Marshal.AllocHGlobal(Marshal.SizeOf(pointInfo));
+                        //Marshal.Copy(message.exInfo, 0, ptr, Marshal.SizeOf(pointInfo));
+                        //pointInfo = (PointInfo)Marshal.PtrToStructure(ptr, pointInfo.GetType());
+                        //Marshal.FreeHGlobal(ptr);
+                        message.GetExtraInfo<PointInfo>(ref pointInfo);
 
                         pMain.pointManager.randomIndexArray = pointInfo.points;
                     }
@@ -98,15 +102,6 @@ namespace SceneMainState
                 pMain.uiManager.DisAppearMatchingWait();
                 Debug.Log("マッチング完了");
 
-                // 自分がホストならポイントデータを相手に送信
-                if (pMain.networkManager.isServer)
-                {
-                    PointInfo exInfo = new PointInfo();
-                    exInfo.points = new int[10];
-                    exInfo.points = pMain.pointManager.randomIndexArray;
-                    MessageManager.Dispatch(pMain.playerManager.GetMyPlayerID(), MessageType.SyncPoint, exInfo);
-                }
-
                 // ステートチェンジ
                 pMain.stateMachine.ChangeState(BattleStart.GetInstance());
             }
@@ -131,19 +126,22 @@ namespace SceneMainState
 
         public override void Enter(SceneMain pMain)
         {
-
+            // 自分がホストならポイントデータを相手に送信
+            if (MessageManager.isServer)
+            {
+                PointInfo exInfo = new PointInfo();
+                exInfo.points = new int[10];
+                exInfo.points = pMain.pointManager.randomIndexArray;
+                MessageManager.Dispatch(pMain.playerManager.GetMyPlayerID(), MessageType.SyncPoint, exInfo);
+            }
         }
 
         public override void Execute(SceneMain pMain)
         {
             if (pMain.playerManager.isPlayesStandbyOK())
             {
-                pMain.uiManager.AppearFirstDraw();
-                // プレイヤーにドローさせる
-                pMain.playerManager.SetState(PlayerState.FirstDraw);
-
                 // ステートチェンジ
-                pMain.stateMachine.ChangeState(FiestDraw.GetInstance());
+                pMain.stateMachine.ChangeState(SyncDeck.GetInstance());
             }
         }
 
@@ -157,29 +155,74 @@ namespace SceneMainState
         }
     }
 
-    public class FiestDraw : BaseEntityState<SceneMain>
+    public class SyncDeck : BaseEntityState<SceneMain>
     {
         // Singleton.
-        static FiestDraw instance;
-        public static FiestDraw GetInstance() { if (instance == null) { instance = new FiestDraw(); } return instance; }
+        static SyncDeck instance;
+        public static SyncDeck GetInstance() { if (instance == null) { instance = new SyncDeck(); } return instance; }
 
         public override void Enter(SceneMain pMain)
-        { }
+        {
+            // 自分のデッキデータを送り、送信しあう
+            if(!MessageManager.isServer)
+            {
+                pMain.playerManager.GetCPUPlayer().SendSyncDeckInfo();
+            }
+            pMain.playerManager.GetMyPlayer().SendSyncDeckInfo();
+        }
 
         public override void Execute(SceneMain pMain)
         {
-            if (pMain.playerManager.isFirstDrawEnd())
+            // 互いにデッキデータの同期が終わったら
+            if (pMain.playerManager.isSyncDeckOK())
             {
-                // めいんUI表示
-                pMain.uiManager.AppearMainUI();
+                // ステートチェンジ
+                pMain.stateMachine.ChangeState(FirstDraw.GetInstance());
+            }
+        }
 
+        public override void Exit(SceneMain pMain)
+        {
+            // デッキ同期フラグリセット
+            pMain.playerManager.SyncDeckOff();
+        }
+
+        public override bool OnMessage(SceneMain pMain, MessageInfo message)
+        {
+            return false;
+        }
+    }
+
+    public class FirstDraw : BaseEntityState<SceneMain>
+    {
+        // Singleton.
+        static FirstDraw instance;
+        public static FirstDraw GetInstance() { if (instance == null) { instance = new FirstDraw(); } return instance; }
+
+        public override void Enter(SceneMain pMain)
+        {
+            pMain.uiManager.AppearFirstDraw();
+            // プレイヤーにドローさせる
+            pMain.playerManager.SetState(PlayerState.FirstDraw.GetInstance());
+        }
+
+        public override void Execute(SceneMain pMain)
+        {
+            if (pMain.playerManager.isStateEnd()/* && pMain.playerManager.isSyncDeckOK()*/)
+            {
                 // ステートチェンジ
                 pMain.stateMachine.ChangeState(PointDraw.GetInstance());
             }
         }
 
         public override void Exit(SceneMain pMain)
-        { }
+        {
+            // めいんUI表示
+            pMain.uiManager.AppearMainUI();
+
+            // デッキ同期フラグリセット
+            pMain.playerManager.SyncDeckOff();
+        }
 
         public override bool OnMessage(SceneMain pMain, MessageInfo message)
         {
@@ -235,9 +278,6 @@ namespace SceneMainState
         public static OneDraw GetInstance() { if (instance == null) { instance = new OneDraw(); } return instance; }
 
         public override void Enter(SceneMain pMain)
-        { }
-
-        public override void Execute(SceneMain pMain)
         {
             if (pMain.turn == 0)
             {
@@ -248,10 +288,15 @@ namespace SceneMainState
             {
                 pMain.playerManager.Draw();
             }
+        }
 
-            // ステートチェンジ
-            pMain.playerManager.SetState(PlayerState.SetStriker);
-            pMain.stateMachine.ChangeState(SetStriker.GetInstance());
+        public override void Execute(SceneMain pMain)
+        {
+            if (pMain.playerManager.isStateEnd())
+            {
+                // ステートチェンジ
+                pMain.stateMachine.ChangeState(SetStriker.GetInstance());
+            }
         }
 
         public override void Exit(SceneMain pMain)
@@ -276,6 +321,8 @@ namespace SceneMainState
 
         public override void Enter(SceneMain pMain)
         {
+            pMain.playerManager.SetState(PlayerState.SetStriker.GetInstance());
+
             timer = setLimitTime;
 
             // まずプレイヤーがストライカーをセットできる状況か判断。してボタンを表示
@@ -323,8 +370,11 @@ namespace SceneMainState
 
         public override void Exit(SceneMain pMain)
         {
-            // プレイヤーにドローさせる
-            pMain.playerManager.SetState(PlayerState.BeforeOpen);
+            // プレイヤーのステート変更
+            pMain.playerManager.SetState(PlayerState.None.GetInstance());
+
+            // インフォメーションUI非表示
+            pMain.uiManager.DisAppearBattleCardInfomation();
         }
 
         public override bool OnMessage(SceneMain pMain, MessageInfo message)
@@ -434,7 +484,7 @@ namespace SceneMainState
         public override void Enter(SceneMain pMain)
         {
             var winnerPlayerID = pMain.playerManager.StrikerBattle();
-            if(winnerPlayerID != -1)
+            if (winnerPlayerID != -1)
             {
                 pMain.aikoPoint.Clear();
                 if (pMain.uiManager.AddScore(pMain.playerManager.players[winnerPlayerID].isMyPlayer, pMain.currentPoint))
@@ -443,6 +493,8 @@ namespace SceneMainState
                     return;
                 }
             }
+            else if (pMain.aikoPoint.Count >= 2)
+                pMain.aikoPoint.Clear();
             else
                 pMain.aikoPoint.Add(pMain.pointManager.GetCurrentPoint());
 
@@ -471,7 +523,7 @@ namespace SceneMainState
         public override void Enter(SceneMain pMain)
         {
             // ステートチェンジ
-            pMain.playerManager.SetState(PlayerState.TurnEnd);
+            pMain.playerManager.SetState(PlayerState.TurnEnd.GetInstance());
             pMain.stateMachine.ChangeState(PointDraw.GetInstance());
         }
 
@@ -495,7 +547,7 @@ namespace SceneMainState
 
         public override void Enter(SceneMain pMain)
         {
-            if(pMain.networkManager.isServer || !pMain.isOnline)
+            if(MessageManager.isServer || !SelectData.isNetworkBattle)
             {
                 pMain.uiManager.AppearEndGameUI();
             }

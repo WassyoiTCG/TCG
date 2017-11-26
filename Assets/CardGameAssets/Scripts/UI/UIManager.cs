@@ -10,7 +10,7 @@ public class UIManager : MonoBehaviour
     public int cpuScore { get; private set; }   // CPUのスコア
     float lerpCPUScore;                         // 補間用スコア
 
-    public int finishScore = 250;   // ゲームが決着するスコア
+    public int finishScore = 280;   // ゲームが決着するスコア
 
     public GameObject SetStrikerOKButton;
     public GameObject SetStrikerPassButton;
@@ -45,12 +45,15 @@ public class UIManager : MonoBehaviour
 
     public GameObject connectingUI;
 
+    public GameObject selectNumberUI;   // 宝箱とかの
+
     public void Restart()
     {
         myScore = 0;
         myScoreNumber.SetNumber(myScore);
         cpuScore = 0;
         cpuScoreNumber.SetNumber(cpuScore);
+        cemeteryInfoUIManager.Restart();
     }
 
     void Update()
@@ -285,5 +288,15 @@ public class UIManager : MonoBehaviour
     public void DisAppearConnectingUI()
     {
         connectingUI.SetActive(false);
+    }
+
+    public void AppearSelectNumberUI()
+    {
+        selectNumberUI.SetActive(true);
+    }
+
+    public void DisAppearSelectNumberUI()
+    {
+        selectNumberUI.SetActive(false);
     }
 }

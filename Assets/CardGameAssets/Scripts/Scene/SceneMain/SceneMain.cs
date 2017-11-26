@@ -37,15 +37,18 @@ public class SceneMain : MonoBehaviour
     public List<int> aikoPoint { get; private set; }            // あいこポイント
     public int turn;                                            // 現在のターン
 
-    public bool isOnline = false;
+    //public bool isOnline = false;
 
 	// Use this for initialization
 	void Awake()
     {
+        // システム初期化
+        oulSystem.Initialize();
+
         // メッセージ管理初期化
-        MessageManager.Start(this, isOnline);
-        // カード初期化
-        CardDataBase.Start();
+        MessageManager.Start(this, SelectData.isNetworkBattle);
+        //// カード初期化
+        //CardDataBase.Start();
         // ポイントマネージェー初期化
         pointManager = new PointCardManager();
         pointManager.Start();
@@ -54,7 +57,7 @@ public class SceneMain : MonoBehaviour
         stateMachine = new BaseEntityStateMachine<SceneMain>(this);
         stateMachine.globalState = SceneMainState.Global.GetInstance();
         // オンラインかそうでないかで分岐
-        if (isOnline)
+        if (SelectData.isNetworkBattle)
         {
             offlinePlayers.SetActive(false);
             networkManager.gameObject.SetActive(true);
@@ -112,7 +115,7 @@ public class SceneMain : MonoBehaviour
         turn = 0;
 
         // オンラインかそうでないかで分岐
-        if (isOnline)
+        if (SelectData.isNetworkBattle)
         {
             stateMachine.ChangeState(SceneMainState.MatchingWait.GetInstance());
         }

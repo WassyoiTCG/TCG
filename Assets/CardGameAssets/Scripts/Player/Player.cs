@@ -2,20 +2,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum PlayerState
-{
-    Start,          // 開始
-    FirstDraw,      // 最初のドロー、マリガン
-    PointDraw,      // 点数カードをめくる
-    Draw,           // 最初のターンと3ターンずつドローフェイズがある
-    SetStriker,     // ファイターをセットする、イベントを発動などができる、互いがファイターを伏せ、準備完了となるまで難解でもファイターをセットしなおすことができる。
-    BeforeOpen,     // オープン前
-    Open,           // オープン
-    AfterOpen,      // オープン後
-    TurnEnd,        // ターン終了
-    End             // 勝ったプレイヤーに点数を与える、相内の場合は次へ持ち越し(もう点数山札ないときは終了)
-}
-
 public class Player : MonoBehaviour
 {
     public float moveSpeed = 1;
@@ -23,8 +9,8 @@ public class Player : MonoBehaviour
     public Vector3 move;
     //Transform cashTransform;
 
-    public PlayerState state { get; private set; }                       // プレイヤーのステート
-    public DeckData deckData = new DeckData();             // デッキの情報
+    public BaseEntityStateMachine<Player> stateMachine { get; private set; }                       // プレイヤーのステート
+    public PlayerDeckData deckData;             // デッキの情報
     public DeckManager deckManager { get; private set; }    // デッキ管理さん(ドローとか)
     //public List<Card> hand { get; private set; }
 
@@ -36,9 +22,13 @@ public class Player : MonoBehaviour
     public int playerID;    // ネット的なID
     public bool isMyPlayer; // 自分が操作しているプレイヤーかどうか
 
-    public bool isFirstDrawEnd;
-    public bool isSynced;
-    public bool isPushedJunbiKanryo { get; private set; }
+    public bool isStateEnd;
+    public bool isSyncDeck;
+    public bool isPushedJunbiKanryo;
+
+    // ステートマシン用
+    public int step;
+    public bool isMarigan;
 
     public void JunbiKanryoON()
     {
@@ -62,21 +52,27 @@ public class Player : MonoBehaviour
     void Start ()
     {
         deckManager = new DeckManager();
+        stateMachine = new BaseEntityStateMachine<Player>(this);
+        stateMachine.currentState = PlayerState.None.GetInstance();
         //hand = new List<Card>();
 
-
         // 仮でデッキデータ作成
-        deckData.fighterCards[0] = CardDataBase.GetCardData(0);
-        deckData.fighterCards[1] = CardDataBase.GetCardData(1);
-        deckData.fighterCards[2] = CardDataBase.GetCardData(2);
-        deckData.fighterCards[3] = CardDataBase.GetCardData(3);
-        deckData.fighterCards[4] = CardDataBase.GetCardData(4);
-        deckData.fighterCards[5] = CardDataBase.GetCardData(5);
-        deckData.fighterCards[6] = CardDataBase.GetCardData(6);
-        deckData.fighterCards[7] = CardDataBase.GetCardData(7);
-        deckData.fighterCards[8] = CardDataBase.GetCardData(8);
-        deckData.fighterCards[9] = CardDataBase.GetCardData(9);
-        deckData.jorkerCard = CardDataBase.GetCardData(10);
+        //deckData = new PlayerDeckData();
+        //deckData.strikerCards[0] = 0;
+        //deckData.strikerCards[1] = 1;
+        //deckData.strikerCards[2] = 2;
+        //deckData.strikerCards[3] = 3;
+        //deckData.strikerCards[4] = 4;
+        //deckData.strikerCards[5] = 5;
+        //deckData.strikerCards[6] = 6;
+        //deckData.strikerCards[7] = 7;
+        //deckData.strikerCards[8] = 8;
+        //deckData.strikerCards[9] = 9;
+        //deckData.jorkerCard = 10;
+        //deckData.eventCards[0] = (int)IDType.NONE;
+        //deckData.eventCards[1] = (int)IDType.NONE;
+        //deckData.eventCards[2] = (int)IDType.NONE;
+        //deckData.eventCards[3] = (int)IDType.NONE;
 
         // キャッシュ
         //cashTransform = transform;
@@ -93,7 +89,7 @@ public class Player : MonoBehaviour
     {
         // デッキ管理さん初期化
         deckManager.Start(this, cardObjectManager);
-        deckManager.Reset(deckData);
+        deckManager.Reset();
 
         var controller = GetComponent<PlayerController>();
         if(controller)
@@ -108,8 +104,8 @@ public class Player : MonoBehaviour
         }
 
         // その他
-        isFirstDrawEnd = false;
-        isSynced = false;
+        isStateEnd = false;
+        isSyncDeck = false;
         isPushedJunbiKanryo = false;
     }
 	
@@ -137,6 +133,9 @@ public class Player : MonoBehaviour
         //{
         //    
         //}
+
+        // ステートマシン更新
+        stateMachine.Update();
     }
 
     void FixedUpdate()
@@ -147,52 +146,9 @@ public class Player : MonoBehaviour
     //    move *= 0.5f;
     }
 
-    public void ChangeState(PlayerState newState)
+    public void ChangeState(BaseEntityState<Player> newState)
     {
-        isSynced = false;
-
-        // Exit処理
-        switch (state)
-        {
-            case PlayerState.SetStriker:
-                playerManager.uiManager.DisAppearWaitYouUI();
-                break;
-        }
-
-
-        state = newState;
-
-        // Enter処理
-        switch (newState)
-        {
-            case PlayerState.Start:
-                break;
-            case PlayerState.FirstDraw:
-                FirstDraw();
-                break;
-            case PlayerState.PointDraw:
-                break;
-            case PlayerState.Draw:
-                break;
-            case PlayerState.SetStriker:
-                waitTimer = 0;
-                break;
-            case PlayerState.BeforeOpen:
-                break;
-            case PlayerState.Open:
-                break;
-            case PlayerState.AfterOpen:
-                break;
-            case PlayerState.TurnEnd:
-                isPushedJunbiKanryo = false;
-                deckManager.TurnEnd();
-                // UI更新
-                playerManager.uiManager.UpdateDeckUI(deckManager, isMyPlayer);
-                break;
-            default:
-                break;
-        }
-
+        stateMachine.ChangeState(newState);
     }
 
     public void FirstDraw()
@@ -201,25 +157,80 @@ public class Player : MonoBehaviour
         deckManager.Draw(firstDrawCount);
     }
 
-    public void Marigan()
+    public void Marigan(SyncDeckInfo info)
     {
         // 手札とか山札リセット
-        deckManager.Reset(deckData);
-        // ドロー
-        FirstDraw();
-        // ドロー終了
-        isFirstDrawEnd = true;
+        //deckManager.SetDeckData(deckData);
+        deckManager.Marigan(info);
+
+        isMarigan = true;
 
         // 手札・デッキ情報送信
-        SendSyncDeckInfo();
+        //SendSyncDeckInfo();
     }
 
     public void NoMarigan()
     {
-        isFirstDrawEnd = true;
+        isMarigan = false;
+
+        isStateEnd = true;
 
         // 手札・デッキ情報送信
-        SendSyncDeckInfo();
+        //SendSyncDeckInfo();
+    }
+
+    public SyncDeckInfo GetSyncDeckInfo()
+    {
+        // ex構造体作成
+        SyncDeckInfo info = new SyncDeckInfo();
+        int num;
+        //exInfo.hand = new int[9];
+
+        //exInfo.bochi = new int[15];
+        //exInfo.tuihou = new int[15];
+
+        //// 手札同期
+        //if (num == 0) exInfo.hand[0] = -1;
+        //else if (num < 9) exInfo.hand[num] = -1;
+        //for (int i = 0; i < num; i++)
+        //{
+        //    exInfo.hand[i] = deckManager.GetHandCard(i).id;
+        //}
+
+        // 山札同期
+        info.yamahuda = new int[15];
+        num = deckManager.GetNumYamahuda();
+        if (num == 0) info.yamahuda[0] = -1;
+        else if (num < 15) info.yamahuda[num] = -1;
+        for (int i = 0; i < num; i++)
+        {
+            info.yamahuda[i] = deckManager.GetYamahudaCard(i).id;
+        }
+
+        //// 墓地同期
+        //num = deckManager.GetNumBochi();
+        //if (num == 0) exInfo.bochi[0] = -1;
+        //else if (num < 15) exInfo.bochi[num] = -1;
+        //for (int i = 0; i < num; i++)
+        //{
+        //    exInfo.bochi[i] = deckManager.GetCemeteryCard(i).id;
+        //}
+
+        //// 追放同期
+        //num = deckManager.GetNumTsuihou();
+        //if (num == 0) exInfo.tuihou[0] = -1;
+        //else if (num < 15) exInfo.tuihou[num] = -1;
+        //for (int i = 0; i < num; i++)
+        //{
+        //    exInfo.tuihou[i] = deckManager.GetExpulsionCard(i).id;
+        //}
+
+        //Info1 exInfo;
+        //exInfo.a = 114;
+        //exInfo.b = 514;
+        //exInfo.pos = new Vector3(810, 19, 19);
+
+        return info;
     }
 
     public void SendSyncDeckInfo()
@@ -231,66 +242,21 @@ public class Player : MonoBehaviour
         }
 
         // カード情報をネットに送って相手と同期させる
-        // ex構造体作成
-        SyncDeckInfo exInfo = new SyncDeckInfo();
-        exInfo.hand = new int[9];
-        exInfo.yamahuda = new int[15];
-        exInfo.bochi = new int[15];
-        exInfo.tuihou = new int[15];
+        var exInfo = GetSyncDeckInfo();
 
-        // 手札同期
-        var num = deckManager.GetNumHand();
-        if (num == 0) exInfo.hand[0] = -1;
-        else if (num < 9) exInfo.hand[num] = -1;
-        for (int i = 0; i < num; i++)
-        {
-            exInfo.hand[i] = deckManager.GetHandCard(i).id;
-        }
-
-        // 山札同期
-        num = deckManager.GetNumYamahuda();
-        if (num == 0) exInfo.yamahuda[0] = -1;
-        else if (num < 15) exInfo.yamahuda[num] = -1;
-        for (int i = 0; i < num; i++)
-        {
-            exInfo.yamahuda[i] = deckManager.GetYamahudaCard(i).id;
-        }
-
-        // 墓地同期
-        num = deckManager.GetNumBochi();
-        if (num == 0) exInfo.bochi[0] = -1;
-        else if (num < 15) exInfo.bochi[num] = -1;
-        for (int i = 0; i < num; i++)
-        {
-            exInfo.bochi[i] = deckManager.GetCemeteryCard(i).id;
-        }
-
-        // 追放同期
-        num = deckManager.GetNumTsuihou();
-        if (num == 0) exInfo.tuihou[0] = -1;
-        else if (num < 15) exInfo.tuihou[num] = -1;
-        for (int i = 0; i < num; i++)
-        {
-            exInfo.tuihou[i] = deckManager.GetExpulsionCard(i).id;
-        }
-
-        //Info1 exInfo;
-        //exInfo.a = 114;
-        //exInfo.b = 514;
-        //exInfo.pos = new Vector3(810, 19, 19);
         // メッセージ送信
         MessageManager.Dispatch(playerID, MessageType.SyncDeck, exInfo);
 
     }
 
-    public void Draw()
-    {
-        // 1枚ドロー
-        deckManager.Draw(1);
+    //public void Draw()
+    //{
+    //    // 1枚ドロー
+    //    deckManager.Draw(1);
 
-        // UI更新
-        playerManager.uiManager.UpdateDeckUI(deckManager, isMyPlayer);
-    }
+    //    // UI更新
+    //    playerManager.uiManager.UpdateDeckUI(deckManager, isMyPlayer);
+    //}
 
     public void SetCard(SetCardInfo info)
     {
@@ -325,6 +291,8 @@ public class Player : MonoBehaviour
     // 手札や山札の情報のセット
     public void SyncDeck(SyncDeckInfo syncData)
     {
+        // 相手から送られてくる前提のコード、
+
         // 手札・山札etc情報同期
         deckManager.Sync(syncData);
     }

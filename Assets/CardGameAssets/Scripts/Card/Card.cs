@@ -23,10 +23,16 @@ public class Card : MonoBehaviour
     public bool isSetField = false;
     public bool uraomoteFlag;               // 裏表
 
-    public Vector3 handPosition;    // 手札の座標保存用
-    public Vector3 nextPosition;    // なんか補間とかで使う
+    //public Vector3 handPosition;    // 手札の座標保存用
 
-    public Transform cashTransform;
+    // ステートマシンからのアクセス用
+    public float timer;
+    public Vector3 startPosition;
+    public Vector3 startAngle;
+    public Vector3 nextPosition;    // なんか補間とかで使う
+    public Vector3 nextAngle;
+
+    public Transform cacheTransform;
 
     public CardData cardData { get; private set; }
 
@@ -37,7 +43,7 @@ public class Card : MonoBehaviour
     void Awake()
     {
         //canvas = GetComponent<Canvas>();
-        cashTransform = transform;
+        cacheTransform = transform;
 
         // ステート初期化
         stateMachine = new BaseEntityStateMachine<Card>(this);
@@ -60,16 +66,15 @@ public class Card : MonoBehaviour
         canvas.sortingOrder = no;
     }
 
-    public void SetCardData(CardData data, bool isMyPlayer)
+    public void SetCardData(CardData data)
     {
-        isMyPlayerSide = isMyPlayer;
         cardData = data;
 
         // カード名
         cardNameText.text = data.cardName;
         // カード画像
         //cardSprite.sprite = data.image;
-        cardImageRenderer.materials[0].SetTexture("_MainTex", data.image); 
+        cardImageRenderer.materials[0].SetTexture("_MainTex", data.image.texture); 
 
         switch (data.cardType)
         {
@@ -102,6 +107,8 @@ public class Card : MonoBehaviour
 
     public void SetUraomote(bool omote)
     {
+        // 表フラグがtrueならパワーフレームとか名前が出る。
+        // falseならパワーフレームが非表示になる
         uraomoteFlag = omote;
         if (omote)
         {
@@ -119,6 +126,29 @@ public class Card : MonoBehaviour
     {
         // ステートてぇんじ
         stateMachine.ChangeState(CardObjectState.Open.GetInstance());
+    }
+
+    public void Draw(Vector3 deckPosition, Vector3 deckAngle)
+    {
+        // デッキ→手札への補間用
+        startPosition = deckPosition;
+        startAngle = deckAngle;
+        // ステートてぇんじ
+        stateMachine.ChangeState(CardObjectState.Draw.GetInstance());
+    }
+
+    public void Marigan(Vector3 handPosition, Vector3 handAngle)
+    {
+        // デッキ→手札への補間用
+        startPosition = handPosition;
+        startAngle = handAngle;
+        // ステートてぇんじ
+        stateMachine.ChangeState(CardObjectState.Marigan.GetInstance());
+    }
+
+    public void ChangeState(BaseEntityState<Card> newState)
+    {
+        stateMachine.ChangeState(newState);
     }
 
     // カードを出す

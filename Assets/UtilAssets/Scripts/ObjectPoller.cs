@@ -69,7 +69,7 @@ public class ObjectPoller : MonoBehaviour
         {
             if (!poolDatas[ID].poolObjects[indexArray[i]]) Debug.LogWarning("ぬるぽ" + ID + "," + i);
             // アクティブじゃないやつがいたらそいつをアクティブにして返す
-            if (!poolDatas[ID].poolObjects[indexArray[i]].activeInHierarchy)
+            if (!poolDatas[ID].poolObjects[indexArray[i]].activeSelf/*activeInHierarchy*/)
             {
                 poolDatas[ID].poolObjects[indexArray[i]].SetActive(true);
                 //Debug.Log(i);

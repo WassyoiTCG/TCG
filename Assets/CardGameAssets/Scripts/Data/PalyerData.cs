@@ -56,6 +56,17 @@ public class PlayerDeckData
             eventCards[i] = array[numStriker + numJoker + i];
         }
     }
+
+    // ストライカーとジョーカーが全部セットされているかどうかチェック
+    public bool isSetAllStriker()
+    {
+        foreach (int strikerCardID in strikerCards)
+            if (strikerCardID == (int)IDType.NONE) return false;
+
+        if (jorkerCard == (int)IDType.NONE) return false;
+
+        return true;
+    }
 }
 
 
@@ -179,7 +190,7 @@ public static class PlayerDataManager
                 // イベント描きだし
                 for (int j = 0; j < PlayerDeckData.numEvent; j++)
                 {
-                    writer.Write(deckData.eventCards[j].ToString() + " ");
+                    writer.Write(deckData.eventCards[j].ToString() + ((j == PlayerDeckData.numEvent - 1) ? "\r\n" : " "));
                 }
             }
         }

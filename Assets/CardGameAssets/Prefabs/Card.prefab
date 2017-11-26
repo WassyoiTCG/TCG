@@ -443,8 +443,15 @@ MonoBehaviour:
   cardSleeveRenderer: {fileID: 23097201202478872}
   cardImageRenderer: {fileID: 23419146321740566}
   isMyPlayerSide: 0
+  isSetField: 0
+  uraomoteFlag: 0
   handPosition: {x: 0, y: 0, z: 0}
-  cashTransform: {fileID: 0}
+  timer: 0
+  startPosition: {x: 0, y: 0, z: 0}
+  startAngle: {x: 0, y: 0, z: 0}
+  nextPosition: {x: 0, y: 0, z: 0}
+  nextAngle: {x: 0, y: 0, z: 0}
+  cacheTransform: {fileID: 0}
 --- !u!114 &114112400886563150
 MonoBehaviour:
   m_ObjectHideFlags: 1

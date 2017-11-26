@@ -13,9 +13,8 @@ public class oulNetwork : NetworkManager
     //public InputField ipInput;
     //public NetworkClient client { get; private set; }
 
-    public bool isServer = false;
-    List<ClientMessageOKInfo> clientIDList = new List<ClientMessageOKInfo>();
-    List<MyNetworkMessage> messageQueue = new List<MyNetworkMessage>();
+    //List<ClientMessageOKInfo> clientIDList = new List<ClientMessageOKInfo>();
+    Queue<MyNetworkMessage> messageQueue = new Queue<MyNetworkMessage>();
 
     float waitTimer;
     int sendMessageNumber;
@@ -23,11 +22,11 @@ public class oulNetwork : NetworkManager
 
     MessageInfo[] messageBuffer = new MessageInfo[2048];
 
-    class ClientMessageOKInfo
-    {
-        public int connectionId;   // 接続してるクライアントのID
-        public bool sendOK;        // 正しくメッセージが送れたか
-    }
+    //class ClientMessageOKInfo
+    //{
+    //    public int connectionId;   // 接続してるクライアントのID
+    //    public bool sendOK;        // 正しくメッセージが送れたか
+    //}
 
 
     void Start()
@@ -48,41 +47,50 @@ public class oulNetwork : NetworkManager
         }
     }
 
-    bool isAllSendOK()
-    {
-        foreach(ClientMessageOKInfo c in clientIDList)
-        {
-            if (!c.sendOK) return false;
-        }
-        return true;
-    }
+    //bool isAllSendOK()
+    //{
+    //    foreach(ClientMessageOKInfo c in clientIDList)
+    //    {
+    //        if (!c.sendOK) return false;
+    //    }
+    //    return true;
+    //}
 
     void Update()
     {
-        if (!isServer) return;
+        if (!MessageManager.isServer) return;
 
         if(messageQueue.Count > 0)
         {
-            // 全員に送れたら
-            if (isAllSendOK())
-            {
-                // フラグリセット
-                foreach (ClientMessageOKInfo c in clientIDList)
-                {
-                    c.sendOK = false;
-                }
-                // 先頭メッセージ削除
-                messageQueue.RemoveAt(0);
-                return;
-            }
+            var mes = messageQueue.Dequeue();
 
-            if ((waitTimer += Time.deltaTime) > 0.5f)
-            {
-                foreach (ClientMessageOKInfo c in clientIDList)
-                {
-                    if (!c.sendOK) NetworkServer.SendToClient(c.connectionId, Msg.MyMessage, messageQueue[0]);
-                }
-            }
+            // クライアントに送信
+            var res = NetworkServer.SendToAll(Msg.MyMessage, mes);
+
+            // クライアント全員に送信する
+            Debug.Log("クライアント全員に" + mes.myMessageInfo.number + "番のメッセージ送信[" + mes.myMessageInfo.messageType.ToString() + 
+                "]" + res.ToString());
+
+            //// 全員に送れたら
+            //if (isAllSendOK())
+            //{
+            //    // フラグリセット
+            //    foreach (ClientMessageOKInfo c in clientIDList)
+            //    {
+            //        c.sendOK = false;
+            //    }
+            //    // 先頭メッセージ削除
+            //    messageQueue.RemoveAt(0);
+            //    return;
+            //}
+
+            //if ((waitTimer += Time.deltaTime) > 0.5f)
+            //{
+            //    foreach (ClientMessageOKInfo c in clientIDList)
+            //    {
+            //        if (!c.sendOK) NetworkServer.SendToClient(c.connectionId, Msg.MyMessage, messageQueue[0]);
+            //    }
+            //}
 
 
         }
@@ -182,7 +190,7 @@ public class oulNetwork : NetworkManager
         base.OnStartServer();
 
         // 
-        isServer = true;
+        MessageManager.isServer = true;
 
         // サーバがMsg.Textを受信したときに行う関数を登録する
         NetworkServer.RegisterHandler(Msg.MyMessage, networkMessage =>
@@ -191,33 +199,34 @@ public class oulNetwork : NetworkManager
             Debug.Log("サーバー: " + networkMessage.conn.connectionId + "番のプレイヤーからのメッセージを受信" + mes.myMessageInfo.messageType.ToString());
 
             // 
-            if (mes.myMessageInfo.messageType == MessageType.ReceiveOK)
-            {
-                // byte[]→構造体
-                ReceiveOKInfo info = new ReceiveOKInfo();
-                IntPtr ptr = Marshal.AllocHGlobal(Marshal.SizeOf(info));
-                Marshal.Copy(mes.myMessageInfo.exInfo, 0, ptr, Marshal.SizeOf(info));
-                info = (ReceiveOKInfo)Marshal.PtrToStructure(ptr, info.GetType());
-                Marshal.FreeHGlobal(ptr);
+            //if (mes.myMessageInfo.messageType == MessageType.ReceiveOK)
+            //{
+            //    // byte[]→構造体
+            //    ReceiveOKInfo info = new ReceiveOKInfo();
+            //    IntPtr ptr = Marshal.AllocHGlobal(Marshal.SizeOf(info));
+            //    Marshal.Copy(mes.myMessageInfo.exInfo, 0, ptr, Marshal.SizeOf(info));
+            //    info = (ReceiveOKInfo)Marshal.PtrToStructure(ptr, info.GetType());
+            //    Marshal.FreeHGlobal(ptr);
 
-                for (int i = 0; i < clientIDList.Count; i++)
-                {
-                    if (clientIDList[i].connectionId == networkMessage.conn.connectionId)
-                    {
-                        clientIDList[i].sendOK = true;
-                        break;
-                    }
-                }
-                return;
-            }
-            else if(mes.myMessageInfo.messageType == MessageType.ReMessage)
+            //    for (int i = 0; i < clientIDList.Count; i++)
+            //    {
+            //        if (clientIDList[i].connectionId == networkMessage.conn.connectionId)
+            //        {
+            //            clientIDList[i].sendOK = true;
+            //            break;
+            //        }
+            //    }
+            //    return;
+            //}
+            if(mes.myMessageInfo.messageType == MessageType.ReMessage)
             {
                 // byte[]→構造体
                 ReMessageInfo reMessageInfo = new ReMessageInfo();
-                IntPtr ptr = Marshal.AllocHGlobal(Marshal.SizeOf(reMessageInfo));
-                Marshal.Copy(mes.myMessageInfo.exInfo, 0, ptr, Marshal.SizeOf(reMessageInfo));
-                reMessageInfo = (ReMessageInfo)Marshal.PtrToStructure(ptr, reMessageInfo.GetType());
-                Marshal.FreeHGlobal(ptr);
+                mes.myMessageInfo.GetExtraInfo<ReMessageInfo>(ref reMessageInfo);
+                //IntPtr ptr = Marshal.AllocHGlobal(Marshal.SizeOf(reMessageInfo));
+                //Marshal.Copy(mes.myMessageInfo.exInfo, 0, ptr, Marshal.SizeOf(reMessageInfo));
+                //reMessageInfo = (ReMessageInfo)Marshal.PtrToStructure(ptr, reMessageInfo.GetType());
+                //Marshal.FreeHGlobal(ptr);
 
                 // 返信
                 MyNetworkMessage re = new MyNetworkMessage();
@@ -225,6 +234,8 @@ public class oulNetwork : NetworkManager
                 Debug.Assert(re.myMessageInfo.messageType != MessageType.NoMessage, "ReMessageでエラー");
                 networkMessage.conn.Send(Msg.MyMessage, re);
             }
+
+            Debug.Log("メッセージ保存: " + sendMessageNumber);
 
             // 番号
             messageBuffer[sendMessageNumber] = mes.myMessageInfo;
@@ -241,10 +252,10 @@ public class oulNetwork : NetworkManager
             //networkMessage.conn.Send(Msg.MyMessage, re);
 
             // クライアント全員に送信する
-            NetworkServer.SendToAll(Msg.MyMessage, mes);
+            //NetworkServer.SendToAll(Msg.MyMessage, mes);
 
             // おくられてないとき用にメッセージ保存
-            //messageQueue.Add(mes);
+            messageQueue.Enqueue(mes);
             //waitTimer = 114514;
         });
 
@@ -305,10 +316,10 @@ public class oulNetwork : NetworkManager
         base.OnServerConnect(conn);
 
         // クライアント登録
-        ClientMessageOKInfo info = new ClientMessageOKInfo();
-        info.connectionId = conn.connectionId;
-        info.sendOK = false;
-        clientIDList.Add(info);
+        //ClientMessageOKInfo info = new ClientMessageOKInfo();
+        //info.connectionId = conn.connectionId;
+        //info.sendOK = false;
+        //clientIDList.Add(info);
 
         Debug.Log("サーバー: クライアント" + conn.connectionId + "と接続シテルグマ");
     }
@@ -349,14 +360,16 @@ class Msg
 
 public static class MessageManager
 {
-    static public SceneMain sceneMain;    // ゲーム管理さん
-    static public bool isNetwork;
+    public static SceneMain sceneMain;    // ゲーム管理さん
+    public static bool isNetwork;
+    public static bool isServer = false;
 
     static readonly float kankaku = 0.1f;   // おくる間隔
     static float timer;
     static bool messageSyoriSitemoii;
 
     static int receiveMessageNumber;
+
 
     public static void SetMessageSyoriSitemoii(bool value) { messageSyoriSitemoii = value; }
 
@@ -433,12 +446,12 @@ public static class MessageManager
         // メッセージ何もなかったら
         if (messageBox.Count == 0) return;
         // 一定間隔(Remessage送りすぎないように)
-        if ((timer += Time.deltaTime) < kankaku)
-        {
-            // 通信中UI表示
-            sceneMain.uiManager.AppearConnectingUI();
-            return;
-        }
+        //if ((timer += Time.deltaTime) < kankaku)
+        //{
+        //    // 通信中UI表示
+        //    sceneMain.uiManager.AppearConnectingUI();
+        //    return;
+        //}
         // 通信中UI非表示
         sceneMain.uiManager.DisAppearConnectingUI();
 
@@ -450,12 +463,13 @@ public static class MessageManager
         {
             if(messageBox[i].number == receiveMessageNumber)
             {
-                // 受け取ったことにする
-                sceneMain.HandleMessage(messageBox[i]);
+                var message = messageBox[i];
                 // 処理したのでリストから消去
-                messageBox.RemoveAt(i);
+                messageBox.Remove(message);
                 // 次のメッセージ待機
                 receiveMessageNumber++;
+                // 受け取ったことにする
+                sceneMain.HandleMessage(message);
                 // 見つかったフラグ
                 ok = true;
                 break;
@@ -509,7 +523,10 @@ public static class MessageManager
         if (isNetwork)
         {
             // サーバにMsg.Textを送る
-            oulNetwork.s_Singleton.SendMessage(message);
+            // ※自分がサーバーなら送らず内部で処理する
+            //if(!isServer)
+                oulNetwork.s_Singleton.SendMessage(message);
+            //ReceiveNetwork(message);
         }
 
         else

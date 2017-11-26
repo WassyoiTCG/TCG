@@ -31,13 +31,13 @@ public class BaseEntityStateMachine<entity_type> where entity_type : class, new(
         // 開始関数
         currentState.Enter(owner);
     }
-    void ReventToPreviousState()
+    public void ReventToPreviousState()
     {
         Debug.Assert(previousState != null, "前回ステートがnull");
         ChangeState(previousState);
     }
 
-    bool isInState(BaseEntityState<entity_type> st) { return (currentState.GetType() == st.GetType()); }
+    public bool isInState(BaseEntityState<entity_type> st) { return (currentState.GetType() == st.GetType()); }
 
     public bool HandleMessage(MessageInfo message)
     {

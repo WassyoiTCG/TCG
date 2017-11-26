@@ -25,7 +25,36 @@ public class PlayerManager : MonoBehaviour
         return allOK;
     }
 
-    public Player GetPlayer(int id) { return players[id]; }
+    public bool isSyncDeckOK()
+    {
+        bool allOK = true;
+        foreach (Player player in players)
+            if (!player.isSyncDeck) allOK = false;
+        return allOK;
+    }
+
+    public void SyncDeckOff()
+    {
+        foreach (Player player in players)
+            player.isSyncDeck = false;
+    }
+
+    public Player GetPlayer(int id)
+    {
+        foreach (Player player in players)
+            if (player.playerID == id) return player;
+
+        Debug.LogWarning("プレイヤー取得null");
+        return null;
+    }
+    public Player GetAitePlayer(int id)
+    {
+        foreach (Player player in players)
+            if (player.playerID != id) return player;
+
+        Debug.LogWarning("プレイヤー取得null");
+        return null;
+    }
 
     // 自分が操作しているプレイヤーのIDを取得
     public int GetMyPlayerID()
@@ -60,7 +89,7 @@ public class PlayerManager : MonoBehaviour
         return null;
     }
 
-    public void SetState(PlayerState state)
+    public void SetState(BaseEntityState<Player> state)
     {
         foreach (Player player in players)
             player.ChangeState(state);
@@ -89,14 +118,14 @@ public class PlayerManager : MonoBehaviour
     public void Draw()
     {
         foreach (Player player in players)
-            player.Draw();
+            player.ChangeState(PlayerState.Draw.GetInstance());
     }
 
-    public bool isFirstDrawEnd()
+    public bool isStateEnd()
     {
         bool allOK = true;
         foreach (Player player in players)
-            if (!player.isFirstDrawEnd || !player.isSynced) allOK = false;
+            if (!player.isStateEnd) allOK = false;
         return allOK;
     }
 
@@ -119,7 +148,11 @@ public class PlayerManager : MonoBehaviour
         // switchにすると構造体受け取りでバグる
         if(message.messageType == MessageType.Marigan)
         {
-            players[message.fromPlayerID].Marigan();
+            // byte[]→構造体
+            SyncDeckInfo syncDeckInfo = new SyncDeckInfo();
+            message.GetExtraInfo<SyncDeckInfo>(ref syncDeckInfo);
+
+            players[message.fromPlayerID].Marigan(syncDeckInfo);
             return true;
         }
         if (message.messageType == MessageType.NoMarigan)
@@ -150,10 +183,11 @@ public class PlayerManager : MonoBehaviour
 
             // byte[]→構造体
             SetCardInfo setCardInfo = new SetCardInfo();
-            IntPtr ptr = Marshal.AllocHGlobal(Marshal.SizeOf(setCardInfo));
-            Marshal.Copy(message.exInfo, 0, ptr, Marshal.SizeOf(setCardInfo));
-            setCardInfo = (SetCardInfo)Marshal.PtrToStructure(ptr, setCardInfo.GetType());
-            Marshal.FreeHGlobal(ptr);
+            message.GetExtraInfo<SetCardInfo>(ref setCardInfo);
+            //IntPtr ptr = Marshal.AllocHGlobal(Marshal.SizeOf(setCardInfo));
+            //Marshal.Copy(message.exInfo, 0, ptr, Marshal.SizeOf(setCardInfo));
+            //setCardInfo = (SetCardInfo)Marshal.PtrToStructure(ptr, setCardInfo.GetType());
+            //Marshal.FreeHGlobal(ptr);
 
             Debug.Log("受信: プレイヤー" + message.fromPlayerID + "が手札" + setCardInfo.handNo + "のカードをセットしました");
 
@@ -170,10 +204,11 @@ public class PlayerManager : MonoBehaviour
 
             // byte[]→構造体
             BackToHandInfo backToHandInfo = new BackToHandInfo();
-            IntPtr ptr = Marshal.AllocHGlobal(Marshal.SizeOf(backToHandInfo));
-            Marshal.Copy(message.exInfo, 0, ptr, Marshal.SizeOf(backToHandInfo));
-            backToHandInfo = (BackToHandInfo)Marshal.PtrToStructure(ptr, backToHandInfo.GetType());
-            Marshal.FreeHGlobal(ptr);
+            message.GetExtraInfo<BackToHandInfo>(ref backToHandInfo);
+            //IntPtr ptr = Marshal.AllocHGlobal(Marshal.SizeOf(backToHandInfo));
+            //Marshal.Copy(message.exInfo, 0, ptr, Marshal.SizeOf(backToHandInfo));
+            //backToHandInfo = (BackToHandInfo)Marshal.PtrToStructure(ptr, backToHandInfo.GetType());
+            //Marshal.FreeHGlobal(ptr);
 
             players[message.fromPlayerID].BackToHand(backToHandInfo);
 
@@ -190,10 +225,11 @@ public class PlayerManager : MonoBehaviour
 
             // byte[]→構造体
             SyncDeckInfo syncDeckInfo = new SyncDeckInfo();
-            IntPtr ptr = Marshal.AllocHGlobal(Marshal.SizeOf(syncDeckInfo));
-            Marshal.Copy(message.exInfo, 0, ptr, Marshal.SizeOf(syncDeckInfo));
-            syncDeckInfo = (SyncDeckInfo)Marshal.PtrToStructure(ptr, syncDeckInfo.GetType());
-            Marshal.FreeHGlobal(ptr);
+            message.GetExtraInfo<SyncDeckInfo>(ref syncDeckInfo);
+            //IntPtr ptr = Marshal.AllocHGlobal(Marshal.SizeOf(syncDeckInfo));
+            //Marshal.Copy(message.exInfo, 0, ptr, Marshal.SizeOf(syncDeckInfo));
+            //syncDeckInfo = (SyncDeckInfo)Marshal.PtrToStructure(ptr, syncDeckInfo.GetType());
+            //Marshal.FreeHGlobal(ptr);
 
             //Debug.Log("受信: プレイヤー" + message.fromPlayerID + "の手札情報:" +
             //    syncDeckInfo.yamahuda[0] + "," +
@@ -219,7 +255,7 @@ public class PlayerManager : MonoBehaviour
             uiManager.UpdateDeckUI(players[message.fromPlayerID].deckManager, isMyPlayer);
 
             // 同期フラグ
-            players[message.fromPlayerID].isSynced = true;
+            players[message.fromPlayerID].isSyncDeck = true;
 
             return true;
         }

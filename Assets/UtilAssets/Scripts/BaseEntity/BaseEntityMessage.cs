@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using UnityEngine;
 
 
 public enum MessageType
@@ -27,6 +28,7 @@ public enum MessageType
     SetStrikerPass, // ストライカーセットをパス
     Marigan,        // マリガン
     NoMarigan,      // マリガンなし
+    SelectNumber,   // 数字選択
     Restart,        // もう一度
     EndGame,        // ゲーム終了
 
@@ -37,14 +39,14 @@ public enum MessageType
 // デッキ情報同期する用構造体(int型はカードのID)
 public struct SyncDeckInfo
 {
-    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 9)]
-    public int[] hand;         // 手札
+    //[MarshalAs(UnmanagedType.ByValArray, SizeConst = 9)]
+    //public int[] hand;         // 手札
     [MarshalAs(UnmanagedType.ByValArray, SizeConst = 15)]
     public int[] yamahuda;     // 山札
-    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 15)]
-    public int[] bochi;        // 墓地
-    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 15)]
-    public int[] tuihou;       // 追放
+    //[MarshalAs(UnmanagedType.ByValArray, SizeConst = 15)]
+    //public int[] bochi;        // 墓地
+    //[MarshalAs(UnmanagedType.ByValArray, SizeConst = 15)]
+    //public int[] tuihou;       // 追放
 }
 
 public struct ReceiveOKInfo
@@ -74,6 +76,10 @@ public struct BackToHandInfo
     public int iCardType;
 }
 
+public struct SelectNumberInfo
+{
+    public int selectNumber;
+}
 
 public struct MessageInfo
 {
@@ -102,6 +108,17 @@ public struct MessageInfo
 
         //exInfo = Marshal.AllocHGlobal(Marshal.SizeOf(structure));
         //Marshal.StructureToPtr(structure, exInfo, false);
+    }
+
+    public void GetExtraInfo<T>(ref T outStructure)
+    {
+        Debug.Assert(exInfo != null, "exInfoがnullなのに値を取得しようとしています。\r\nnullチェックで呼ばないようにするか、ex構造体を追加するのを忘れています");
+
+        // byte[]→構造体
+        IntPtr ptr = Marshal.AllocHGlobal(Marshal.SizeOf(outStructure));
+        Marshal.Copy(exInfo, 0, ptr, Marshal.SizeOf(outStructure));
+        outStructure = (T)Marshal.PtrToStructure(ptr, outStructure.GetType());
+        Marshal.FreeHGlobal(ptr);
     }
 }
 

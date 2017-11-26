@@ -2,7 +2,29 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class oulSystem : MonoBehaviour
+public static class oulSystem
+{
+    static bool isInitialized = false;
+    static GameObject gameObject;
+    static oulSystemObject systemObject;
+    static oulText debugText;
+
+    public static void Initialize()
+    {
+        if (isInitialized) return;
+        isInitialized = true;
+
+        // GameObjectを作る
+        gameObject = new GameObject("System");
+        // 破棄しないようにする
+        GameObject.DontDestroyOnLoad(gameObject);
+        // コンポーネントをくっつける
+        systemObject = gameObject.AddComponent<oulSystemObject>();
+        debugText = gameObject.AddComponent<oulText>();
+    }
+}
+
+public class oulSystemObject : MonoBehaviour
 {
     [Range(10, 60)]
     public int frameRate = 60;
@@ -35,7 +57,11 @@ public class oulSystem : MonoBehaviour
         //cam = Camera.main;
         UpdateAspect();
 
+        // プレイヤーデータ読み込み
         PlayerDataManager.Load();
+
+        // カードデータ読み込み
+        CardDataBase.Start();
     }
 
     // Use this for initialization

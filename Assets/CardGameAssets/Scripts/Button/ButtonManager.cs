@@ -61,10 +61,19 @@ public class ButtonManager : MonoBehaviour
     // マリガンボタンを押したとき
     public void OnClickMarigan()
     {
-        if(myPlayerID == -1)
-            myPlayerID = GameObject.Find("PlayerManager").GetComponent<PlayerManager>().GetMyPlayerID();
+        var playerManager = GameObject.Find("PlayerManager").GetComponent<PlayerManager>();
 
-        MessageManager.Dispatch(myPlayerID, MessageType.Marigan, null);
+        if(myPlayerID == -1)
+            myPlayerID = playerManager.GetMyPlayerID();
+
+        // とてつもないゴリのような何か
+        // マリガンを、新しくシャッフルしたデッキの情報を互いに同期させて7ドローという処理をしているので、
+        // ここでもう一度山札をリセットして情報をつっこんでいる
+        var player = playerManager.GetMyPlayer();
+        player.deckManager.SetDeckData(player.deckData, false);
+        var exInfo = player.GetSyncDeckInfo();
+
+        MessageManager.Dispatch(myPlayerID, MessageType.Marigan, exInfo);
 
         // ボタン非表示
         uiManager.DisAppearFirstDraw();

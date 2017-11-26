@@ -15,7 +15,7 @@
 
 [ELEMENT]
 1
-12
+8
 
 [POWER]
 6

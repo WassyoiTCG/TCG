@@ -67,8 +67,8 @@ public class uGUICard : MonoBehaviour
     // Use this for initialization
     protected virtual void Awake()
     {
-        DeckSetInfo.SetActive(false);
-        EventFullInfo.SetActive(false);
+        if(DeckSetInfo != null)DeckSetInfo.SetActive(false);
+        if(EventFullInfo != null)EventFullInfo.SetActive(false);
 
     }
 
@@ -87,7 +87,7 @@ public class uGUICard : MonoBehaviour
 
         cardName.text = data.cardName;
 
-        mainTexture.sprite = Sprite.Create((Texture2D)data.image, new Rect(0, 0, data.image.width, data.image.height), new Vector2(0.5f, 0.5f)); ;
+        mainTexture.sprite = data.image;/*Sprite.Create((Texture2D)data.image, new Rect(0, 0, data.image.width, data.image.height), new Vector2(0.5f, 0.5f));*/
 
         // パワーのフレームの有り無し
         if (true)

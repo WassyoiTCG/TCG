@@ -41,6 +41,14 @@ public class CemeteryInfomationUI : MonoBehaviour
         }
     }
 
+    public void Restart()
+    {
+        foreach(uGUICard card in uguiCards)
+        {
+            card.gameObject.SetActive(false);
+        }
+    }
+
     public void Appear(CardData[] cemetery, CardData[] expulsion)
     {
         gameObject.SetActive(true);

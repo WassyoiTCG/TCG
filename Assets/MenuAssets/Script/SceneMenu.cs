@@ -52,6 +52,9 @@ public class SceneMenu : MonoBehaviour {
     // Use this for initialization
     void Start () {
 
+        // 追加1126 システムの初期化をする(WinMainのInitApp)
+        oulSystem.Initialize();
+
         m_bSceneChange = false;
         //  a.GetComponent<ScreenOutAppeared>().Action();
 
@@ -260,12 +263,15 @@ public class SceneMenu : MonoBehaviour {
                 //m_bSceneChange = true;
                 break;
             case MENU_SPHERE_TYPE.BATTLE:
-
-                //m_bSceneChange = true;
+                // 追加(SceneMainに飛ぶ)
+                m_bSceneChange = true;
+                SelectData.isNetworkBattle = false;
+                SceneManager.LoadScene("Main");
                 break;
             case MENU_SPHERE_TYPE.NET_BATTLE:
                 //+-------------------------------------------------------------------
                 // ステートを次の選択へ
+                SelectData.isNetworkBattle = true;
                 m_pStateMachine.ChangeState(SceneMenuState.NetBattleSecondSelect.GetInstance());
                 break;
             case MENU_SPHERE_TYPE.DECK_CREATE:

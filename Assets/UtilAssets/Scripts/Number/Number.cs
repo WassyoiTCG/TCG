@@ -59,7 +59,11 @@ public class Number : MonoBehaviour
         //  ゴリニキ降臨 Start関数は複製した時呼ばれてしまうのでstartNumberもかえる必要あり。
         startNumber = number;
 
-        if (!isStart) Start();
+        if (!isStart)
+        {
+            Start();
+            return;
+        }
 
         //アクティブだった数字オブジェクトを非アクティブに
         for (int i = 0; i < cashTransform.childCount; i++)
