@@ -57,6 +57,11 @@ namespace SceneMainState
 
                 case MessageType.EndGame:
                     //Application.Quit();
+                    // ネットワーク終了
+                    if(SelectData.isNetworkBattle)
+                    {
+                        pMain.networkManager.Stop();
+                    }
                     // メニューに戻る
                     SceneManager.LoadScene("Menu");
                     break;
@@ -84,6 +89,7 @@ namespace SceneMainState
     }
 
 
+    // ネットワークでプレイヤーが2人揃うまで待つステート
     public class MatchingWait : BaseEntityState<SceneMain>
     {
         // Singleton.
@@ -102,6 +108,9 @@ namespace SceneMainState
                 pMain.uiManager.DisAppearMatchingWait();
                 Debug.Log("マッチング完了");
 
+                // プレイヤー初期化
+                pMain.playerManager.Restart();
+
                 // ステートチェンジ
                 pMain.stateMachine.ChangeState(BattleStart.GetInstance());
             }
@@ -118,6 +127,7 @@ namespace SceneMainState
         }
     }
 
+    // バトルスタートって出るステート
     public class BattleStart : BaseEntityState<SceneMain>
     {
         // Singleton.
@@ -155,6 +165,7 @@ namespace SceneMainState
         }
     }
 
+    // 互いのデッキを同期するステート
     public class SyncDeck : BaseEntityState<SceneMain>
     {
         // Singleton.
@@ -193,6 +204,7 @@ namespace SceneMainState
         }
     }
 
+    // 最初のドローのステート
     public class FirstDraw : BaseEntityState<SceneMain>
     {
         // Singleton.
@@ -230,6 +242,7 @@ namespace SceneMainState
         }
     }
 
+    // ポイント(ダメージ)の数値更新のステート
     public class PointDraw : BaseEntityState<SceneMain>
     {
         // Singleton.
@@ -271,6 +284,7 @@ namespace SceneMainState
         }
     }
 
+    // 3ターンごとなら1ドローするステート
     public class OneDraw : BaseEntityState<SceneMain>
     {
         // Singleton.
@@ -279,15 +293,20 @@ namespace SceneMainState
 
         public override void Enter(SceneMain pMain)
         {
-            if (pMain.turn == 0)
+            // 初回ドロー
+            if (pMain.turn++ == 0)
             {
-                pMain.playerManager.Draw();
+                pMain.playerManager.SetState(PlayerState.Draw.GetInstance());
+                return;
             }
-            pMain.turn++;
-            if (pMain.turn % 3 == 0)
+            // 2ターンごとドロー
+            if (pMain.turn % 2 == 0)
             {
-                pMain.playerManager.Draw();
+                pMain.playerManager.SetState(PlayerState.Draw.GetInstance());
+                return;
             }
+            // ドローなしなのでステートチェンジ
+            pMain.playerManager.SetState(PlayerState.None.GetInstance());
         }
 
         public override void Execute(SceneMain pMain)
@@ -308,28 +327,23 @@ namespace SceneMainState
         }
     }
 
+    // ストライカーをセットするステート
     public class SetStriker : BaseEntityState<SceneMain>
     {
         static SetStriker instance;
         public static SetStriker GetInstance() { if (instance == null) { instance = new SetStriker(); } return instance; }
 
         readonly float setLimitTime = 60 + 1;   // ストライカーセットする制限時間
-        float timer;                            // 時間用変数
-
-        Text limitTimeText;
-        Image eventTimeGauge;    // イベント時間ゲージ
 
         public override void Enter(SceneMain pMain)
         {
             pMain.playerManager.SetState(PlayerState.SetStriker.GetInstance());
 
-            timer = setLimitTime;
-
             // まずプレイヤーがストライカーをセットできる状況か判断。してボタンを表示
             pMain.uiManager.AppearStrikerOK(pMain.playerManager.GetMyPlayer().isHaveStrikerCard());
 
-            if (limitTimeText == null) limitTimeText = pMain.uiManager.limitTimeText;
-            if (eventTimeGauge == null) eventTimeGauge = pMain.uiManager.eventTimeGauge;
+            // タイマーセット
+            pMain.uiManager.SetTimer(setLimitTime);
         }
 
         public override void Execute(SceneMain pMain)
@@ -337,39 +351,26 @@ namespace SceneMainState
             // 互いがストライカーセットし終わっていたら
             if (pMain.playerManager.isSetStrikerEnd())
             {
-                timer = 0;
-
                 // ステートチェンジ
                 pMain.stateMachine.ChangeState(BeforeStrikerOpen.GetInstance());
             }
 
-            // 時間減算処理
-            if (timer > 0)
+            // 時間切れなったら
+            if (pMain.uiManager.isTimerEnd())
             {
-                if ((timer -= Time.deltaTime) < 0)
-                {
-                    timer = 0;
+                // 時間切れメッセージ
+                //MessageManager.Dispatch(pMain.playerManager.GetMyPlayerID(), MessageType.SetStrikerTimeOver, null);
 
-                    // 時間切れメッセージ
-                    //MessageManager.Dispatch(pMain.playerManager.GetMyPlayerID(), MessageType.SetStrikerTimeOver, null);
-
-                    // 時間切れ処理
-                    pMain.playerManager.GetMyPlayer().SetStrikerTimeOver();
-                }
+                // 時間切れ処理
+                pMain.playerManager.GetMyPlayer().SetStrikerTimeOver();
             }
-
-            // UIの時間表示
-            var minutes = (int)timer / 60;
-            var second = (int)timer % 60;
-            limitTimeText.text = minutes + ":" + second.ToString("00");
-
-            // UIのゲージ設定
-            var timeRate = timer / setLimitTime;
-            eventTimeGauge.fillAmount = timeRate;
         }
 
         public override void Exit(SceneMain pMain)
         {
+            // タイマーストップ
+            pMain.uiManager.StopTimer();
+
             // プレイヤーのステート変更
             pMain.playerManager.SetState(PlayerState.None.GetInstance());
 
@@ -383,6 +384,7 @@ namespace SceneMainState
         }
     }
 
+    // ストライカーを開ける前のステート
 
     public class BeforeStrikerOpen : BaseEntityState<SceneMain>
     {
@@ -408,6 +410,8 @@ namespace SceneMainState
         }
     }
 
+
+    // ストライカーを開けるステート
     public class StrikerOpen : BaseEntityState<SceneMain>
     {
         // Singleton.
@@ -430,7 +434,7 @@ namespace SceneMainState
             if ((timer += Time.deltaTime) > 2)
             {
                 // ステートチェンジ
-                pMain.stateMachine.ChangeState(AfterStrikeOpen.GetInstance());
+                pMain.stateMachine.ChangeState(SetIntercept.GetInstance());
             }
         }
 
@@ -443,23 +447,114 @@ namespace SceneMainState
         }
     }
 
-    public class AfterStrikeOpen : BaseEntityState<SceneMain>
+    // インターセプトカードをセットするステート
+    public class SetIntercept : BaseEntityState<SceneMain>
     {
         // Singleton.
-        static AfterStrikeOpen instance;
-        public static AfterStrikeOpen GetInstance() { if (instance == null) { instance = new AfterStrikeOpen(); } return instance; }
+        static SetIntercept instance;
+        public static SetIntercept GetInstance() { if (instance == null) { instance = new SetIntercept(); } return instance; }
+
+        int step;
+
+        readonly float setLimitTime = 5 + 1;   // インターセプトセットする制限時間
+
+        public override void Enter(SceneMain pMain)
+        {
+            step = 0;
+
+            // 誰もインターセプトを持っていなかったら飛ばす
+            if (!pMain.playerManager.isHaveInterceptCard())
+            {
+                // ステートチェンジ
+                pMain.stateMachine.ChangeState(StrikerAbility.GetInstance());
+
+                return;
+            }
+
+            // プレイヤーステート変更(インターセプトセットステート)
+            pMain.playerManager.SetState(PlayerState.SetIntercept.GetInstance());
+
+            var myPlayer = pMain.playerManager.GetMyPlayer();
+            // 自分がインターセプト持ってなかったら最初からボタン押した扱いUIのボタンを表示
+            if (!myPlayer.isHaveInterceptCard())
+            {
+                myPlayer.isPushedJunbiKanryo = true;
+            }
+
+            pMain.uiManager.AppearStrikerOK(false);  // falseにするとパスが出る
+
+            // UIに時間セット
+            pMain.uiManager.SetTimer(setLimitTime);
+        }
+
+        public override void Execute(SceneMain pMain)
+        {
+            switch(step)
+            {
+                case 0:
+                    // 時間切れなったら
+                    if(pMain.uiManager.isTimerEnd())
+                    {
+                        step++;
+                        return;
+                    }
+                    // 2人準備完了(パスだったり出してたり)
+                    if(pMain.playerManager.isPushedJunbiKanryo())
+                    {
+                        // タイマーストップ
+                        pMain.uiManager.StopTimer();
+                        step++;
+                    }
+                    break;
+
+                case 1:
+                    // 効果を発動させる
+                    pMain.playerManager.ActionIntercept();
+                    step++;
+                    break;
+
+                case 2:
+                    // 効果処理が終わったら
+                    if (pMain.abilityManager.isAbilityEnd())
+                    {
+                        // ステートチェンジ
+                        pMain.stateMachine.ChangeState(StrikerAbility.GetInstance());
+                    }
+                    break;
+            }
+        }
+
+        public override void Exit(SceneMain pMain)
+        {
+            // タイマーストップ
+            pMain.uiManager.StopTimer();
+        }
+
+        public override bool OnMessage(SceneMain pMain, MessageInfo message)
+        {
+            return false;
+        }
+    }
+
+    // ストライカーのアビリティが発動するステート
+    public class StrikerAbility : BaseEntityState<SceneMain>
+    {
+        // Singleton.
+        static StrikerAbility instance;
+        public static StrikerAbility GetInstance() { if (instance == null) { instance = new StrikerAbility(); } return instance; }
 
         //float timer;
 
         public override void Enter(SceneMain pMain)
         {
-            // 時間初期化
-            //timer = 0;
+            // プレイヤーステート変更(効果持ちモンスターのバトル後発動効果の処理)
+            pMain.playerManager.SetState(PlayerState.StrikerAbility.GetInstance());
         }
 
         public override void Execute(SceneMain pMain)
         {
-            //if ((timer += Time.deltaTime) > 3)
+            // 効果処理が終わったら
+            if (pMain.abilityManager.isAbilityEnd())
             {
                 // ステートチェンジ
                 pMain.stateMachine.ChangeState(StrikerBattleResult.GetInstance());
@@ -475,6 +570,7 @@ namespace SceneMainState
         }
     }
 
+    // バトルの結果を清算するステート
     public class StrikerBattleResult : BaseEntityState<SceneMain>
     {
         // Singleton.
@@ -487,7 +583,7 @@ namespace SceneMainState
             if (winnerPlayerID != -1)
             {
                 pMain.aikoPoint.Clear();
-                if (pMain.uiManager.AddScore(pMain.playerManager.players[winnerPlayerID].isMyPlayer, pMain.currentPoint))
+                if (pMain.uiManager.Damage(!pMain.playerManager.players[winnerPlayerID].isMyPlayer, pMain.currentPoint))
                 {
                     pMain.Finish();
                     return;
@@ -514,6 +610,7 @@ namespace SceneMainState
         }
     }
 
+    // ターンエンド(出したストライカーを墓地に送ったり)
     public class TurnEnd : BaseEntityState<SceneMain>
     {
         // Singleton.
@@ -539,6 +636,7 @@ namespace SceneMainState
         }
     }
 
+    // ゲーム終了ステート
     public class Finish : BaseEntityState<SceneMain>
     {
         // Singleton.

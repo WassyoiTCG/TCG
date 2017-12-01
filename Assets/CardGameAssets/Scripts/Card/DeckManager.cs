@@ -14,7 +14,7 @@ public class DeckManager
     const int Maxhand = 9;  // 手札の最大数
     List<CardData> hand = new List<CardData>();         // 手札
     Queue<CardData> yamahuda = new Queue<CardData>();   // 山札
-    List<CardData> bochi = new List<CardData>();      // 墓地
+    List<CardData> cemetery = new List<CardData>();      // 墓地
     Queue<CardData> tsuihou = new Queue<CardData>();     // 追放
 
     Player player;
@@ -29,7 +29,7 @@ public class DeckManager
         // スタック初期化
         hand.Clear();
         yamahuda.Clear();
-        bochi.Clear();
+        cemetery.Clear();
         tsuihou.Clear();
     }
 
@@ -136,25 +136,25 @@ public class DeckManager
         //return ret;
     }
 
-    public CardData GetDraw()
+    CardData GetDraw()
     {
         // 山札切れの場合、墓地から全部山札に戻す
         if (yamahuda.Count == 0)
         {
             // 墓地もない(全部追放されていたら)死ぬ
-            if (bochi.Count == 0)
+            if (cemetery.Count == 0)
             {
                 Debug.Log("ルナの負けだよ");
                 return null;
             }
 
             // 墓地がなくなるまで
-            while (bochi.Count > 0)
+            while (cemetery.Count > 0)
             {
-                var lastIndex = bochi.Count - 1;
+                var lastIndex = cemetery.Count - 1;
                 // 墓地→山札
-                yamahuda.Enqueue(bochi[lastIndex]);
-                bochi.RemoveAt(lastIndex);
+                yamahuda.Enqueue(cemetery[lastIndex]);
+                cemetery.RemoveAt(lastIndex);
             }
             // 山札シャッフル
             Shuffle(ref yamahuda);
@@ -167,17 +167,17 @@ public class DeckManager
 
     public CardData DrawBochiStriker()
     {
-        if (bochi.Count <= 0) return null;
+        if (cemetery.Count <= 0) return null;
 
         // 墓地から無造作にストライカーを探す
-        int[] randomArray = oulRandom.GetRandomArray(0, bochi.Count - 1);
+        int[] randomArray = oulRandom.GetRandomArray(0, cemetery.Count - 1);
         foreach(int r in randomArray)
         {
-            var card = bochi[r];
+            var card = cemetery[r];
             // ストライカー系のカードだったら
             if(card.isStrikerCard())
             {
-                bochi.RemoveAt(r);
+                cemetery.RemoveAt(r);
                 return card;
             }
         }
@@ -199,14 +199,16 @@ public class DeckManager
 
     public bool isSetStriker() { return (fieldStrikerCard != null); }
 
-    public void AddHand(CardData card)
+    public void AddHand(Card card)
     {
-        hand.Add(card);
+        hand.Add(card.cardData);
+        cardObjectManager.AddHand(card);
     }
 
-    public void AddBochi(CardData card)
+    public void AddBochi(Card card)
     {
-        bochi.Add(card);
+        cemetery.Add(card.cardData);
+        cardObjectManager.AddCemetery(card);
     }
 
     public void TurnEnd()
@@ -216,7 +218,7 @@ public class DeckManager
             // 手札から消す
             hand.Remove(fieldStrikerCard);
             // 墓地に送る
-            bochi.Add(fieldStrikerCard);
+            cemetery.Add(fieldStrikerCard);
             fieldStrikerCard = null;
         }
         if (fieldEventCard != null)
@@ -224,7 +226,7 @@ public class DeckManager
             // 手札から消す
             hand.Remove(fieldEventCard);
             // 墓地に送る
-            bochi.Add(fieldEventCard);
+            cemetery.Add(fieldEventCard);
             fieldEventCard = null;
         }
         // カードオブジェクト更新
@@ -246,10 +248,10 @@ public class DeckManager
 
     public CardData GetCemeteryCard(int bothiNo)
     {
-        return bochi.ToArray()[bothiNo];
+        return cemetery.ToArray()[bothiNo];
     }
 
-    public CardData[] GetCemeteryCards() { return bochi.ToArray(); }
+    public CardData[] GetCemeteryCards() { return cemetery.ToArray(); }
 
     public CardData GetExpulsionCard(int tuihouNo)
     {
@@ -289,7 +291,37 @@ public class DeckManager
         hand.Remove(card);
 
         //cardObjectManager.UpdateHand(hand, player);
-        cardObjectManager.UpdateHandPosition(this);
+        cardObjectManager.UpdateHandPosition();
+    }
+
+    public void SetIntercept(int handNo)
+    {
+        if (handNo < 0 || handNo >= hand.Count)
+        {
+            Debug.LogWarning("配列参照外" + handNo);
+            return;
+        }
+
+        var card = hand[handNo];
+        var type = card.cardType;
+        switch (type)
+        {
+            case CardType.Intercept:
+                fieldEventCard = card;
+                break;
+
+            default:
+                Debug.LogWarning("インターセプト以外がセットされてるクマ");
+                break;
+        }
+
+        cardObjectManager.FieldSet(handNo, player.isMyPlayer);
+
+        // ★★★手札から消す
+        hand.Remove(card);
+
+        //cardObjectManager.UpdateHand(hand, player);
+        cardObjectManager.UpdateHandPosition();
     }
 
     public void BackToHand(BackToHandInfo info)
@@ -310,7 +342,7 @@ public class DeckManager
 
                 break;
         }
-        cardObjectManager.BackToHand(this);
+        cardObjectManager.BackToHand();
     }
 
     void Shuffle(ref Queue<CardData> deck)
@@ -336,31 +368,47 @@ public class DeckManager
     //}
 
     // 手札から無造作に1枚吐き出す
-    public CardData DequeueHand()
+    public Card DequeueHand()
     {
         // (TODO)0の時は発動させないようにする？
         if(hand.Count > 0)
         {
-            var card = hand[Random.Range(0, hand.Count - 1)];
+            var r = Random.Range(0, hand.Count - 1);
+            var card = hand[r];
             hand.Remove(card);
             // (TODO)手札カードオブジェクト更新
             //cardObjectManager.UpdateHand(hand, player);
-            return card;
+            return cardObjectManager.DequeueHand(r);
         }
 
         return null;
     }
 
     // 山札から1枚吐き出す
-    public CardData DequeueYamahuda()
+    public Card DequeueYamahuda()
     {
-        // (TODO)LO
-        if (yamahuda.Count > 0)
+        //// (TODO)LO
+        //if (yamahuda.Count > 0)
+        //{
+        //    var card = yamahuda.Dequeue();
+        //    // 山札カードオブジェクト更新
+        //    //cardObjectManager.UpdateYamahuda(yamahuda, player);
+        //    return card;
+        //}
+
+        var draw = GetDraw();
+        return cardObjectManager.DequeueYamahuda(draw);
+    }
+
+    public Card DequeCemetery()
+    {
+        // (TODO)0の時は発動させないようにする？
+        if (cemetery.Count > 0)
         {
-            var card = yamahuda.Dequeue();
-            // 山札カードオブジェクト更新
-            //cardObjectManager.UpdateYamahuda(yamahuda, player);
-            return card;
+            var r = Random.Range(0, cemetery.Count - 1);
+            var card = cemetery[r];
+            cemetery.Remove(card);
+            return cardObjectManager.DequeueCemetery(r);
         }
 
         return null;
@@ -368,13 +416,13 @@ public class DeckManager
 
     public int GetNumHand() { return hand.Count; }
     public int GetNumYamahuda() { return yamahuda.Count; }
-    public int GetNumBochi() { return bochi.Count; }
+    public int GetNumBochi() { return cemetery.Count; }
     public int GetNumTsuihou() { return tsuihou.Count; }
 
     // そのカードの属性が墓地にいるか
     public bool isExistBochiCardType(CardType type)
     {
-        foreach(CardData card in bochi)
+        foreach(CardData card in cemetery)
         {
             if (card.cardType == type) return true;
         }
@@ -388,6 +436,16 @@ public class DeckManager
         {
             // (isStrikerはジョーカーがfalseになるのでこの書き方)
             if (!card.isEventCard()) return true;
+        }
+        return false;
+    }
+
+    public bool isHaveInterceptCard()
+    {
+        // 1枚でもインターセプトカードを持っているならtrue
+        foreach (CardData card in hand)
+        {
+            if (card.cardType == CardType.Intercept) return true;
         }
         return false;
     }

@@ -17,6 +17,7 @@ public class Player : MonoBehaviour
     public CardObjectManager cardObjectManager;
     public PlayerManager playerManager { get; private set; }     // プレイヤー管理する人の実体
 
+    public static readonly int noSetStrikerPower = -1;
     readonly int firstDrawCount = 7;                            // 最初のドローする枚数
 
     public int playerID;    // ネット的なID
@@ -25,6 +26,7 @@ public class Player : MonoBehaviour
     public bool isStateEnd;
     public bool isSyncDeck;
     public bool isPushedJunbiKanryo;
+    bool isStart = false;
 
     // ステートマシン用
     public int step;
@@ -34,10 +36,11 @@ public class Player : MonoBehaviour
     {
         isPushedJunbiKanryo = true;
         var striker = GetFieldStrikerCard();
-        if(striker != null)
+        if (striker != null)
         {
             jissainoPower = striker.power;
         }
+        else jissainoPower = noSetStrikerPower;
     }
     //public void JubikanryoOFF()
     //{
@@ -49,8 +52,11 @@ public class Player : MonoBehaviour
     public int jissainoPower;   // イベントとかでいろいろ演算した後の実際のパワー
 
     // Use this for initialization
-    void Start ()
+    void Awake()
     {
+        if (isStart) return;
+        isStart = true;
+
         deckManager = new DeckManager();
         stateMachine = new BaseEntityStateMachine<Player>(this);
         stateMachine.currentState = PlayerState.None.GetInstance();
@@ -77,19 +83,50 @@ public class Player : MonoBehaviour
         // キャッシュ
         //cashTransform = transform;
 
-        // 初期化
-        Restart();
+        //// 初期化
+        //Restart();
+
+        InitializeDeck();
 
         // プレイヤーマネージャーに追加
         playerManager = GameObject.Find("PlayerManager").GetComponent<PlayerManager>();
         playerID = playerManager.AddPlayer(this);
 	}
 
+    public void InitializeDeck()
+    {
+        // x番目のデッキを使用
+        deckData = PlayerDataManager.GetPlayerData().GetDeckData(0);
+        // ストライカーか抜けてたらの処理
+        if (!deckData.isSetAllStriker())
+        {
+            deckData = new PlayerDeckData();
+            deckData.strikerCards[0] = 0;
+            deckData.strikerCards[1] = 1;
+            deckData.strikerCards[2] = 2;
+            deckData.strikerCards[3] = 3;
+            deckData.strikerCards[4] = 4;
+            deckData.strikerCards[5] = 5;
+            deckData.strikerCards[6] = 6;
+            deckData.strikerCards[7] = 7;
+            deckData.strikerCards[8] = 8;
+            deckData.strikerCards[9] = 9;
+            deckData.jorkerCard = 10;
+            deckData.eventCards[0] = (int)IDType.NONE;
+            deckData.eventCards[1] = (int)IDType.NONE;
+            deckData.eventCards[2] = (int)IDType.NONE;
+            deckData.eventCards[3] = (int)IDType.NONE;
+        }
+    }
+
     public void Restart()
     {
+        if (!isStart) Awake();
+
         // デッキ管理さん初期化
         deckManager.Start(this, cardObjectManager);
         deckManager.Reset();
+        deckManager.SetDeckData(deckData);
 
         var controller = GetComponent<PlayerController>();
         if(controller)
@@ -263,6 +300,11 @@ public class Player : MonoBehaviour
         deckManager.FieldSet(info.handNo);
     }
 
+    public void SetIntercept(SetCardInfo info)
+    {
+        deckManager.SetIntercept(info.handNo);
+    }
+
     public void BackToHand(BackToHandInfo info)
     {
         deckManager.BackToHand(info);
@@ -273,7 +315,7 @@ public class Player : MonoBehaviour
 
     public bool isSetStrikerOK()
     {
-        return (isSetStriker() && cardObjectManager.isSetEndStriker() && isPushedJunbiKanryo);
+        return (/*isSetStriker() && cardObjectManager.isSetEndStriker() && */!cardObjectManager.isInMovingState() && isPushedJunbiKanryo);
     }
 
     public void SetStrikerTimeOver()
@@ -285,7 +327,8 @@ public class Player : MonoBehaviour
 
     public void OpenStriker()
     {
-        cardObjectManager.fieldStrikerCard.Open();
+        var card = cardObjectManager.fieldStrikerCard;
+        if (card) card.Open();
     }
 
     // 手札や山札の情報のセット
@@ -302,8 +345,18 @@ public class Player : MonoBehaviour
         return deckManager.fieldStrikerCard;
     }
 
+    public CardData GetFieldEventCard()
+    {
+        return deckManager.fieldEventCard;
+    }
+
     public bool isHaveStrikerCard()
     {
         return deckManager.isHaveStrikerCard();
+    }
+
+    public bool isHaveInterceptCard()
+    {
+        return deckManager.isHaveInterceptCard();
     }
 }

@@ -68,31 +68,6 @@ public class PlayerController : NetworkBehaviour
             cameraPosition.z = -cameraPosition.z;
             cameraAngle.y = 180;
         }
-
-        // x番目のデッキを使用
-        var deckData = PlayerDataManager.GetPlayerData().GetDeckData(0);
-        // ストライカーか抜けてたらの処理
-        if(!deckData.isSetAllStriker())
-        {
-            deckData = new PlayerDeckData();
-            deckData.strikerCards[0] = 0;
-            deckData.strikerCards[1] = 1;
-            deckData.strikerCards[2] = 2;
-            deckData.strikerCards[3] = 3;
-            deckData.strikerCards[4] = 4;
-            deckData.strikerCards[5] = 5;
-            deckData.strikerCards[6] = 6;
-            deckData.strikerCards[7] = 7;
-            deckData.strikerCards[8] = 8;
-            deckData.strikerCards[9] = 9;
-            deckData.jorkerCard = 10;
-            deckData.eventCards[0] = (int)IDType.NONE;
-            deckData.eventCards[1] = (int)IDType.NONE;
-            deckData.eventCards[2] = (int)IDType.NONE;
-            deckData.eventCards[3] = (int)IDType.NONE;
-        }
-        myPlayer.deckData = deckData;
-        myPlayer.deckManager.SetDeckData(myPlayer.deckData);
     }
 
     public void Restart()
@@ -111,9 +86,10 @@ public class PlayerController : NetworkBehaviour
             CardTapUpdate();
             SetStrikerUpdate();
         }
-
-        // カードタップ
-
+        if(myPlayer.stateMachine.isInState(PlayerState.SetIntercept.GetInstance()))
+        {
+            SetInterceptUpdate();
+        }
 	}
 
     void CardTapUpdate()
@@ -171,7 +147,7 @@ public class PlayerController : NetworkBehaviour
         }
     }
 
-    protected virtual void SetStrikerUpdate()
+    void SetStrikerUpdate()
     {
         if (myPlayer.isPushedJunbiKanryo)
         {
@@ -215,7 +191,7 @@ public class PlayerController : NetworkBehaviour
 
                 // カード位置更新
                 var newPosition = RaypickHand(currentPosition);
-                holdCard.transform.localPosition = newPosition;
+                holdCard.cacheTransform.localPosition = newPosition;
 
                 // マウスクリック放したら
                 if (oulInput.GetTouchState() == oulInput.TouchState.Ended)
@@ -273,6 +249,8 @@ public class PlayerController : NetworkBehaviour
                     myPlayer.playerManager.uiManager.DisAppearBattleCardInfomation();
                     return;
                 }
+                // 選択不可のカードなら情報は出すけどセットはできない
+                if (holdCard.notSelectFlag) return;
                 // 移動量を計算
                 if (currentPosition.y > setFieldBorderY)
                 {
@@ -384,6 +362,127 @@ public class PlayerController : NetworkBehaviour
         }
     }
 
+    void SetInterceptUpdate()
+    {
+        if (myPlayer.isPushedJunbiKanryo) return;
+
+        if (holdHandNo != noHoldCard)
+        {
+            var currentPosition = oulInput.GetPosition(0, false);
+
+            if (cardSetOK)
+            {
+                // 手札に戻る判定
+                if (currentPosition.y <= setFieldBorderY)
+                {
+                    cardSetOK = false;
+
+                    // カードの座標を手札に戻す
+                    holdCard.cacheTransform.localPosition = orgHoldCardPosition;
+                    // 描画順
+                    holdCard.SetOrder(holdHandNo);
+                    return;
+                }
+
+                // カード位置更新
+                var newPosition = RaypickHand(currentPosition);
+                holdCard.cacheTransform.localPosition = newPosition;
+
+                // マウスクリック放したら
+                if (oulInput.GetTouchState() == oulInput.TouchState.Ended)
+                {
+                    // ex構造体作成
+                    SetCardInfo exInfo = new SetCardInfo();
+                    exInfo.handNo = holdHandNo;
+                    // メッセージ送信
+                    MessageManager.Dispatch(myPlayer.playerID, MessageType.SetIntercept, exInfo);
+
+                    // 掴んでるカードを離す
+                    holdHandNo = noHoldCard;
+
+                    // インフォメーション非表示
+                    myPlayer.playerManager.uiManager.DisAppearBattleCardInfomation();
+                }
+            }
+            // 手札から動かないモード
+            else
+            {
+                // マウスクリック放したら
+                if (oulInput.GetTouchState() == oulInput.TouchState.Ended)
+                {
+                    // 掴んでるカードを離す
+                    holdHandNo = noHoldCard;
+
+                    // インフォメーション非表示
+                    myPlayer.playerManager.uiManager.DisAppearBattleCardInfomation();
+                    return;
+                }
+                // 選択不可のカードなら情報は出すけどセットはできない
+                if (holdCard.notSelectFlag) return;
+                // 移動量を計算
+                if (currentPosition.y > setFieldBorderY)
+                {
+                    cardSetOK = true;
+                    // 一番前
+                    holdCard.SetOrder(114);
+
+                    // インフォメーション非表示
+                    myPlayer.playerManager.uiManager.DisAppearBattleCardInfomation();
+                }
+            }
+        }
+        else
+        {
+            // マウスがUIにポイントしていたら
+            if (UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject())
+            {
+                return;
+            }
+
+            // マウスクリックした瞬間
+            if (oulInput.GetTouchState() == oulInput.TouchState.Began)
+            {
+                var tapObject = oulInput.Collision3D();
+                if (!tapObject) return;
+
+                // レイに触れたオブジェクトがカードかどうかチェック
+                if (tapObject.tag == "Card")
+                {
+                    var card = tapObject.GetComponent<Card>();
+                    // 相手サイドは見れない
+                    if (!card.isMyPlayerSide) return;
+
+                    var hand = myPlayer.cardObjectManager.GetHandCardObject();
+                    var fieldCard = myPlayer.cardObjectManager.fieldEventCard;
+
+                    if (fieldCard != null/*.gameObject.activeInHierarchy*/)
+                    {
+                        return;
+                    }
+
+                    // 裏になってるカードは見れない
+                    if (!card.uraomoteFlag) return;
+
+                    for (int i = 0; i < hand.Length; i++)
+                    {
+                        if (card.cardData.id == hand[i].cardData.id)
+                        {
+                            holdCard = card;
+                            isFieldCardHold = false;
+                            holdHandNo = i;
+                            // 掴んでる座標
+                            orgHoldCardPosition = card.transform.localPosition;
+
+                            // インフォメーション表示
+                            myPlayer.playerManager.uiManager.AppearBattleCardInfomation(card.cardData);
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     public Vector3 RaypickHand(Vector3 screenPosition)
     {
         return oulMath.ScreenToWorldPlate(screenPosition, Vector3.up, myPlayer.cardObjectManager.handShift.magnitude + 2);
@@ -407,6 +506,8 @@ public class PlayerController : NetworkBehaviour
                     holdHandNo = noHoldCard;
                     return;
                 }
+
+                // (TODO)イベントカード、フィールドから掴んだカードの場合
 
                 holdCard = null;
                 holdHandNo = noHoldCard;
@@ -436,6 +537,6 @@ public class PlayerController : NetworkBehaviour
         SetCardInfo exInfo = new SetCardInfo();
         exInfo.handNo = handNo;
         // メッセージ送信
-        MessageManager.Dispatch(myPlayer.playerID, MessageType.SetCard, exInfo);
+        MessageManager.Dispatch(myPlayer.playerID, MessageType.SetStriker, exInfo);
     }
 }

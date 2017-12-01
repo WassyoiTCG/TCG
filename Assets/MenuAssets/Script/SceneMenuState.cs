@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 //+---------------------------------------------------
 //  メニューステートマシン
@@ -827,7 +828,6 @@ namespace SceneMenuState
 
         public override void Execute(SceneMenu e)
         {
-
             e.NetBattleGroup.GetComponent<ScreenOutAppeared>().SelfUpdate();
         }
 
@@ -860,12 +860,170 @@ namespace SceneMenuState
                     switch ((NET_BATTLE_TYPE)info.Index)
                     {
                         case NET_BATTLE_TYPE.SERVER:
-                        
+                            e.m_pStateMachine.ChangeState(NetBattleHostSelected.GetInstance());
                             break;
                         case NET_BATTLE_TYPE.CLIENT:
-
+                            e.m_pStateMachine.ChangeState(NetBattleClientSelected.GetInstance());
                             break;
                         case NET_BATTLE_TYPE.END:
+                        default:
+                            //+-------------------------------------------------------------------
+                            // もどる
+                            e.m_pStateMachine.ChangeState(SceneMenuState.BattleSelect.GetInstance());
+                            break;
+                    }
+
+                    return true; // trueを返して終り
+
+                default:
+
+                    break;
+            }
+            return false; // 何も引っかからなかった
+        }
+
+    }
+
+    //+-------------------------------------------
+    //  ネットバトル時ホスト選択時
+    //+-------------------------------------------
+    public class NetBattleHostSelected : BaseEntityState<SceneMenu>
+    {
+        static NetBattleHostSelected m_pInstance;
+        public static NetBattleHostSelected GetInstance()
+        {
+            if (m_pInstance == null) { m_pInstance = new NetBattleHostSelected(); }
+            return m_pInstance;
+        }
+
+        public override void Enter(SceneMenu e)
+        {
+            // ホスト開始
+            e.networkManager.StartHost();
+
+            // 黒背景
+            e.BlackPanel.SetActive(true);
+        }
+
+        public override void Execute(SceneMenu e)
+        {
+            // 2人集まったら
+            if (e.networkManager.GetNumServerConnections() >= 2)
+            {
+                // シーンチェンジフラグ
+                e.m_bSceneChange = true;
+                // シーンメインにいく
+                SceneManager.LoadScene("Main");
+            }
+        }
+
+        public override void Exit(SceneMenu e)
+        {
+
+        }
+
+        public override bool OnMessage(SceneMenu e, MessageInfo message)
+        {
+
+            // メッセージタイプが一致している箇所に
+            switch (message.messageType)
+            {
+                case MessageType.ClickAnyButton:
+
+                    // byte[]→構造体
+                    AnyButton info = new AnyButton();
+                    IntPtr ptr = Marshal.AllocHGlobal(Marshal.SizeOf(info));
+                    Marshal.Copy(message.exInfo, 0, ptr, Marshal.SizeOf(info));
+                    info = (AnyButton)Marshal.PtrToStructure(ptr, info.GetType());
+                    Marshal.FreeHGlobal(ptr);
+                    //+-------------------------------------------------------------
+                    // ★選択したアイコンのタイプに変更
+                    switch (info.Index)
+                    {
+                        case 0:
+                            // 戻るボタン
+                            // ホスト停止
+                            e.networkManager.StopHost();
+                            break;
+                        default:
+                            //+-------------------------------------------------------------------
+                            // もどる
+                            e.m_pStateMachine.ChangeState(SceneMenuState.BattleSelect.GetInstance());
+                            break;
+                    }
+
+                    return true; // trueを返して終り
+
+                default:
+
+                    break;
+            }
+            return false; // 何も引っかからなかった
+        }
+
+    }
+
+    //+-------------------------------------------
+    //  ネットバトル時クライアント選択時
+    //+-------------------------------------------
+    public class NetBattleClientSelected : BaseEntityState<SceneMenu>
+    {
+        static NetBattleClientSelected m_pInstance;
+        public static NetBattleClientSelected GetInstance()
+        {
+            if (m_pInstance == null) { m_pInstance = new NetBattleClientSelected(); }
+            return m_pInstance;
+        }
+
+        public override void Enter(SceneMenu e)
+        {
+            // クライアント開始(IPアドレスを引数に渡す)
+            e.networkManager.StartClient2(e.ipInput.text);
+
+            // 黒背景
+            e.BlackPanel.SetActive(true);
+        }
+
+        public override void Execute(SceneMenu e)
+        { 
+            // サーバーと繋がったら
+            if (e.networkManager.GetNumClientConnections() >= 1)
+            {
+                // シーンチェンジフラグ
+                e.m_bSceneChange = true;
+                // シーンメインにいく
+                SceneManager.LoadScene("Main");
+            }
+        }
+
+        public override void Exit(SceneMenu e)
+        {
+
+        }
+
+        public override bool OnMessage(SceneMenu e, MessageInfo message)
+        {
+
+            // メッセージタイプが一致している箇所に
+            switch (message.messageType)
+            {
+                case MessageType.ClickAnyButton:
+
+                    // byte[]→構造体
+                    AnyButton info = new AnyButton();
+                    IntPtr ptr = Marshal.AllocHGlobal(Marshal.SizeOf(info));
+                    Marshal.Copy(message.exInfo, 0, ptr, Marshal.SizeOf(info));
+                    info = (AnyButton)Marshal.PtrToStructure(ptr, info.GetType());
+                    Marshal.FreeHGlobal(ptr);
+                    //+-------------------------------------------------------------
+                    // ★選択したアイコンのタイプに変更
+                    switch (info.Index)
+                    {
+                        case 0:
+                            // 戻るボタン
+                            // クライアント停止
+                            e.networkManager.StopHost();
+                            break;
                         default:
                             //+-------------------------------------------------------------------
                             // もどる

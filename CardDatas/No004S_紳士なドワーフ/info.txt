@@ -13,9 +13,9 @@
 [F_TEXT]
 プロテイン買って。
 
+[POWER]
+5
+
 [ELEMENT]
 1
 0
-
-[POWER]
-5

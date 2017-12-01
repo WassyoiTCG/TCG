@@ -5,12 +5,12 @@ using UnityEngine.UI;
 
 public class UIManager : MonoBehaviour
 {
-    public int myScore { get; private set; }    // 自分のスコア
-    float lerpMyScore;                          // 補間用スコア
-    public int cpuScore { get; private set; }   // CPUのスコア
-    float lerpCPUScore;                         // 補間用スコア
+    public int myHP { get; private set; }    // 自分のスコア
+    float lerpMyHP;                          // 補間用スコア
+    public int cpuHP { get; private set; }   // CPUのスコア
+    float lerpCPUHP;                         // 補間用スコア
 
-    public int finishScore = 280;   // ゲームが決着するスコア
+    public int MaxHP = 250;   // ゲームが決着するスコア
 
     public GameObject SetStrikerOKButton;
     public GameObject SetStrikerPassButton;
@@ -22,12 +22,15 @@ public class UIManager : MonoBehaviour
 
     public CemeteryInfomationUI cemeteryInfoUIManager;
 
+    float timer;
+    float limitTime;
+    bool timerFlag = false;
     public Text limitTimeText;
     public Image eventTimeGauge;    // イベント時間ゲージ
 
-    public Number myScoreNumber;
+    public Number myHPNumber;
     public Image myScoreGauge;
-    public Number cpuScoreNumber;
+    public Number cpuHPNumber;
     public Image cpuScoreGauge;
 
     public Number myHandCountNumber, myYamahudaCountNumber, myBochiCountNumber, myTsuihouCountNumber;
@@ -49,27 +52,63 @@ public class UIManager : MonoBehaviour
 
     public void Restart()
     {
-        myScore = 0;
-        myScoreNumber.SetNumber(myScore);
-        cpuScore = 0;
-        cpuScoreNumber.SetNumber(cpuScore);
+        myHP = MaxHP;
+        myHPNumber.SetNumber(myHP);
+        cpuHP = MaxHP;
+        cpuHPNumber.SetNumber(cpuHP);
         cemeteryInfoUIManager.Restart();
+        DisAppearMainUI();
     }
 
     void Update()
     {
         // 補間処理
-        lerpMyScore = Mathf.Lerp(lerpMyScore, (float)myScore, 0.5f);
-        lerpCPUScore = Mathf.Lerp(lerpCPUScore, (float)cpuScore, 0.5f);
+        lerpMyHP = Mathf.Lerp(lerpMyHP, (float)myHP, 0.5f);
+        lerpCPUHP = Mathf.Lerp(lerpCPUHP, (float)cpuHP, 0.5f);
 
         // ゲージ処理
-        var rate = lerpMyScore / finishScore;
+        var rate = lerpMyHP / MaxHP;
         myScoreGauge.fillAmount = rate;
 
         // ゲージ処理
-        rate = lerpCPUScore / finishScore;
+        rate = lerpCPUHP / MaxHP;
         cpuScoreGauge.fillAmount = rate;
+
+        // 制限時間処理
+        if (!timerFlag) return;
+        if (timer > 0)
+        {
+            if ((timer -= Time.deltaTime) < 0)
+            {
+                timer = 0;
+            }
+        }
+        // 時間UI更新
+        UpdateLimitTimeText();
     }
+
+    void UpdateLimitTimeText()
+    {
+        // UIの時間表示
+        var minutes = (int)timer / 60;
+        var second = (int)timer % 60;
+        limitTimeText.text = minutes + ":" + second.ToString("00");
+
+        // UIのゲージ設定
+        var timeRate = timer / limitTime;
+        eventTimeGauge.fillAmount = timeRate;
+    }
+
+    public void SetTimer(float limit)
+    {
+        timerFlag = true;
+        timer = limit;
+        limitTime = limit;
+        UpdateLimitTimeText();
+    }
+    public void StopTimer() { timerFlag = false; }
+
+    public bool isTimerEnd() { return (timer == 0); }
 
     //public void AppearNetOrOffline()
     //{
@@ -139,19 +178,24 @@ public class UIManager : MonoBehaviour
             activeSetStrikerButton = SetStrikerOKButton;
             // 画像はOFFの状態
             activeSetStrikerButton.GetComponent<Image>().sprite = spriteSetStrikerOFF;
+            // パスボタン消す
             SetStrikerPassButton.SetActive(false);
+            // ボタン機能無効
+            activeSetStrikerButton.GetComponent<Button>().enabled = false;
         }
         else
         {
             activeSetStrikerButton = SetStrikerPassButton;
             // 画像はOFFの状態
-            activeSetStrikerButton.GetComponent<Image>().sprite = spriteSetStrikerPassOFF;
+            activeSetStrikerButton.GetComponent<Image>().sprite = spriteSetStrikerPassON;
+            // セットOKボタン消す
             SetStrikerOKButton.SetActive(false);
+            // ボタン機能有効(パスなので最初から押して)
+            activeSetStrikerButton.GetComponent<Button>().enabled = true;
         }
 
         activeSetStrikerButton.SetActive(true);
-        // ボタン機能無効
-        activeSetStrikerButton.GetComponent<Button>().enabled = false;              
+           
     }
     public void EnableSetStrikerButton()
     {
@@ -221,43 +265,43 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    public bool AddScore(bool isMyPlayer, int score)
+    public bool Damage(bool isMyPlayer, int score)
     {
         if(isMyPlayer)
         {
-            myScore = Mathf.Min(myScore + score, finishScore);
-            myScoreNumber.SetNumber(myScore);
-            if (myScore >= finishScore) return true;
+            myHP = Mathf.Max(myHP - score, 0);
+            myHPNumber.SetNumber(myHP);
+            if (myHP == 0) return true;
         }
         else
         {
-            cpuScore = Mathf.Min(cpuScore + score, finishScore);
-            cpuScoreNumber.SetNumber(cpuScore);
-            if (cpuScore >= finishScore) return true;
+            cpuHP = Mathf.Max(cpuHP - score, 0);
+            cpuHPNumber.SetNumber(cpuHP);
+            if (cpuHP == 0) return true;
         }
 
         return false;
     }
 
-    public bool SetScore(bool isMyPlayer, int score)
+    public bool SetHP(bool isMyPlayer, int score)
     {
         if (isMyPlayer)
         {
-            myScore = score;
-            myScoreNumber.SetNumber(myScore);
-            if (myScore >= finishScore) return true;
+            myHP = Mathf.Min(Mathf.Max(score, 0), MaxHP);
+            myHPNumber.SetNumber(myHP);
+            if (myHP == 0) return true;
         }
         else
         {
-            cpuScore = score;
-            cpuScoreNumber.SetNumber(cpuScore);
-            if (cpuScore >= finishScore) return true;
+            cpuHP = Mathf.Min(Mathf.Max(score, 0), cpuHP);
+            cpuHPNumber.SetNumber(cpuHP);
+            if (cpuHP == 0) return true;
         }
 
         return false;
     }
 
-    public int GetScore(bool isMyPlayer) { return isMyPlayer ? myScore : cpuScore; }
+    public int GetScore(bool isMyPlayer) { return isMyPlayer ? myHP : cpuHP; }
 
 
     public void AppearEndGameUI()

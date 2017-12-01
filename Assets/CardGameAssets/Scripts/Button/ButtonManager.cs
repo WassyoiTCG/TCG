@@ -6,7 +6,7 @@ public class ButtonManager : MonoBehaviour
 {
     int myPlayerID = -1;                    // 自分のプレイヤーのID
 
-    public oulNetwork networkManager;
+    //public oulNetwork networkManager;
     public UIManager uiManager;
 
     //public void OnClickNetPlay()
@@ -42,21 +42,21 @@ public class ButtonManager : MonoBehaviour
         uiManager.cemeteryInfoUIManager.ShowExplusionInfo();
     }
 
-    public void OnClickHostGame()
-    {
-        networkManager.StartHost();
+    //public void OnClickHostGame()
+    //{
+    //    networkManager.StartHost();
 
-        // ボタン非表示
-        uiManager.DisAppearLobby();
-    }
+    //    // ボタン非表示
+    //    uiManager.DisAppearLobby();
+    //}
 
-    public void OnClickClientGame()
-    {
-        networkManager.StartClient();
+    //public void OnClickClientGame()
+    //{
+    //    networkManager.StartClient();
 
-        // ボタン非表示
-        uiManager.DisAppearLobby();
-    }
+    //    // ボタン非表示
+    //    uiManager.DisAppearLobby();
+    //}
 
     // マリガンボタンを押したとき
     public void OnClickMarigan()

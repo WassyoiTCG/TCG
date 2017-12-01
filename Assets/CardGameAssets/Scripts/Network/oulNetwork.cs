@@ -10,7 +10,6 @@ public class oulNetwork : NetworkManager
 {
     static public oulNetwork s_Singleton;
 
-    //public InputField ipInput;
     //public NetworkClient client { get; private set; }
 
     //List<ClientMessageOKInfo> clientIDList = new List<ClientMessageOKInfo>();
@@ -21,6 +20,9 @@ public class oulNetwork : NetworkManager
     //int receiveMessageNumber;
 
     MessageInfo[] messageBuffer = new MessageInfo[2048];
+
+    List<NetworkConnection> clientConnections = new List<NetworkConnection>();
+    List<NetworkConnection> serverConnections = new List<NetworkConnection>();
 
     //class ClientMessageOKInfo
     //{
@@ -34,6 +36,20 @@ public class oulNetwork : NetworkManager
         s_Singleton = this;
         Restart();
         //DontDestroyOnLoad(gameObject);
+    }
+
+    public void Stop()
+    {
+        if(MessageManager.isServer)
+        {
+            // ホスト終了
+            StopHost();
+        }
+        else
+        {
+            // クライアント終了
+            StopClient();
+        }
     }
 
     public void Restart()
@@ -102,52 +118,30 @@ public class oulNetwork : NetworkManager
     //    ipInput.onEndEdit.AddListener(onEndEditIP);
     //}
 
-    //public void StartHost()
-    //{
-    //    // サーバがMsg.Textを受信したときに行う関数を登録する
-    //    NetworkServer.RegisterHandler(Msg.MyMessage, networkMessage =>
-    //    {
-    //        var mes = networkMessage.ReadMessage<MyNetworkMessage>();
-    //        Debug.Log("サーバ受信:" + mes.myMessageInfo.messageType.ToString());
-    //        // Msg.Textを送ってきたクライアントに返信する
-    //        networkMessage.conn.Send(Msg.MyMessage, mes);
-    //    });
+    public override NetworkClient StartHost()
+    {
+        return base.StartHost();
+        //// サーバー開始
+        //NetworkServer.Listen("127.0.0.1", 7000);
+        //
+        //ConnectClient("127.0.0.1");
+    }
 
-    //    // サーバー開始
-    //    NetworkServer.Listen("127.0.0.1", 7000);
-    //    isServer = true;
-    //    Debug.Log("サーバー開始キテルグマ");
-
-    //    ConnectClient("127.0.0.1");
-    //}
-
-    //public void StartClient()
-    //{
-    //    isServer = false;
-
-    //    ConnectClient(ipInput.text);
-    //}
+    public void StartClient2(string ip)
+    {
+        MessageManager.isServer = false;
+        // 入力されたipアドレスを保存
+        networkAddress = ip;
+        // Unityちゃんにマルナゲータ
+        StartClient();
+        //ConnectClient(ipInput.text);
+    }
 
     //public void ConnectClient(string ip)
     //{
     //    // クライアント開始
     //    client = new NetworkClient();
-    //    Debug.Log("クライアント開始キテルグマ");
-
-    //    // クライアントがサーバに接続完了したときに行う関数を登録する
-    //    client.RegisterHandler(MsgType.Connect, _ =>
-    //    {
-    //        Debug.Log("サーバー接続キテルグマ");
-    //    });
-
-
-    //    // クライアントがMsg.Textを受信したときに行う関数を登録する
-    //    client.RegisterHandler(Msg.MyMessage, networkMessage =>
-    //    {
-    //        var mes = networkMessage.ReadMessage<MyNetworkMessage>();
-    //        Debug.Log("クライアント受信:" + mes.myMessageInfo.messageType.ToString());
-    //        MessageManager.Receive(mes.myMessageInfo);
-    //    });
+    //    //Debug.Log("クライアント開始キテルグマ");
 
     //    // サーバーに接続
     //    client.Connect(ipInput.text, 7000);
@@ -306,14 +300,20 @@ public class oulNetwork : NetworkManager
         Debug.Log("クライアント開始キテルグマ");
     }
 
-    //public override void OnClientConnect(NetworkConnection conn)
-    //{
-    //    base.OnClientConnect(conn);
-    //}
+    public override void OnClientConnect(NetworkConnection conn)
+    {
+        base.OnClientConnect(conn);
+
+        clientConnections.Add(conn);
+
+        Debug.Log("OnClientConnect");
+    }
 
     public override void OnServerConnect(NetworkConnection conn)
     {
         base.OnServerConnect(conn);
+
+        serverConnections.Add(conn);
 
         // クライアント登録
         //ClientMessageOKInfo info = new ClientMessageOKInfo();
@@ -321,7 +321,26 @@ public class oulNetwork : NetworkManager
         //info.sendOK = false;
         //clientIDList.Add(info);
 
-        Debug.Log("サーバー: クライアント" + conn.connectionId + "と接続シテルグマ");
+        Debug.Log("OnServerConnect: クライアント" + conn.connectionId + "と接続シテルグマ");
+    }
+
+    public override void OnStopHost()
+    {
+        base.OnStopHost();
+
+        serverConnections.Clear();
+    }
+
+    public override void OnStopClient()
+    {
+        base.OnStopClient();
+
+        serverConnections.Clear();
+    }
+
+    public void Spawn()
+    {
+        ClientScene.AddPlayer(0);
     }
 
     //public void OnClickJoin()
@@ -344,6 +363,9 @@ public class oulNetwork : NetworkManager
     //        StartClient();
     //    }
     //}
+
+    public int GetNumClientConnections() { return clientConnections.Count; }
+    public int GetNumServerConnections() { return serverConnections.Count; }
 }
 
 

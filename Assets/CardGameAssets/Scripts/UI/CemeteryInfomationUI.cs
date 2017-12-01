@@ -45,7 +45,7 @@ public class CemeteryInfomationUI : MonoBehaviour
     {
         foreach(uGUICard card in uguiCards)
         {
-            card.gameObject.SetActive(false);
+            if(card)card.gameObject.SetActive(false);
         }
     }
 
@@ -108,7 +108,7 @@ public class CemeteryInfomationUI : MonoBehaviour
 
         //}
 
-        for (int i = 0; i < list.Count; i++)
+        for (int i = 0; i < 15; i++)
         {
             if (i >= list.Count)
             {

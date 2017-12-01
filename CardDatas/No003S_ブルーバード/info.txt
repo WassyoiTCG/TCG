@@ -13,9 +13,9 @@
 [F_TEXT]
 イガイガドラゴンの上に巣を作る。
 
+[POWER]
+4
+
 [ELEMENT]
 1
 7
-
-[POWER]
-4

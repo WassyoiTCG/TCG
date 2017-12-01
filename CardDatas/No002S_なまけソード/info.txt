@@ -13,9 +13,9 @@
 [F_TEXT]
 Ç‹ÇΩÇ†Ç∆Ç≈ÅB
 
+[POWER]
+3
+
 [ELEMENT]
 1
 13
-
-[POWER]
-3

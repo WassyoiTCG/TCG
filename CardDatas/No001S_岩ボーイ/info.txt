@@ -13,10 +13,10 @@
 [F_TEXT]
 åòÇªÇ§ÅB
 
+[POWER]
+2
+
 [ELEMENT]
 2
 9
 13
-
-[POWER]
-2

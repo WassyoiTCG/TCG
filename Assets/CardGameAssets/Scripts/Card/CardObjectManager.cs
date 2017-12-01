@@ -11,7 +11,7 @@ public class CardObjectManager : MonoBehaviour
     //const int numCardObject = 10 + 1 + 4;  // 1 ~ 10 + ジョーカー + イベント
     List<Card> handCards = new List<Card>();        // 手札のカード
     List<Card> yamahudaCards = new List<Card>();    // 山札のカード
-    List<Card> bochiCards = new List<Card>();       // 墓地のカード
+    List<Card> cemeteryCards = new List<Card>();    // 墓地のカード
     public Card fieldStrikerCard { get; private set; }
     public Card fieldEventCard { get; private set; }
 
@@ -20,39 +20,45 @@ public class CardObjectManager : MonoBehaviour
 
     readonly Vector3 yamahudaField = new Vector3(15, 0, -15);      // 山札の位置
     readonly Vector3 strikerField = new Vector3(0, 0, -10);     // ストライカーカードをセットする位置
-    readonly Vector3 eventField = new Vector3(0, 0, -10);       // イベントカードをセットする位置
+    readonly Vector3 eventField = new Vector3(-5, 0, -10);       // イベントカードをセットする位置
+
+    public Vector3 cemeteryPosition = Vector3.zero;
+
+    public Texture strikerFrame, abilityStrikerFrame, jokerFrame, supportFrame, eventFrame;
 
     // Use this for initialization
-    //void Awake()
-    //{
-    //    // カードの実体を生成
+    void Start()
+    {
+        // 墓地の位置を取ってくる
 
-    //    // 手札カード
-    //    handCards.Clear();
-    //    //for (int i=0;i< handCards.Length;i++)
-    //    //{
-    //    //    handCards[i] = Instantiate(cardPrefab, transform);
-    //    //    handCards[i].name = "HandCard" + i;
-    //    //    handCards[i].gameObject.SetActive(false);
-    //    //}
+        //// カードの実体を生成
 
-    //    // 山札カード
-    //    yamahudaCards.Clear();
-    //    //for (int i=0;i< yamahudaCards.Length;i++)
-    //    //{
-    //    //    yamahudaCards[i] = Instantiate(cardPrefab, transform);
-    //    //    yamahudaCards[i].name = "Card" + i;
-    //    //    yamahudaCards[i].gameObject.SetActive(false);
-    //    //}
+        //// 手札カード
+        //handCards.Clear();
+        ////for (int i=0;i< handCards.Length;i++)
+        ////{
+        ////    handCards[i] = Instantiate(cardPrefab, transform);
+        ////    handCards[i].name = "HandCard" + i;
+        ////    handCards[i].gameObject.SetActive(false);
+        ////}
 
-    //    // フィールドカード
-    //    //fieldStrikerCard = Instantiate(cardPrefab, transform);
-    //    //fieldStrikerCard.name = "FieldStrikerCard";
-    //    //fieldStrikerCard.gameObject.SetActive(false);
-    //    //fieldEventCard = Instantiate(cardPrefab, transform);
-    //    //fieldEventCard.name = "FieldEventCard";
-    //    //fieldEventCard.gameObject.SetActive(false);
-    //}
+        //// 山札カード
+        //yamahudaCards.Clear();
+        ////for (int i=0;i< yamahudaCards.Length;i++)
+        ////{
+        ////    yamahudaCards[i] = Instantiate(cardPrefab, transform);
+        ////    yamahudaCards[i].name = "Card" + i;
+        ////    yamahudaCards[i].gameObject.SetActive(false);
+        ////}
+
+        //// フィールドカード
+        ////fieldStrikerCard = Instantiate(cardPrefab, transform);
+        ////fieldStrikerCard.name = "FieldStrikerCard";
+        ////fieldStrikerCard.gameObject.SetActive(false);
+        ////fieldEventCard = Instantiate(cardPrefab, transform);
+        ////fieldEventCard.name = "FieldEventCard";
+        ////fieldEventCard.gameObject.SetActive(false);
+    }
 
 
     public void Restart()
@@ -61,21 +67,38 @@ public class CardObjectManager : MonoBehaviour
         //fieldStrikerCard.gameObject.SetActive(false);
         //fieldEventCard.gameObject.SetActive(false);
 
+        if (fieldStrikerCard)
+        {
+            yamahudaCards.Add(fieldStrikerCard);
+            fieldStrikerCard = null;
+        }
+
+        if (fieldEventCard)
+        {
+            yamahudaCards.Add(fieldEventCard);
+            fieldEventCard = null;
+        }
+
         // 手札を空にする
-        while(handCards.Count > 0)
+        while (handCards.Count > 0)
         {
             var card = handCards[0];
             handCards.Remove(card);
+            card.gameObject.SetActive(true);
             yamahudaCards.Add(card);
         }
 
         // 墓地を空にする
-        while (bochiCards.Count > 0)
+        while (cemeteryCards.Count > 0)
         {
-            var card = bochiCards[0];
-            bochiCards.Remove(card);
+            var card = cemeteryCards[0];
+            cemeteryCards.Remove(card);
+            card.gameObject.SetActive(true);
             yamahudaCards.Add(card);
         }
+
+        // 山札座標更新
+        UpdateYamahudaPosition();
     }
 
     // Update is called once per frame
@@ -86,40 +109,106 @@ public class CardObjectManager : MonoBehaviour
 
     public Card[] GetHandCardObject() { return handCards.ToArray(); }
 
-    public void Draw(CardData[] cards)
+    public Card DequeueHand(int handNo)
     {
-        var orgNumHand = handCards.Count;
-
-        foreach(CardData card in cards)
+        Card draw = null;
+        if(handNo < handCards.Count)
         {
-            Card draw;
-            if(yamahudaCards.Count > 0)
-            {
-                draw = yamahudaCards[yamahudaCards.Count - 1];
-                yamahudaCards.Remove(draw);
-            }
-            else draw = Instantiate(cardPrefab, transform);
+            draw = handCards[handNo];
+            handCards.Remove(draw);
 
-            // カード情報設定
-            draw.SetCardData(card);
-
-            // 手札リストに突っ込む
-            handCards.Add(draw);
-
-            var index = handCards.Count - 1;
-
-            // デッキにいる位置を保存
-            var position = draw.cacheTransform.localPosition;
-            var angle = draw.cacheTransform.localEulerAngles;
-
-            // 手札の位置
-            MakeHandTransform(index, orgNumHand + cards.Length, draw);
-            draw.SetOrder(index);
-
-            // カードの動きをドローモードにする
-            draw.Draw(position, angle);
+            // 手札位置更新
+            UpdateHandPosition();
         }
+        else Debug.Log("手札ないクマ");
+        return draw;
+    }
 
+    public Card DequeueYamahuda(CardData cardData)
+    {
+        Card draw = null;
+        if (yamahudaCards.Count > 0)
+        {
+            draw = yamahudaCards[yamahudaCards.Count - 1];
+            yamahudaCards.Remove(draw);
+            draw.SetCardData(cardData);
+        }
+        else Debug.Log("LOしてるグマ");
+
+        return draw;
+    }
+
+    public Card DequeueCemetery(int cemeteryNo)
+    {
+        Card draw = null;
+        if (cemeteryNo < cemeteryCards.Count)
+        {
+            draw = cemeteryCards[cemeteryNo];
+            cemeteryCards.Remove(draw);
+            draw.gameObject.SetActive(false);
+        }
+        else Debug.Log("墓地無いクマ");
+        return draw;
+    }
+
+    // 手札をストライカーセット状態にする(コネクトとインターセプトを選択不可に)
+    public void ChangeHandSetStrikerMode()
+    {
+        foreach(Card card in handCards)
+        {
+            switch(card.cardData.cardType)
+            {
+                // ストライカー系は無条件で選択可能
+                case CardType.Fighter:
+                case CardType.AbilityFighter:
+                case CardType.Joker:
+                    card.SetNotSelectFlag(false);
+                    break;
+
+                case CardType.Support:
+                case CardType.Connect:
+                    // はつどう条件を満たしているなら(今日は休みますならジョーカーが手札にあるかとか)
+                    if (card.cardData.GetEventCard().abilityData.HatsudouOK())
+                    {
+                        card.SetNotSelectFlag(false);
+                    }
+                    else card.SetNotSelectFlag(true);
+                    break;
+
+                    // インターセプトは無条件で選択不可能
+                case CardType.Intercept:
+                    card.SetNotSelectFlag(true);
+                    break;
+            }
+        }
+    }
+
+    public void ChangeHandSetInterceptMode()
+    {
+        foreach (Card card in handCards)
+        {
+            switch (card.cardData.cardType)
+            {
+                // インターセプト以外は選択不可能
+                case CardType.Fighter:
+                case CardType.AbilityFighter:
+                case CardType.Joker:
+                case CardType.Support:
+                case CardType.Connect:
+                    card.SetNotSelectFlag(true);
+                    break;
+
+                // インターセプト
+                case CardType.Intercept:
+                    // はつどう条件を満たしているなら(今日は休みますならジョーカーが手札にあるかとか)
+                    if (card.cardData.interceptCard.abilityData.HatsudouOK())
+                    {
+                        card.SetNotSelectFlag(false);
+                    }
+                    else card.SetNotSelectFlag(true);
+                    break;
+            }
+        }
     }
 
     //public void UpdateHand(List<CardData> hand, Player player)
@@ -145,20 +234,20 @@ public class CardObjectManager : MonoBehaviour
     //}
 
     // 手札の位置更新
-    public void UpdateHandPosition(DeckManager deckManager)
+    public void UpdateHandPosition()
     {
         for(int i = 0; i < handCards.Count; i++)
         {
             var card = handCards[i];
 
-            if (!handCards[i].isActiveAndEnabled) break;
+            //if (!handCards[i].isActiveAndEnabled) break;
 
             // 表
             card.SetUraomote(true);
             // 描画順
             card.SetOrder(i);
 
-            MakeHandTransform(i, deckManager.GetNumHand(), card);
+            MakeHandTransform(i, handCards.Count, card);
         }
     }
 
@@ -271,7 +360,6 @@ public class CardObjectManager : MonoBehaviour
         var position = Vector3.zero;
         var angle = card.cacheTransform.localEulerAngles;
         angle.x = 0;
-        angle.z = 180;
 
         switch (type)
         {
@@ -292,39 +380,45 @@ public class CardObjectManager : MonoBehaviour
                         position.z = -position.z;
                     }
                     //fieldStrikerCard.cashTransform.localPosition = position;
-                    fieldStrikerCard.nextPosition = position;
-                    fieldStrikerCard.cacheTransform.localEulerAngles = angle;
+                    //fieldStrikerCard.nextPosition = position;
+                    //fieldStrikerCard.cacheTransform.localEulerAngles = angle;
+
+                    // 裏にする
+                    angle.z = 180;
+                    fieldStrikerCard.SetUraomote(false);
 
                     // セットのステートにさせる
-                    fieldStrikerCard.ChangeState(CardObjectState.Set.GetInstance());
+                    fieldStrikerCard.FieldSet(position, angle);
                 }
                 break;
-        
-            //case CardType.Event:
-            //    // フィールドにおいてるストライカーのカード
-            //    fieldEventCard = card;
-            //    // カードを指定の位置にセット
-            //    position = eventField;
-            //    // 逆サイド処理
-            //    if (isMyPlayer == false)
-            //    {
-            //        position.x = -position.x;
-            //        position.z = -position.z;
-            //        angle.z = 180;
-            //    }
-            //    fieldEventCard.cashTransform.localPosition = position;
-            //    fieldEventCard.cashTransform.localPosition = angle;
 
-            //    // 裏にする
-            //    fieldEventCard.SetUraomote(false);
-            //    break;
+            case CardType.Intercept:
+                // フィールドにおいてるストライカーのカード
+                fieldEventCard = card;
+                // カードを指定の位置にセット
+                position = eventField;
+                // 逆サイド処理
+                if (isMyPlayer == false)
+                {
+                    position.x = -position.x;
+                    position.z = -position.z;
+                    angle.z = 180;
+                }
+
+                // 表にする
+                angle.z = 0;
+                fieldStrikerCard.SetUraomote(true);
+
+                // セットのステートにさせる
+                fieldEventCard.FieldSet(position, angle);
+                break;
         }
 
         // ★★★手札から消す
         handCards.Remove(card);
     }
 
-    public void BackToHand(/*List<CardData> hand,*/ DeckManager deckManager)
+    public void BackToHand(/*List<CardData> hand, DeckManager deckManager*/)
     {
         // カード非表示
         if (fieldStrikerCard)
@@ -337,7 +431,7 @@ public class CardObjectManager : MonoBehaviour
         }
         //fieldStrikerCard.gameObject.SetActive(false);
         // 手札に戻す
-        UpdateHandPosition(deckManager);
+        UpdateHandPosition();
         //UpdateHand(hand, player);
     }
 
@@ -371,18 +465,32 @@ public class CardObjectManager : MonoBehaviour
         // フィールドに存在するカードを墓地に送る
         if(fieldStrikerCard)
         {
-            fieldStrikerCard.gameObject.SetActive(false);
-            bochiCards.Add(fieldStrikerCard);
+            //fieldStrikerCard.gameObject.SetActive(false);
+            fieldStrikerCard.MoveToCemetery();
+            cemeteryCards.Add(fieldStrikerCard);
             fieldStrikerCard = null;
         }
         if(fieldEventCard)
         {
-            fieldEventCard.gameObject.SetActive(false);
-            bochiCards.Add(fieldEventCard);
+            //fieldEventCard.gameObject.SetActive(false);
+            fieldEventCard.MoveToCemetery();
+            cemeteryCards.Add(fieldEventCard);
             fieldEventCard = null;
         }
         //fieldStrikerCard.gameObject.SetActive(false);
         //fieldEventCard.gameObject.SetActive(false);
+    }
+
+    public void AddHand(Card card)
+    {
+        handCards.Add(card);
+        card.Draw(handCards.Count - 1, handCards.Count);
+    }
+
+    public void AddCemetery(Card card)
+    {
+        cemeteryCards.Add(card);
+        card.MoveToCemetery();
     }
 
     public bool isSetEndStriker()
@@ -394,14 +502,20 @@ public class CardObjectManager : MonoBehaviour
         return false;
     }
 
-    public void Draw()
-    {
-
-    }
-
 
     public void SetDeckData(CardData[] yamahuda, bool isMyPlayer)
     {
+        // ★墓地の座標を保存
+        if(isMyPlayer)
+        {
+            cemeteryPosition = GameObject.Find("myCemetery").transform.localPosition;
+        }
+        else
+        {
+            cemeteryPosition = GameObject.Find("cpuCemetery").transform.localPosition;
+        }
+        cemeteryPosition.y -= 0.01f;
+
         // デッキデータ
         for (int i = 0; i < yamahuda.Length; i++)
         {
@@ -420,6 +534,34 @@ public class CardObjectManager : MonoBehaviour
 
         // 山札位置更新
         UpdateYamahudaPosition();
+    }
+
+    public void Draw(CardData[] cards)
+    {
+        var orgNumHand = handCards.Count;
+
+        foreach (CardData card in cards)
+        {
+            Card draw;
+            if (yamahudaCards.Count > 0)
+            {
+                draw = yamahudaCards[yamahudaCards.Count - 1];
+                yamahudaCards.Remove(draw);
+            }
+            else draw = Instantiate(cardPrefab, transform);
+
+            // カード情報設定
+            draw.SetCardData(card);
+
+            // 手札リストに突っ込む
+            handCards.Add(draw);
+
+            var index = handCards.Count - 1;
+
+            // カードの動きをドローモードにする
+            draw.Draw(index, orgNumHand + cards.Length);
+        }
+
     }
 
     public void Marigan(CardData[] yamahuda)
@@ -455,12 +597,12 @@ public class CardObjectManager : MonoBehaviour
         foreach(Card card in yamahudaCards)
         {
             // 何かしらの動いてるステートにいる
-            if (!card.stateMachine.isInState(CardObjectState.None.GetInstance())) return true;
+            if (card.isInMovingState()) return true;
         }
         foreach(Card card in handCards)
         {
             // 何かしらの動いてるステートにいる
-            if (!card.stateMachine.isInState(CardObjectState.None.GetInstance())) return true;
+            if (card.isInMovingState()) return true;
         }
         // 誰も動いてるステートにいない
         return false;

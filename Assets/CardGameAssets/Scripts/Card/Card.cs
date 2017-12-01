@@ -21,7 +21,8 @@ public class Card : MonoBehaviour
 
     public bool isMyPlayerSide;
     public bool isSetField = false;
-    public bool uraomoteFlag;               // 裏表
+    public bool uraomoteFlag;                           // 裏表
+    public bool notSelectFlag { get; private set; }      // 手札から選択できないフラグ
 
     //public Vector3 handPosition;    // 手札の座標保存用
 
@@ -33,6 +34,9 @@ public class Card : MonoBehaviour
     public Vector3 nextAngle;
 
     public Transform cacheTransform;
+
+    // フレームのテクスチャ取得用
+    public CardObjectManager cardObjectManager;
 
     public CardData cardData { get; private set; }
 
@@ -68,6 +72,8 @@ public class Card : MonoBehaviour
 
     public void SetCardData(CardData data)
     {
+        if (!cardObjectManager) cardObjectManager = cacheTransform.parent.GetComponent<CardObjectManager>();
+
         cardData = data;
 
         // カード名
@@ -79,9 +85,31 @@ public class Card : MonoBehaviour
         switch (data.cardType)
         {
             case CardType.Fighter:
+                {
+                    // フレーム差し替え
+                    if (cardObjectManager)
+                        if (cardFrameRenderer.materials[0].GetTexture("_MainTex") != cardObjectManager.strikerFrame)
+                            cardFrameRenderer.materials[0].SetTexture("_MainTex", cardObjectManager.strikerFrame);
+
+                    fighterPowerFrame.gameObject.SetActive(true);
+
+                    var fighter = data.GetFighterCard();
+                    // パワー
+                    powerNumber.SetNumber(data.power);
+                    // 種族
+                    syuzokuText.text = CardDataBase.SyuzokuString[(int)fighter.syuzokus[0]];
+                    for (int i = 1; i < fighter.syuzokus.Length; i++)
+                        syuzokuText.text += " / " + CardDataBase.SyuzokuString[(int)fighter.syuzokus[i]];
+                }
+                break;
             case CardType.AbilityFighter:
                 {
-                    //fighterPowerFrame.SetActive(true);
+                    // フレーム差し替え
+                    if (cardObjectManager)
+                        if (cardFrameRenderer.materials[0].GetTexture("_MainTex") != cardObjectManager.abilityStrikerFrame)
+                            cardFrameRenderer.materials[0].SetTexture("_MainTex", cardObjectManager.abilityStrikerFrame);
+
+                    fighterPowerFrame.gameObject.SetActive(true);
 
                     var fighter = data.GetFighterCard();
                     // パワー
@@ -94,23 +122,68 @@ public class Card : MonoBehaviour
                 break;
 
             case CardType.Joker:
-                //fighterPowerFrame.SetActive(false);
+                // フレーム差し替え
+                if (cardObjectManager)
+                    if (cardFrameRenderer.materials[0].GetTexture("_MainTex") != cardObjectManager.jokerFrame)
+                        cardFrameRenderer.materials[0].SetTexture("_MainTex", cardObjectManager.jokerFrame);
+                fighterPowerFrame.gameObject.SetActive(true);
                 powerNumber.SetNumber(0);
                 break;
 
-            //case CardType.Event:
-            //    //fighterPowerFrame.SetActive(false);
-            //    powerNumber.SetNumber(data.power);
-            //    break;
+            case CardType.Support:
+                // フレーム差し替え
+                if (cardObjectManager)
+                    if (cardFrameRenderer.materials[0].GetTexture("_MainTex") != cardObjectManager.supportFrame)
+                        cardFrameRenderer.materials[0].SetTexture("_MainTex", cardObjectManager.supportFrame);
+                fighterPowerFrame.gameObject.SetActive(false);
+                syuzokuText.text = "サポートカード";
+                //powerNumber.SetNumber(data.power);
+                break;
+
+            case CardType.Connect:
+                // フレーム差し替え
+                if (cardObjectManager)
+                    if (cardFrameRenderer.materials[0].GetTexture("_MainTex") != cardObjectManager.eventFrame)
+                        cardFrameRenderer.materials[0].SetTexture("_MainTex", cardObjectManager.eventFrame);
+                fighterPowerFrame.gameObject.SetActive(true);
+                syuzokuText.text = "コネクトカード";
+                powerNumber.SetNumber(data.power);
+                break;
+            case CardType.Intercept:
+                // フレーム差し替え
+                if (cardObjectManager)
+                    if (cardFrameRenderer.materials[0].GetTexture("_MainTex") != cardObjectManager.eventFrame)
+                        cardFrameRenderer.materials[0].SetTexture("_MainTex", cardObjectManager.eventFrame);
+                fighterPowerFrame.gameObject.SetActive(true);
+                syuzokuText.text = "インターセプトカード";
+                powerNumber.SetNumber(data.power);
+                break;
         }
     }
 
-    public void SetUraomote(bool omote)
+    public void SetNotSelectFlag(bool value)
+    {
+        notSelectFlag = value;
+
+        // 選択できないなら色を若干落とす
+        if(notSelectFlag)
+        {
+            cardImageRenderer.materials[0].color = new Color(0.5f, 0.5f, 0.5f);
+            cardFrameRenderer.materials[0].color = new Color(0.5f, 0.5f, 0.5f);
+        }
+        else
+        {
+            cardImageRenderer.materials[0].color = new Color(1, 1, 1);
+            cardFrameRenderer.materials[0].color = new Color(1, 1, 1);
+        }
+    }
+
+    public void SetUraomote(bool value)
     {
         // 表フラグがtrueならパワーフレームとか名前が出る。
         // falseならパワーフレームが非表示になる
-        uraomoteFlag = omote;
-        if (omote)
+        uraomoteFlag = value;
+        if (value)
         {
             fighterPowerFrame.gameObject.SetActive(true);
             canvas.gameObject.SetActive(true);
@@ -128,11 +201,37 @@ public class Card : MonoBehaviour
         stateMachine.ChangeState(CardObjectState.Open.GetInstance());
     }
 
-    public void Draw(Vector3 deckPosition, Vector3 deckAngle)
+    public void Draw(int handNumber, int numHand)
     {
-        // デッキ→手札への補間用
-        startPosition = deckPosition;
-        startAngle = deckAngle;
+        // デッキにいる位置を保存
+        startPosition = cacheTransform.localPosition;
+        startAngle = cacheTransform.localEulerAngles;
+
+        // 手札の位置
+        cardObjectManager.MakeHandTransform(handNumber, numHand, this);
+        SetOrder(handNumber);
+        nextPosition = cacheTransform.localPosition;
+        nextAngle = cacheTransform.localEulerAngles;
+
+        // ステートてぇんじ
+        stateMachine.ChangeState(CardObjectState.Draw.GetInstance());
+    }
+
+    // 宝箱とか見せる用の位置に移動するドロー
+    public void ShowDraw()
+    {
+        // デッキにいる位置を保存
+        startPosition = cacheTransform.localPosition;
+        startAngle = cacheTransform.localEulerAngles;
+
+        // 手札の位置
+        cardObjectManager.MakeHandTransform(0, 1, this);
+        // 最前面
+        SetOrder(114);
+        nextPosition = cacheTransform.localPosition;
+        nextPosition.x = 0;
+        nextPosition.z += 2;
+        nextAngle = cacheTransform.localEulerAngles;
         // ステートてぇんじ
         stateMachine.ChangeState(CardObjectState.Draw.GetInstance());
     }
@@ -142,14 +241,38 @@ public class Card : MonoBehaviour
         // デッキ→手札への補間用
         startPosition = handPosition;
         startAngle = handAngle;
+        nextPosition = cacheTransform.localPosition;
+        nextAngle = cacheTransform.localEulerAngles;
         // ステートてぇんじ
         stateMachine.ChangeState(CardObjectState.Marigan.GetInstance());
+    }
+
+    public void FieldSet(Vector3 fieldPosition, Vector3 angle)
+    {
+        nextPosition = fieldPosition;
+        cacheTransform.localEulerAngles = angle;
+
+        // ステートてぇんじ
+        stateMachine.ChangeState(CardObjectState.Set.GetInstance());
+    }
+
+    // 墓地に移動して消える
+    public void MoveToCemetery()
+    {
+        startPosition = cacheTransform.localPosition;
+        startAngle = cacheTransform.localEulerAngles;
+        nextPosition = cardObjectManager.cemeteryPosition;
+        nextAngle = cacheTransform.localEulerAngles;
+        // ステートてぇんじ
+        stateMachine.ChangeState(CardObjectState.MoveToCemetery.GetInstance());
     }
 
     public void ChangeState(BaseEntityState<Card> newState)
     {
         stateMachine.ChangeState(newState);
     }
+
+    public bool isInMovingState() { return (!stateMachine.isInState(CardObjectState.None.GetInstance())); }
 
     // カードを出す
     //public void SendCard()

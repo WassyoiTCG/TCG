@@ -53,9 +53,10 @@ public enum DifferenceRangeType
 
 public enum AbilityType
 {
+    None,               // 効果なし(ダミー)
     GettingPoint,       // ポイント系
     ChangePower,        // パワーの変化
-    Hand,               // 手札系
+    CardMove,               // 手札系
     Lose = 9,           // 無条件敗北
     Victory = 10,       // 無条件勝利
 }
@@ -459,22 +460,23 @@ public static class CardDataBase
                     cardDatas[i].flavorText += str;
                 }
 
+                // パワー
+                //skip = loader.ReadString();
+                cardDatas[i].power = loader.ReadInt();
+
                 // タイプによって分岐
                 switch (cardType)
                 {
                     case CardType.Fighter:
                         {
                             // 種族
-                            //skip = loader.ReadLine();
+                            skip = loader.ReadLine();
                             // 種族の個数
                             int numSyuzoku = loader.ReadInt();
                             cardDatas[i].fighterCard.syuzokus = new Syuzoku[numSyuzoku];
                             // 個数に応じて読み込み
                             for (int j = 0; j < numSyuzoku; j++)
                                 cardDatas[i].fighterCard.syuzokus[j] = (Syuzoku)loader.ReadInt();
-                            // パワー
-                            skip = loader.ReadString();
-                            cardDatas[i].power = loader.ReadInt();
                         }
                         break;
 
@@ -483,50 +485,18 @@ public static class CardDataBase
                             var abilityFighterCard = cardDatas[i].abilityFighterCard;
 
                             // 種族
-                            //skip = loader.ReadLine();
+                            skip = loader.ReadLine();
                             // 種族の個数
                             int numSyuzoku = loader.ReadInt();
                             abilityFighterCard.syuzokus = new Syuzoku[numSyuzoku];
                             // 個数に応じて読み込み
                             for (int j = 0; j < numSyuzoku; j++)
                                 abilityFighterCard.syuzokus[j] = (Syuzoku)loader.ReadInt();
-                            // パワー
-                            skip = loader.ReadString();
-                            cardDatas[i].power = loader.ReadInt();
 
-                            // 効果
+                            // 効果読み込み
                             skip = loader.ReadString();
                             abilityFighterCard.abilityData = new CardAbilityData();
-
-                            /* 1行目 */
-                            // 発動タイミング
-                            abilityFighterCard.abilityData.abilityTriggerType = (AbilityTriggerType)loader.ReadInt();
-                            // 発動条件
-                            abilityFighterCard.abilityData.costType = (CostType)loader.ReadInt();
-                            // 汎用数値
-                            abilityFighterCard.abilityData.c_value0 = loader.ReadInt();
-                            abilityFighterCard.abilityData.c_value1 = loader.ReadInt();
-
-                            /* 2行目 */
-                            // 効果個数
-                            abilityFighterCard.abilityData.numAbility = loader.ReadInt();
-
-                            /* 3行目 */
-                            // 効果のタイプ
-                            abilityFighterCard.abilityData.abilityType = (AbilityType)loader.ReadInt();
-                            // 汎用数値
-                            abilityFighterCard.abilityData.a_value0 = loader.ReadInt();
-                            abilityFighterCard.abilityData.a_value1 = loader.ReadInt();
-                            abilityFighterCard.abilityData.a_value2 = loader.ReadInt();
-                            abilityFighterCard.abilityData.a_value3 = loader.ReadInt();
-                            abilityFighterCard.abilityData.a_value4 = loader.ReadInt();
-                            abilityFighterCard.abilityData.a_value5 = loader.ReadInt();
-                            abilityFighterCard.abilityData.a_value6 = loader.ReadInt();
-                            abilityFighterCard.abilityData.a_value7 = loader.ReadInt();
-                            abilityFighterCard.abilityData.a_value8 = loader.ReadInt();
-                            abilityFighterCard.abilityData.a_value9 = loader.ReadInt();
-
-                            //LoadAbility(loader);
+                            LoadAbility(loader, out abilityFighterCard.abilityData);
                         }
                         break;
 
@@ -541,36 +511,8 @@ public static class CardDataBase
                             var eventCard = cardDatas[i].GetEventCard();
 
                             // 効果
-                            skip = loader.ReadString();
                             eventCard.abilityData = new CardAbilityData();
-
-                            /* 1行目 */
-                            // 発動タイミング
-                            eventCard.abilityData.abilityTriggerType = (AbilityTriggerType)loader.ReadInt();
-                            // 発動条件
-                            eventCard.abilityData.costType = (CostType)loader.ReadInt();
-                            // 汎用数値
-                            eventCard.abilityData.c_value0 = loader.ReadInt();
-                            eventCard.abilityData.c_value1 = loader.ReadInt();
-
-                            /* 2行目 */
-                            // 効果個数
-                            eventCard.abilityData.numAbility = loader.ReadInt();
-
-                            /* 3行目 */
-                            // 効果のタイプ
-                            eventCard.abilityData.abilityType = (AbilityType)loader.ReadInt();
-                            // 汎用数値
-                            eventCard.abilityData.a_value0 = loader.ReadInt();
-                            eventCard.abilityData.a_value1 = loader.ReadInt();
-                            eventCard.abilityData.a_value2 = loader.ReadInt();
-                            eventCard.abilityData.a_value3 = loader.ReadInt();
-                            eventCard.abilityData.a_value4 = loader.ReadInt();
-                            eventCard.abilityData.a_value5 = loader.ReadInt();
-                            eventCard.abilityData.a_value6 = loader.ReadInt();
-                            eventCard.abilityData.a_value7 = loader.ReadInt();
-                            eventCard.abilityData.a_value8 = loader.ReadInt();
-                            eventCard.abilityData.a_value9 = loader.ReadInt();
+                            LoadAbility(loader, out eventCard.abilityData);
                         }
                         break;
                 }
@@ -580,6 +522,98 @@ public static class CardDataBase
             // キャラ画像
             var texture = PngLoader.LoadPNG(path + "/image.png");
             if (texture) cardDatas[i].image = /*texture;*/  Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f)); 
+        }
+    }
+
+    static void LoadAbility(TextLoader loader, out CardAbilityData abilityData)
+    {
+        // 効果
+        abilityData = new CardAbilityData();
+
+        /* 1行目 */
+        // 発動タイミング
+        abilityData.abilityTriggerType = (AbilityTriggerType)loader.ReadInt();
+        // 発動条件
+        abilityData.costType = (CostType)loader.ReadInt();
+        switch (abilityData.costType)
+        {
+            case CostType.NoneLimit:
+                abilityData.cost = new Cost.NoneLimit();
+                break;
+            case CostType.Otakebi:
+                abilityData.cost = new Cost.Otakebi();
+                break;
+            case CostType.Tsumeato:
+                abilityData.cost = new Cost.Tsumeato();
+                break;
+            case CostType.Sousai:
+                //abilityFighterCard.abilityData.cost = new Cost.();
+                break;
+            case CostType.Burst:
+                abilityData.cost = new Cost.Burst();
+                break;
+            case CostType.Treasure:
+                abilityData.cost = new Cost.Treasure();
+                break;
+            case CostType.Nakama:
+                abilityData.cost = new Cost.Nakama();
+                break;
+            case CostType.Kisikaisei:
+                abilityData.cost = new Cost.Kisikaisei();
+                break;
+            default:
+                Debug.LogWarning("超すとおかしいクマ");
+                break;
+        }
+        // 汎用数値
+        abilityData.c_value0 = loader.ReadInt();
+        abilityData.c_value1 = loader.ReadInt();
+
+        /* 2行目 */
+        // 効果個数
+        abilityData.numSkill = loader.ReadInt();
+        abilityData.skillDatas = new CardAbilityData.SkillData[abilityData.numSkill];
+
+        /* 3行目 */
+        // 効果のタイプ
+        for (int i = 0; i < abilityData.numSkill; i++)
+        {
+            abilityData.skillDatas[i] = new CardAbilityData.SkillData();
+            var skillData = abilityData.skillDatas[i];
+
+            skillData.nextSkillNumber = loader.ReadInt();
+            skillData.abilityType = (AbilityType)loader.ReadInt();
+            switch (skillData.abilityType)
+            {
+                case AbilityType.GettingPoint:
+                    skillData.skill = new Skill.Score();
+                    break;
+                case AbilityType.ChangePower:
+                    skillData.skill = new Skill.Power();
+                    break;
+                case AbilityType.CardMove:
+                    skillData.skill = new Skill.CardMove();
+                    break;
+                case AbilityType.Lose:
+                    Debug.LogWarning("未実装: 無条件敗北");
+                    break;
+                case AbilityType.Victory:
+                    Debug.LogWarning("未実装: 無条件勝利");
+                    break;
+                default:
+                    break;
+            }
+            // 汎用数値
+            skillData.s_value0 = loader.ReadInt();
+            skillData.s_value1 = loader.ReadInt();
+            skillData.s_value2 = loader.ReadInt();
+            skillData.s_value3 = loader.ReadInt();
+            skillData.s_value4 = loader.ReadInt();
+            skillData.s_value5 = loader.ReadInt();
+            skillData.s_value6 = loader.ReadInt();
+            skillData.s_value7 = loader.ReadInt();
+            skillData.s_value8 = loader.ReadInt();
+            skillData.s_value9 = loader.ReadInt();
         }
     }
 

@@ -50,6 +50,9 @@ public class oulSystemObject : MonoBehaviour
         // サウンド初期化
         oulAudio.Initialize();
 
+        // 共通データ初期化
+        SelectData.Initialize();
+
         // ウィンドウサイズサイズ
         Screen.SetResolution(windowWidth, windowHeight, false, 60);
 

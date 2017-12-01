@@ -13,6 +13,9 @@
 [F_TEXT]
 ¡“ú‚Í‹x‚Ý‚Ü‚·B
 
+[POWER]
+0
+
 [ELEMENT]
 1
 15

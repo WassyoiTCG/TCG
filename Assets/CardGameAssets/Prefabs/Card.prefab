@@ -439,13 +439,12 @@ MonoBehaviour:
   powerNumber: {fileID: 114804456736402708}
   cardNameText: {fileID: 114616134281787204}
   syuzokuText: {fileID: 114629361596787520}
-  cardFrameRenderer: {fileID: 23691383844575990}
-  cardSleeveRenderer: {fileID: 23097201202478872}
+  cardFrameRenderer: {fileID: 23097201202478872}
+  cardSleeveRenderer: {fileID: 23691383844575990}
   cardImageRenderer: {fileID: 23419146321740566}
   isMyPlayerSide: 0
   isSetField: 0
   uraomoteFlag: 0
-  handPosition: {x: 0, y: 0, z: 0}
   timer: 0
   startPosition: {x: 0, y: 0, z: 0}
   startAngle: {x: 0, y: 0, z: 0}

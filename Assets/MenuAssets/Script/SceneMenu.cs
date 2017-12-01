@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class SceneMenu : MonoBehaviour {
 
@@ -47,7 +48,11 @@ public class SceneMenu : MonoBehaviour {
     public GameObject NetBattleGroup;
 
     // シーンチェンジフラグ
-    private bool m_bSceneChange = false;
+    public bool m_bSceneChange = false;
+
+    // ネットワーク
+    public oulNetwork networkManager;
+    public InputField ipInput;
 
     // Use this for initialization
     void Start () {
@@ -150,7 +155,9 @@ public class SceneMenu : MonoBehaviour {
 
         //  コイン
         CoinPlate = Canvas.transform.Find("Info/CoinPlate").gameObject;
-        
+
+        // IP入力初期化
+        if (ipInput) ipInput.text = "127.0.0.1";
 
         // ステートマシンの初期化や切り替えは最後に行う
         m_pStateMachine = new BaseEntityStateMachine<SceneMenu>(this);

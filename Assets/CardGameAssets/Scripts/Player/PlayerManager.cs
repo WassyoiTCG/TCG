@@ -115,11 +115,6 @@ public class PlayerManager : MonoBehaviour
         return id;
     }
 
-    public void Draw()
-    {
-        foreach (Player player in players)
-            player.ChangeState(PlayerState.Draw.GetInstance());
-    }
 
     public bool isStateEnd()
     {
@@ -137,10 +132,86 @@ public class PlayerManager : MonoBehaviour
         return allOK;
     }
 
+    public bool isPushedJunbiKanryo()
+    {
+        bool allOK = true;
+        foreach (Player player in players)
+            if (!player.isPushedJunbiKanryo) allOK = false;
+        return allOK;
+    }
+
     public void OpenStriker()
     {
         foreach (Player player in players)
             player.OpenStriker();
+    }
+
+    public void ActionIntercept()
+    {
+        var card0 = players[0].GetFieldEventCard();
+        var card1 = players[1].GetFieldEventCard();
+        var abilityManager = GameObject.Find("GameMain/AbilityManager").GetComponent<CardAbilityManager>();
+        if (card0 == null)
+        {
+            if (card1 == null) return;
+
+            var ability = card1.interceptCard.abilityData;
+            // 効果の条件を満たしているかどうか(爪痕とかのチェック)
+            if (!ability.HatsudouOK()) return;
+            // 効果発動!
+            abilityManager.PushAbility(ability, players[1].playerID);
+        }
+        else if(card1 == null)
+        {
+            var ability = card0.interceptCard.abilityData;
+            // 効果の条件を満たしているかどうか(爪痕とかのチェック)
+            if (!ability.HatsudouOK()) return;
+            // 効果発動!
+            abilityManager.PushAbility(ability, players[0].playerID);
+        }
+        else
+        {
+            // 相殺処理
+            if(card0.power == card1.power)
+            {
+
+                return;
+            }
+
+            var ability0 = card0.interceptCard.abilityData;
+            var ability1 = card0.interceptCard.abilityData;
+            if (!ability0.HatsudouOK())
+            {
+                if (!ability1.HatsudouOK()) return;
+                abilityManager.PushAbility(ability1, players[1].playerID);
+            }
+            else if (!ability1.HatsudouOK())
+            {
+                abilityManager.PushAbility(ability0, players[0].playerID);
+            }
+            // 両方発動できる
+            else
+            {
+                // パワーの高い方から処理する
+                if (card0.power > card1.power)
+                {
+                    abilityManager.PushAbility(ability0, players[0].playerID);
+                    abilityManager.PushAbility(ability1, players[1].playerID);
+                }
+                else
+                {
+                    abilityManager.PushAbility(ability1, players[1].playerID);
+                    abilityManager.PushAbility(ability0, players[0].playerID);
+                }
+            }
+        }
+    }
+
+    public bool isHaveInterceptCard()
+    {
+        foreach (Player player in players)
+            if (player.isHaveInterceptCard()) return true;
+        return false;
     }
 
     public bool HandleMessage(MessageInfo message)
@@ -176,7 +247,7 @@ public class PlayerManager : MonoBehaviour
                 uiManager.DisableSetStrikerButton();
             return true;
         }
-        if (message.messageType == MessageType.SetCard)
+        if (message.messageType == MessageType.SetStriker)
         {
             if (message.exInfo == null)
                 return false;
@@ -195,6 +266,27 @@ public class PlayerManager : MonoBehaviour
             // ボタン表示
             if (players[message.fromPlayerID].isMyPlayer)
                 uiManager.EnableSetStrikerButton();
+            return true;
+        }
+        if(message.messageType == MessageType.SetIntercept)
+        {
+            if (message.exInfo == null)
+                return false;
+
+            // byte[]→構造体
+            SetCardInfo setCardInfo = new SetCardInfo();
+            message.GetExtraInfo<SetCardInfo>(ref setCardInfo);
+
+            Debug.Log("受信: プレイヤー" + message.fromPlayerID + "が手札" + setCardInfo.handNo + "のカードをセットしました");
+
+            players[message.fromPlayerID].SetIntercept(setCardInfo);
+            // ステート終了
+            //players[message.fromPlayerID].isStateEnd = true;
+            players[message.fromPlayerID].isPushedJunbiKanryo = true;
+
+            // ボタン非表示
+            if (players[message.fromPlayerID].isMyPlayer)
+                uiManager.DisableSetStrikerButton();
             return true;
         }
         if(message.messageType == MessageType.BackToHand)
@@ -324,6 +416,6 @@ public class PlayerManager : MonoBehaviour
     public void Restart()
     {
         foreach (Player player in players)
-            player.Restart();
+            if(player)player.Restart();
     }
 }

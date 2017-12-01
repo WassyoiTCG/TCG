@@ -13,9 +13,9 @@
 [F_TEXT]
 ’·‚¢‹——£‚Ì‘å—¤‚ð‰¡’f‚µ‚Ä‚¢‚é‚½‚ßA—ƒ‚ª‘Þ‰»‚µ‚½B
 
+[POWER]
+6
+
 [ELEMENT]
 1
 12
-
-[POWER]
-6

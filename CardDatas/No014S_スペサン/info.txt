@@ -13,10 +13,10 @@
 [F_TEXT]
 ç≈ã≠ÅB
 
+[POWER]
+3
+
 [ELEMENT]
 2
 2
-15
-
-[POWER]
-3
+16

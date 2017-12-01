@@ -123,6 +123,23 @@
     <Compile Include="Assets\MenuAssets\Anim2D\Shake.cs" />
     <Compile Include="Assets\MenuAssets\Script\SceneMenu.cs" />
     <Compile Include="Assets\MenuAssets\Script\SceneMenuState.cs" />
+    <Compile Include="Assets\NetworkLobby\Lobby\Scripts\DraggablePanel.cs" />
+    <Compile Include="Assets\NetworkLobby\Lobby\Scripts\EventSystemChecker.cs" />
+    <Compile Include="Assets\NetworkLobby\Lobby\Scripts\Lobby\LobbyCountdownPanel.cs" />
+    <Compile Include="Assets\NetworkLobby\Lobby\Scripts\Lobby\LobbyHook.cs" />
+    <Compile Include="Assets\NetworkLobby\Lobby\Scripts\Lobby\LobbyInfoPanel.cs" />
+    <Compile Include="Assets\NetworkLobby\Lobby\Scripts\Lobby\LobbyMainMenu.cs" />
+    <Compile Include="Assets\NetworkLobby\Lobby\Scripts\Lobby\LobbyManager.cs" />
+    <Compile Include="Assets\NetworkLobby\Lobby\Scripts\Lobby\LobbyPlayer.cs" />
+    <Compile Include="Assets\NetworkLobby\Lobby\Scripts\Lobby\LobbyPlayerList.cs" />
+    <Compile Include="Assets\NetworkLobby\Lobby\Scripts\Lobby\LobbyServerEntry.cs" />
+    <Compile Include="Assets\NetworkLobby\Lobby\Scripts\Lobby\LobbyServerList.cs" />
+    <Compile Include="Assets\NetworkLobby\Lobby\Scripts\Lobby\LobbyTopPanel.cs" />
+    <Compile Include="Assets\NetworkLobby\SampleScenes\Scripts\NetworkAsteroid.cs" />
+    <Compile Include="Assets\NetworkLobby\SampleScenes\Scripts\NetworkGameManager.cs" />
+    <Compile Include="Assets\NetworkLobby\SampleScenes\Scripts\NetworkLobbyHook.cs" />
+    <Compile Include="Assets\NetworkLobby\SampleScenes\Scripts\NetworkSpaceship.cs" />
+    <Compile Include="Assets\NetworkLobby\SampleScenes\Scripts\NetworkSpaceshipBullet.cs" />
     <Compile Include="Assets\PostProcessing\Runtime\Attributes\GetSetAttribute.cs" />
     <Compile Include="Assets\PostProcessing\Runtime\Attributes\MinAttribute.cs" />
     <Compile Include="Assets\PostProcessing\Runtime\Attributes\TrackballAttribute.cs" />
@@ -194,6 +211,9 @@
     <Compile Include="Assets\UtilAssets\Shaders\ImageEffects\Scripts\RadialBlur.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Assets\NetworkLobby\Fonts\OpenSans\License!.txt" />
+    <None Include="Assets\NetworkLobby\Lobby\Documentation.txt" />
+    <None Include="Assets\NetworkLobby\Lobby\Instruction.txt" />
     <None Include="Assets\PostProcessing\Editor Resources\Monitors\HistogramCompute.compute" />
     <None Include="Assets\PostProcessing\Editor Resources\Monitors\HistogramRender.shader" />
     <None Include="Assets\PostProcessing\Editor Resources\Monitors\ParadeRender.shader" />

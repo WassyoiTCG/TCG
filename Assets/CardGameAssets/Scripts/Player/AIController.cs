@@ -11,25 +11,6 @@ public class AIController : MonoBehaviour
     {
         myPlayer = GetComponent<Player>();
         Restart();
-
-        // 仮でデッキデータ作成
-        myPlayer.deckData = new PlayerDeckData();
-        myPlayer.deckData.strikerCards[0] = 0;
-        myPlayer.deckData.strikerCards[1] = 1;
-        myPlayer.deckData.strikerCards[2] = 2;
-        myPlayer.deckData.strikerCards[3] = 3;
-        myPlayer.deckData.strikerCards[4] = 4;
-        myPlayer.deckData.strikerCards[5] = 5;
-        myPlayer.deckData.strikerCards[6] = 6;
-        myPlayer.deckData.strikerCards[7] = 7;
-        myPlayer.deckData.strikerCards[8] = 8;
-        myPlayer.deckData.strikerCards[9] = 9;
-        myPlayer.deckData.jorkerCard = 10;
-        myPlayer.deckData.eventCards[0] = (int)IDType.NONE;
-        myPlayer.deckData.eventCards[1] = (int)IDType.NONE;
-        myPlayer.deckData.eventCards[2] = (int)IDType.NONE;
-        myPlayer.deckData.eventCards[3] = (int)IDType.NONE;
-        myPlayer.deckManager.SetDeckData(myPlayer.deckData);
     }
 
     public void Restart()
@@ -54,11 +35,24 @@ public class AIController : MonoBehaviour
         {
             SetStrikerUpdate();
         }
+        else if(myPlayer.stateMachine.isInState(PlayerState.SetIntercept.GetInstance()))
+        {
+            // 絶対イベントカード出さないマン
+            myPlayer.isPushedJunbiKanryo = true;
+        }
     }
 
     void SetStrikerUpdate()
     {
         if (myPlayer.isSetStriker()) return;
+
+        // 手札にセットできるやつがいなかったらパス
+        if(!myPlayer.isHaveStrikerCard())
+        {
+            // セット完了
+            myPlayer.JunbiKanryoON();
+            return;
+        }
 
         // 手札からランダムでセットする
         int r = Random.Range(0, myPlayer.deckManager.GetNumHand() - 1);
@@ -67,7 +61,7 @@ public class AIController : MonoBehaviour
         SetCardInfo exInfo = new SetCardInfo();
         exInfo.handNo = r;
         // メッセージ送信
-        MessageManager.Dispatch(myPlayer.playerID, MessageType.SetCard, exInfo);
+        MessageManager.Dispatch(myPlayer.playerID, MessageType.SetStriker, exInfo);
 
         Debug.Log("CPU:" + r + "番目のカードをセットしました");
 

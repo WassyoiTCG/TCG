@@ -30,6 +30,7 @@ public class SceneMain : MonoBehaviour
     public oulNetwork networkManager;                           // ネット管理さん
     public UIManager uiManager;                                 // UI管理さん
     public PlayerManager playerManager;                         // プレイヤー管理さん
+    public CardAbilityManager abilityManager;                   // 効果管理さん
     public Text pointText;                                      // ポイントのテキスト
     public Text restPointText;                                  // 残りポイントのテキスト
     public PointCardManager pointManager { get; private set; }  // ポイント山札
@@ -56,23 +57,19 @@ public class SceneMain : MonoBehaviour
         // ステート初期化
         stateMachine = new BaseEntityStateMachine<SceneMain>(this);
         stateMachine.globalState = SceneMainState.Global.GetInstance();
-        // オンラインかそうでないかで分岐
+
         if (SelectData.isNetworkBattle)
         {
-            offlinePlayers.SetActive(false);
-            networkManager.gameObject.SetActive(true);
-            stateMachine.ChangeState(SceneMainState.MatchingWait.GetInstance());
-        }
-        else
-        {
-            offlinePlayers.SetActive(true);
-            stateMachine.ChangeState(SceneMainState.BattleStart.GetInstance());
+            if (!networkManager)
+            {
+                networkManager = GameObject.Find("NetworkManager").GetComponent<oulNetwork>();
+                Debug.Assert(networkManager, "ネットワークマネージャー死んでる");
+            }
+            // プレイヤー追加
+            networkManager.Spawn();
         }
 
-        //state = State.NetOrOffline;
-        // UI表示
-        //uiManager.AppearNetOrOffline();
-        uiManager.DisAppearMainUI();
+        Restart();
 	}
 	
 	// Update is called once per frame
@@ -90,8 +87,8 @@ public class SceneMain : MonoBehaviour
 
     public void Finish()
     {
-        var myScore = playerManager.uiManager.myScore;
-        var cpuScore = playerManager.uiManager.cpuScore;
+        var myScore = playerManager.uiManager.myHP;
+        var cpuScore = playerManager.uiManager.cpuHP;
         if (myScore > cpuScore)
         {
             pointText.text = "あなたの勝ち";
@@ -117,18 +114,22 @@ public class SceneMain : MonoBehaviour
         // オンラインかそうでないかで分岐
         if (SelectData.isNetworkBattle)
         {
+            offlinePlayers.SetActive(false);
             stateMachine.ChangeState(SceneMainState.MatchingWait.GetInstance());
+            // ネットワーク初期化
+            networkManager.Restart();
         }
         else
         {
+            offlinePlayers.SetActive(true);
+            // プレイヤー初期化
+            playerManager.Restart();
             stateMachine.ChangeState(SceneMainState.BattleStart.GetInstance());
         }
-        // プレイヤー初期化
-        playerManager.Restart();
+
+
         // UI初期化
         uiManager.Restart();
-        // ネットワーク初期化
-        networkManager.Restart();
         MessageManager.Restart();
     }
 }

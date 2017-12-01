@@ -27,6 +27,55 @@ namespace CardObjectState
         }
     }
 
+    // 線形補間補間で移動
+    public class MoveLerp : BaseEntityState<Card>
+    {
+        // Singleton.
+        static MoveLerp instance;
+        public static MoveLerp GetInstance() { if (instance == null) { instance = new MoveLerp(); } return instance; }
+
+        readonly float endTime = 0.5f;
+
+        public override void Enter(Card card)
+        {
+            card.timer = 0;
+
+            card.cacheTransform.localPosition = card.startPosition;
+            card.cacheTransform.localEulerAngles = card.startAngle;
+        }
+
+        public override void Execute(Card card)
+        {
+            if ((card.timer += Time.deltaTime) > endTime)
+            {
+                card.timer = endTime;
+
+                // ステートチェンジ
+                card.ChangeState(None.GetInstance());
+            }
+
+            var rate = card.timer / endTime;
+
+            // 座標
+            card.cacheTransform.localPosition = oulMath.LerpVector(card.startPosition, card.nextPosition, rate);
+
+            // アングルも変える
+            var angle = Vector3.zero;
+            angle.x = Mathf.LerpAngle(card.startAngle.x, card.nextAngle.x, rate);
+            angle.y = Mathf.LerpAngle(card.startAngle.y, card.nextAngle.y, rate);
+            angle.z = Mathf.LerpAngle(card.startAngle.z, card.nextAngle.z, rate);
+            card.cacheTransform.localEulerAngles = angle;
+        }
+
+        public override void Exit(Card card)
+        { }
+
+        public override bool OnMessage(Card card, MessageInfo message)
+        {
+            return false;
+        }
+    }
+
     public struct OpenCardInfo
     {
         public Vector3[] bezierPoints;
@@ -44,8 +93,8 @@ namespace CardObjectState
         {
             card.timer = 0;
 
-            card.nextPosition = card.cacheTransform.localPosition;
-            card.nextAngle = card.cacheTransform.localEulerAngles;
+            //card.nextPosition = card.cacheTransform.localPosition;
+            //card.nextAngle = card.cacheTransform.localEulerAngles;
             card.cacheTransform.localPosition = card.startPosition;
             card.cacheTransform.localEulerAngles = card.startAngle;
 
@@ -75,7 +124,8 @@ namespace CardObjectState
             angle.z = Mathf.LerpAngle(card.startAngle.z, card.nextAngle.z, rate);
             card.cacheTransform.localEulerAngles = angle;
 
-            if (rate > 0.5f) card.SetUraomote(false);
+            // 半分過ぎたらとりあえずて感じで(相手サイドのときは表にする必要なし)
+            if (card.isMyPlayerSide) if (rate > 0.5f) card.SetUraomote(true);
         }
         public override void Exit(Card card)
         {
@@ -99,8 +149,8 @@ namespace CardObjectState
         {
             card.timer = 0;
 
-            card.nextPosition = card.cacheTransform.localPosition;
-            card.nextAngle = card.cacheTransform.localEulerAngles;
+            //card.nextPosition = card.cacheTransform.localPosition;
+            //card.nextAngle = card.cacheTransform.localEulerAngles;
             card.cacheTransform.localPosition = card.startPosition;
             card.cacheTransform.localEulerAngles = card.startAngle;
 
@@ -155,7 +205,6 @@ namespace CardObjectState
         public override void Enter(Card card)
         {
             // 裏にする
-            card.SetUraomote(false);
             var angle = card.cacheTransform.localEulerAngles.y * Mathf.Deg2Rad;
             card.startPosition = card.nextPosition + new Vector3(Mathf.Sin(angle), 0, Mathf.Cos(angle)) * moveDist;
             card.cacheTransform.localPosition = card.startPosition;
@@ -249,6 +298,50 @@ namespace CardObjectState
 
             // 半分過ぎたらとりあえずて感じで
             if (rate > 0.5f) card.SetUraomote(true);
+        }
+
+        public override void Exit(Card card)
+        { }
+
+        public override bool OnMessage(Card card, MessageInfo message)
+        {
+            return false;
+        }
+    }
+
+    // 墓地に行く
+    public class MoveToCemetery : BaseEntityState<Card>
+    {
+        // Singleton.
+        static MoveToCemetery instance;
+        public static MoveToCemetery GetInstance() { if (instance == null) { instance = new MoveToCemetery(); } return instance; }
+
+        public override void Enter(Card card)
+        {
+            card.timer = 0;
+
+            card.cacheTransform.localPosition = card.startPosition;
+            card.cacheTransform.localEulerAngles = card.startAngle;
+        }
+
+        public override void Execute(Card card)
+        {
+            var position = card.cacheTransform.localPosition;
+            position = oulMath.LerpVector(position, card.nextPosition, 0.3f);
+            card.cacheTransform.localPosition = position;
+
+            // ほぼ終点まで移動したら
+            if (Vector3.SqrMagnitude(position - card.nextPosition) < 0.1f)
+            {
+                // ステートチェンジ
+                card.ChangeState(None.GetInstance());
+
+                // 墓地に追加する
+                //card.cardObjectManager.AddCemetery(card);
+
+                // 非表示
+                card.gameObject.SetActive(false);
+            }
         }
 
         public override void Exit(Card card)

@@ -13,9 +13,9 @@
 [F_TEXT]
 ç≈ã≠ÅB
 
+[POWER]
+10
+
 [ELEMENT]
 1
 12
-
-[POWER]
-10

@@ -11,7 +11,9 @@ namespace PlayerState
         public static None GetInstance() { if (instance == null) { instance = new None(); } return instance; }
 
         public override void Enter(Player player)
-        { }
+        {
+            player.isStateEnd = true;
+        }
 
         public override void Execute(Player player)
         { }
@@ -124,7 +126,13 @@ namespace PlayerState
         public static SetStriker GetInstance() { if (instance == null) { instance = new SetStriker(); } return instance; }
 
         public override void Enter(Player player)
-        { }
+        {
+            if(player.isMyPlayer)
+            {
+                // インターセプトを選択不可能に
+                player.cardObjectManager.ChangeHandSetStrikerMode();
+            }
+        }
 
         public override void Execute(Player player)
         { }
@@ -133,6 +141,75 @@ namespace PlayerState
         {
             player.playerManager.uiManager.DisAppearWaitYouUI();
         }
+
+        public override bool OnMessage(Player player, MessageInfo message)
+        {
+            return false;
+        }
+    }
+
+    public class SetIntercept : BaseEntityState<Player>
+    {
+        // Singleton.
+        static SetIntercept instance;
+        public static SetIntercept GetInstance() { if (instance == null) { instance = new SetIntercept(); } return instance; }
+
+        public override void Enter(Player player)
+        {
+            player.isStateEnd = false;
+            player.isPushedJunbiKanryo = false;
+
+            if (player.isMyPlayer)
+            {
+                // インターセプトを選択可能に
+                player.cardObjectManager.ChangeHandSetInterceptMode();
+            }
+        }
+
+        public override void Execute(Player player)
+        { }
+
+        public override void Exit(Player player)
+        {
+            player.playerManager.uiManager.DisAppearWaitYouUI();
+        }
+
+        public override bool OnMessage(Player player, MessageInfo message)
+        {
+            return false;
+        }
+    }
+
+
+    public class StrikerAbility : BaseEntityState<Player>
+    {
+        // Singleton.
+        static StrikerAbility instance;
+        public static StrikerAbility GetInstance() { if (instance == null) { instance = new StrikerAbility(); } return instance; }
+
+        public override void Enter(Player player)
+        {
+            // 出したストライカーが効果持ちでなおかつバトル後効果発動なら
+            var card = player.GetFieldStrikerCard();
+            if (card == null) return;
+            if (card.cardType != CardType.AbilityFighter) return;
+            var ability = card.abilityFighterCard.abilityData;
+            if (ability.abilityTriggerType != AbilityTriggerType.AfterBattle) return;
+
+            // 効果の条件を満たしているかどうか(爪痕とかのチェック)
+            if (!ability.HatsudouOK()) return;
+
+            // 効果発動!
+            GameObject.Find("GameMain/AbilityManager").GetComponent<CardAbilityManager>().PushAbility(ability, player.playerID);
+        }
+
+        public override void Execute(Player player)
+        {
+            
+        }
+
+        public override void Exit(Player player)
+        { }
 
         public override bool OnMessage(Player player, MessageInfo message)
         {

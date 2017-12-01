@@ -14,6 +14,9 @@
 [F_TEXT]
 ¼“cŒN‚ÌØ‚èŽD
 
+[POWER]
+0
+
 [ABILITY]
 3 5 0 1
 2

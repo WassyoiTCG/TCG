@@ -31,7 +31,10 @@ namespace Cost
 
         public override void Execute(CardAbilityData abilityData)
         {
-
+            // 即終了
+            endFlag = true;
+            // 条件OK
+            abilityData.isJoukenOK = true;
         }
 
 
@@ -57,7 +60,7 @@ namespace Cost
 
             var myPower = abilityData.myPlayer.jissainoPower;
             var youPower = abilityData.youPlayer.jissainoPower;
-            bool ok = (myPower > youPower);    // 勝ってたらtrue
+            bool ok = (myPower > youPower || youPower == Player.noSetStrikerPower);    // 勝ってたらtrue
             if (!ok)
             {
                 abilityData.isJoukenOK = false;
@@ -100,7 +103,7 @@ namespace Cost
             return false;
         }
 
-        public override bool HatsudouCheck(CardAbilityData abilityData) { return false; }
+        public override bool HatsudouCheck(CardAbilityData abilityData) { return true; }
     }
 
     public class Tsumeato : Base
@@ -182,7 +185,7 @@ namespace Cost
 
 
         int step;
-        CardData drawCard;
+        Card drawCard;
 
         public override void Enter(CardAbilityData abilityData)
         {
@@ -198,23 +201,38 @@ namespace Cost
             {
                 case 0:
                     // ドロー！
-                    drawCard = abilityData.myPlayer.deckManager.GetDraw();
-                    // モンスターカード！(isStrikerはジョーカーがfalseになるのでこの書き方)
-                    if (!drawCard.isEventCard())
-                    {
-                        step++;
-                    }
+                    drawCard = abilityData.myPlayer.deckManager.DequeueYamahuda();
+                    drawCard.ShowDraw();
 
+                    //// データ上で引いたカードを墓地に送る
+                    //abilityData.myPlayer.deckManager.AddBochi(drawCard.cardData);
+
+                    step++;
                     break;
 
                 case 1:
+                    if (!drawCard.isInMovingState())
+                    {
+                        // 引いたカードを墓地に送る動き
+                        abilityData.myPlayer.deckManager.AddBochi(drawCard);
+
+                        // モンスターカード！なら次のステート(isStrikerはジョーカーがfalseになるのでこの書き方)
+                        if (!drawCard.cardData.isEventCard())
+                        {
+                            step++;
+                        }
+                        else
+                        {
+                            step--;
+                        }
+                    }
+                    break;
+
+                case 2:
                     if (drawCard != null)
                     {
                         // パワーを足す用の変数に格納
-                        abilityData.delvValue0 = drawCard.power;
-
-                        // 引いたカードを墓地に送る
-                        abilityData.myPlayer.deckManager.AddBochi(drawCard);
+                        abilityData.delvValue0 = drawCard.cardData.power;
                     }
                     else Debug.LogWarning("バースト: 引いたカードがnullクマ");
 
@@ -243,7 +261,7 @@ namespace Cost
 
         int step;
         int selectNumber;   // プレイヤーの選択した番号
-        CardData drawCard;
+        Card drawCard;
 
         public override void Enter(CardAbilityData abilityData)
         {
@@ -265,16 +283,37 @@ namespace Cost
                     break;
                 case 1:
                     // ドロー！モンスターカード！が終わったら
-                    
-                    if(true)
-                    {
-                        step++;
-                    }
+                    // ドロー！
+                    drawCard = abilityData.myPlayer.deckManager.DequeueYamahuda();
+                    drawCard.ShowDraw();
+
+                    // データ上で引いたカードを墓地に送る
+                    //abilityData.myPlayer.deckManager.AddBochi(drawCard.cardData);
+
+                    step++;
                     break;
 
                 case 2:
+                    if (!drawCard.isInMovingState())
+                    {
+                        // モンスターカード！なら次のステート(isStrikerはジョーカーがfalseになるのでこの書き方)
+                        if (!drawCard.cardData.isEventCard())
+                        {
+                            step++;
+                        }
+                        else
+                        {
+                            step--;
+
+                            // 引いたカードを墓地に送る
+                            abilityData.myPlayer.deckManager.AddBochi(drawCard);
+                        }
+                    }
+                    break;
+
+                case 3:
                     // プレイヤーの選択した数字と引いたストライカーの数字が同じなら
-                    if(true)
+                    if(selectNumber == drawCard.cardData.power)
                     {
                         // デッキにある枚数分の得点を得る
                         abilityData.delvValue0 = abilityData.myPlayer.deckManager.GetNumYamahuda() * 10;
@@ -283,16 +322,19 @@ namespace Cost
                         abilityData.myPlayer.deckManager.AddHand(drawCard);
 
                         // 成功時の効果に移行
-                        abilityData.hatsudouAbilityNumber = abilityData.c_value0;
+                        abilityData.skillNumber = abilityData.c_value0;
                     }
                     // 残念
                     else
                     {
-                        // 墓地に送る
+                        // 引いたカードを墓地に送る
                         abilityData.myPlayer.deckManager.AddBochi(drawCard);
 
+                        // 引いたカードを墓地に送る動き
+                        drawCard.MoveToCemetery();
+
                         // 失敗時の効果に移行
-                        abilityData.hatsudouAbilityNumber = abilityData.c_value1;
+                        abilityData.skillNumber = abilityData.c_value1;
                     }
 
                     // コスト処理終了
@@ -362,13 +404,13 @@ namespace Cost
                     if (true)
                     {
                         // 成功時の効果に移行
-                        abilityData.hatsudouAbilityNumber = abilityData.c_value0;
+                        abilityData.skillNumber = abilityData.c_value0;
                     }
                     // 残念
                     else
                     {
                         // 失敗時の効果に移行
-                        abilityData.hatsudouAbilityNumber = abilityData.c_value1;
+                        abilityData.skillNumber = abilityData.c_value1;
                     }
 
                     // コスト処理終了
@@ -454,19 +496,20 @@ namespace Cost
 }
 
 
-namespace Ability
+namespace Skill
 {
-    // 終了判定用
-    public class End : BaseEntityState<CardAbilityData>
+    public abstract class Base
     {
-        static End instance;
-        public static End GetInstance() { if (instance == null) { instance = new End(); } return instance; }
+        protected bool endFlag;
 
-        public override void Enter(CardAbilityData abilityData) { }
-        public override void Execute(CardAbilityData abilityData) { }
-        public override void Exit(CardAbilityData abilityData) { }
-        public override bool OnMessage(CardAbilityData abilityData, MessageInfo message) { return false; }
+        public virtual void Enter(CardAbilityData abilityData) { endFlag = false; }
+        public abstract void Execute(CardAbilityData abilityData);
+        public abstract void Exit(CardAbilityData abilityData);
+        public abstract bool OnMessage(CardAbilityData abilityData, MessageInfo message);
+        // 終了チェック
+        public bool EndCheck() { return endFlag; }
     }
+
 
     public static class ValueChange
     {
@@ -527,18 +570,22 @@ namespace Ability
         }
     }
 
-    // スコア系
-    public class Score : BaseEntityState<CardAbilityData>
+    // ライフ系
+    public class Score : Base
     {
         static Score instance;
         public static Score GetInstance() { if (instance == null) { instance = new Score(); } return instance; }
 
         public override void Enter(CardAbilityData abilityData)
         {
-            // ※a_value0=演算タイプ, a_value1=演算する値, a_value2=効果の対象
-            var arithmetic = (Arithmetic)abilityData.a_value0;
-            var value = ValueChange.GetCheckRefValue(abilityData, abilityData.a_value1);
-            var abilityTarget = (AbilityTarget)abilityData.a_value2;
+            base.Enter(abilityData);
+
+            var skillData = abilityData.GetCurrentSkillData();
+
+            // ※s_value0=演算タイプ, s_value1=演算する値, s_value2=効果の対象
+            var arithmetic = (Arithmetic)skillData.s_value0;
+            var value = ValueChange.GetCheckRefValue(abilityData, skillData.s_value1);
+            var abilityTarget = (AbilityTarget)skillData.s_value2;
 
             switch (abilityTarget)
             {
@@ -571,7 +618,7 @@ namespace Ability
             // 演算して
             score = ValueChange.Enzan(arithmetic, score, value);
             // セット
-            uiManager.SetScore(player.isMyPlayer, score);
+            uiManager.SetHP(player.isMyPlayer, score);
         }
 
         public override void Execute(CardAbilityData abilityData)
@@ -579,7 +626,7 @@ namespace Ability
             // 効果のエフェクトが終了したら
             if(true)
             {
-                abilityData.abilities[abilityData.hatsudouAbilityNumber].ChangeState(End.GetInstance());
+                endFlag = true;
             }
         }
 
@@ -595,17 +642,21 @@ namespace Ability
     }
 
     // パワー変化系
-    public class Power : BaseEntityState<CardAbilityData>
+    public class Power : Base
     {
         static Power instance;
         public static Power GetInstance() { if (instance == null) { instance = new Power(); } return instance; }
 
         public override void Enter(CardAbilityData abilityData)
         {
-            // ※a_value0=演算タイプ, a_value1=演算する値, a_value2=効果の対象
-            var arithmetic = (Arithmetic)abilityData.a_value0;
-            var value = ValueChange.GetCheckRefValue(abilityData, abilityData.a_value1);
-            var abilityTarget = (AbilityTarget)abilityData.a_value2;
+            base.Enter(abilityData);
+
+            var skillData = abilityData.GetCurrentSkillData();
+
+            // ※s_value0=演算タイプ, s_value1=演算する値, s_value2=効果の対象
+            var arithmetic = (Arithmetic)skillData.s_value0;
+            var value = ValueChange.GetCheckRefValue(abilityData, skillData.s_value1);
+            var abilityTarget = (AbilityTarget)skillData.s_value2;
 
             switch(abilityTarget)
             {
@@ -644,7 +695,7 @@ namespace Ability
             // 効果のエフェクトが終了したら
             if (true)
             {
-                abilityData.abilities[abilityData.hatsudouAbilityNumber].ChangeState(End.GetInstance());
+                endFlag = true;
             }
         }
 
@@ -660,10 +711,10 @@ namespace Ability
     }
 
     // カード移動系系
-    public class Card : BaseEntityState<CardAbilityData>
+    public class CardMove : Base
     {
-        static Card instance;
-        public static Card GetInstance() { if (instance == null) { instance = new Card(); } return instance; }
+        static CardMove instance;
+        public static CardMove GetInstance() { if (instance == null) { instance = new CardMove(); } return instance; }
 
         public class Search
         {
@@ -742,22 +793,27 @@ namespace Ability
         }
         //SearchType searchType;
 
+        Card drawCard;
+
         public override void Enter(CardAbilityData abilityData)
         {
-            // ※value0=どこから, value1=誰の, value2=どこに, value3=誰の
-            var fromPlace = (From)abilityData.a_value0;
-            var fromTarget = (AbilityTarget)abilityData.a_value1;
-            var searchType = (SearchType)abilityData.a_value2;
-            var toPlace = (To)abilityData.a_value3;
-            var toTarget =  (AbilityTarget)abilityData.a_value4;
+            base.Enter(abilityData);
 
-            var toPlayer = abilityData.GetPlayerByAbilitiTarget(toTarget);
+            var skillData = abilityData.GetCurrentSkillData();
+
+            drawCard = null;
+            
+            // ※value0=どこから, value1=誰の, value2=どこに, value3=誰の
+            var fromPlace = (From)skillData.s_value0;
+            var fromTarget = (AbilityTarget)skillData.s_value1;
+            var searchType = (SearchType)skillData.s_value2;
+            var toPlace = (To)skillData.s_value3;
+            var toTarget =  (AbilityTarget)skillData.s_value4;
 
             if (fromPlace != From.NewCreate)
             {
+                // Fromの処理
                 var fromPlayer = abilityData.GetPlayerByAbilitiTarget(fromTarget);
-
-                CardData card = null;
 
                 switch (fromPlace)
                 {
@@ -765,21 +821,39 @@ namespace Ability
                         // 手札から無造作に
                         if (searchType == SearchType.None)
                         {
-                            card = fromPlayer.deckManager.DequeueHand();
+                            drawCard = fromPlayer.deckManager.DequeueHand();
                         }
                         else if(searchType == SearchType.Saati)
                         {
                             var cards = fromPlayer.deckManager.GetHand();
-
+                            // (TODO)
+                            Debug.LogWarning("未実装の効果が発動しようとしています");
                         }
                         break;
                     case From.Cemetery:
+                        // 墓地から無造作に
+                        if (searchType == SearchType.None)
+                        {
+                            drawCard = fromPlayer.deckManager.DequeCemetery();
+                        }
+                        else if (searchType == SearchType.Saati)
+                        {
+                            var cards = fromPlayer.deckManager.GetCemeteryCards();
+                            // (TODO)
+                            Debug.LogWarning("未実装の効果が発動しようとしています");
+                        }
                         break;
                     case From.Deck:
                         // 山札から無造作に
                         if (searchType == SearchType.None)
                         {
-                            card = fromPlayer.deckManager.DequeueYamahuda();
+                            drawCard = fromPlayer.deckManager.DequeueYamahuda();
+                        }
+                        else if (searchType == SearchType.Saati)
+                        {
+                            var cards = fromPlayer.deckManager.GetHand();
+                            // (TODO)
+                            Debug.LogWarning("未実装の効果が発動しようとしています");
                         }
                         break;
                     case From.CemeteryOrDeck:
@@ -788,17 +862,49 @@ namespace Ability
                         Debug.LogError("FromTypeで想定されない値");
                         return;
                 }
+
+            }
+            else
+            {
+                // もふりとか、生成系の処理
+                //drawCard = 
             }
 
+            // Toの処理
+            var toPlayer = abilityData.GetPlayerByAbilitiTarget(toTarget);
 
+            switch (toPlace)
+            {
+                case To.Hand:
+                    toPlayer.deckManager.AddHand(drawCard);
+                    break;
+                case To.Cemetery:
+                    // データ上でカードを墓地に送る
+                    abilityData.myPlayer.deckManager.AddBochi(drawCard);
+                    // カードを墓地に送る動き
+                    drawCard.MoveToCemetery();
+                    break;
+                case To.Deck:
+                    // (TODO)実装まだ
+                    break;
+                case To.Tsuihou:
+                    // (TODO)実装まだ
+                    break;
+                default:
+                    Debug.LogError("ToTypeで想定されない値");
+                    return;
+            }
         }
 
         public override void Execute(CardAbilityData abilityData)
         {
+            // カードの動きが終わるまで待つ
+            if (drawCard.isInMovingState()) return;
+
             // 効果のエフェクトが終了したら
             if (true)
             {
-                abilityData.abilities[abilityData.hatsudouAbilityNumber].ChangeState(End.GetInstance());
+                endFlag = true;
             }
         }
 
@@ -824,10 +930,9 @@ public class CardAbilityData
     State state;
 
     public Cost.Base                                    cost;        // コスト(効果の条件)委譲クラス
-    public BaseEntityStateMachine<CardAbilityData>[]    abilities;   // 効果委譲クラス(複数あり)
 
-    public int hatsudouAbilityNumber;  // 発動する効果の番号(分岐用に作成)
-    public int numAbility;             // 効果の個数
+    public int skillNumber;         // 発動する効果の番号(分岐用に作成)
+    public int numSkill;             // 効果の個数
 
     public bool isJoukenOK; // Costを抜けた後にこれがtrueだったら効果を発動する(主にストライカーの爪痕とかに使う)
     public bool endFlag;    // 効果が終了したフラグ
@@ -844,17 +949,25 @@ public class CardAbilityData
 
     public const int RefValueFlag = 0x100;  // 256
 
-    public AbilityType abilityType;            // 効果のタイプ
-    public int a_value0;
-    public int a_value1;
-    public int a_value2;
-    public int a_value3;
-    public int a_value4;
-    public int a_value5;
-    public int a_value6;
-    public int a_value7;
-    public int a_value8;
-    public int a_value9;
+    // structにするとvarに格納して処理したときに無駄になってしまう
+    public class SkillData
+    {
+        public Skill.Base skill;        // 効果委譲クラス(複数あり)
+        public int nextSkillNumber;     // 次に発動する効果(ないなら終了)
+        public AbilityType abilityType;                           // 効果のタイプ
+        public int s_value0;
+        public int s_value1;
+        public int s_value2;
+        public int s_value3;
+        public int s_value4;
+        public int s_value5;
+        public int s_value6;
+        public int s_value7;
+        public int s_value8;
+        public int s_value9;
+    }
+    public SkillData[] skillDatas;
+    public SkillData GetCurrentSkillData() { return skillDatas[skillNumber]; }
 
     // スコア系、パワー変化系で使う
     //public int value;                   // 変化の値(パワーだったり、ポイントだったり)
@@ -902,7 +1015,7 @@ public class CardAbilityData
 
         endFlag = false;
         state = State.Cost;
-        hatsudouAbilityNumber = 0;
+        skillNumber = 0;
     }
 
     public void Update()
@@ -915,20 +1028,44 @@ public class CardAbilityData
                 // コスト処理
                 if (cost.EndCheck())
                 {
+                    // 条件を満たしていない場合処理しない
+                    if(!isJoukenOK)
+                    {
+                        endFlag = true;
+                        return;
+                    }
                     state = State.Ability;
+                    GetCurrentSkillData().skill.Enter(this);
                     return;
                 }
                 cost.Execute(this);
                 break;
 
             case State.Ability:
-                // 効果処理
-                if(abilities[hatsudouAbilityNumber].isInState(Ability.End.GetInstance()))
                 {
-                    endFlag = true;
-                    return;
+                    var currentSkill = GetCurrentSkillData();
+                    // 効果処理
+                    if (currentSkill.skill.EndCheck())
+                    {
+                        // 終了処理
+                        currentSkill.skill.Exit(this);
+
+                        // 次に発動するスキルがないなら終了
+                        if (currentSkill.nextSkillNumber == (int)IDType.NONE)
+                        {
+                            endFlag = true;
+                        }
+                        else
+                        {
+                            Debug.Assert(skillNumber != currentSkill.nextSkillNumber, "発動スキル番号重複");
+                            skillNumber = currentSkill.nextSkillNumber;
+
+                            GetCurrentSkillData().skill.Enter(this);
+                        }
+                        return;
+                    }
+                    GetCurrentSkillData().skill.Execute(this);
                 }
-                abilities[hatsudouAbilityNumber].Update();
                 break;
         }
     }
@@ -971,6 +1108,10 @@ public class CardAbilityManager : MonoBehaviour
             excutionAbility = abilityQueue.Dequeue();
             // 効果実行
             excutionAbility.Action();
+            //Debug.Log("効果発動: " + excutionAbility.abilityType.ToString() + ", values: " +
+            //    excutionAbility.s_value0 + ", " + excutionAbility.s_value1 + ", " + excutionAbility.s_value2 + ", " + excutionAbility.s_value3 + ", " +
+            //    excutionAbility.s_value4 + ", " + excutionAbility.s_value5 + ", " + excutionAbility.s_value6 + ", " + excutionAbility.s_value7 + ", " +
+            //    excutionAbility.s_value8 + ", " + excutionAbility.s_value9);
         }
     }
 
@@ -978,5 +1119,11 @@ public class CardAbilityManager : MonoBehaviour
     {
         ability.playerID = playerID;
         abilityQueue.Enqueue(ability);
+    }
+
+    // 全ての効果の処理が終わったかどうかの判定
+    public bool isAbilityEnd()
+    {
+        return (abilityQueue.Count == 0 && excutionAbility == null);
     }
 }

@@ -15,9 +15,9 @@
 [F_TEXT]
 ウニと岩ボーイ。
 
+[POWER]
+7
+
 [ELEMENT]
 1
 12
-
-[POWER]
-7

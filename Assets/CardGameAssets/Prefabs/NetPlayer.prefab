@@ -120,6 +120,11 @@ MonoBehaviour:
     type: 2}
   handShift: {x: 0, y: 4.7, z: -5}
   handCardDir: {x: 0, y: 0.573, z: 0.819}
+  strikerFrame: {fileID: 2800000, guid: 4ee7088eaa4765844ab701d0b90cba48, type: 3}
+  abilityStrikerFrame: {fileID: 2800000, guid: 0202a5622c3d9844d9c3b5b92af61c61, type: 3}
+  jokerFrame: {fileID: 2800000, guid: 81ae543e0786c63479e49e805d5712d8, type: 3}
+  supportFrame: {fileID: 2800000, guid: f950416ee0815934da6d7e3ca38007c2, type: 3}
+  eventFrame: {fileID: 2800000, guid: 160dcccdaf8450b4d84f69f81dc1d165, type: 3}
 --- !u!114 &114383572890857824
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -168,7 +173,10 @@ MonoBehaviour:
   cardObjectManager: {fileID: 114327160917170934}
   playerID: 0
   isMyPlayer: 0
-  isFirstDrawEnd: 0
-  isSynced: 0
+  isStateEnd: 0
+  isSyncDeck: 0
   isPushedJunbiKanryo: 0
+  step: 0
+  isMarigan: 0
   waitTimer: 0
+  jissainoPower: 0

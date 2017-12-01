@@ -22,7 +22,8 @@ public enum MessageType
     //OfflinePlay,    // オフライン対戦プレイ選択
     SyncDeck,       // 山札・手札・墓地・追放情報の同期
     SyncPoint,      // ポイント情報の同期
-    SetCard,        // カードをセット
+    SetStriker,     // カードをセット
+    SetIntercept,   // インターセプト発動
     BackToHand,     // セットしたカードを手札に戻す動作
     SetStrikerOK,   // ストライカーセット完了
     SetStrikerPass, // ストライカーセットをパス
