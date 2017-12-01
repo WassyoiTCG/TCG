@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class SceneDeck : MonoBehaviour
 {
@@ -11,10 +12,11 @@ public class SceneDeck : MonoBehaviour
     // カード表示ニキ
     public GameObject/*uGUICard*/ m_uGraspCard;
     public GameObject/*uGUICard*/ m_uGraspVanishCard;
+    public GameObject/*uGUICard*/ m_uDetailCard;
 
     //　カードのプレート (カード最大分配列用意 
     public GameObject CardPlatePrefab;
-   // private GameObject[] m_aCardPlate = new GameObject[PlayerDeckData.deckMax];
+    // private GameObject[] m_aCardPlate = new GameObject[PlayerDeckData.deckMax];
     public GameObject[] m_aMyDeckCard = new GameObject[PlayerDeckData.deckMax];
 
     //  コレクションカード表示
@@ -43,22 +45,32 @@ public class SceneDeck : MonoBehaviour
     public GameObject Arrow;
     public GameObject DeckPlateBoom;
 
+    public GameObject BlackPanel;
+    //+-----------------------------------
+    // 詳細用グル-プ
+    public GameObject DetailGroup;
+    public Text NameText;
+    public Text ClassText;
+    public Text TypeText;
+    public Text AbilityText;
+
     // Use this for initialization
     void Start()
     {
+
+        //TouchCardObj.GetComponent<uGUICard>().SetCardData(CardDataBase.GetCardData(4)); 
         //Arrow.SetActive(false);
 
         m_vTapPos = new Vector3(0, 0, 0);
         m_vCurrentPos = new Vector3(0, 0, 0);
-        
+
         m_bCardTap = false;
 
         // (TODO)(A列車)システム初期化  を全て共通に  
-        // 追加1126 システムの初期化をする(WinMainのInitApp)
-        oulSystem.Initialize();
+        // oulSystem;
 
-        // カードのデータベースを初期化(1回きりにしたかったのでoulSystemの初期化に書いた)
-        //CardDataBase.Start();
+        // カードのデータベースを初期化
+        CardDataBase.Start();
 
         CardData data = CardDataBase.GetCardData(3);    // ID0番目のカードデータを取ってくる。
         CardData[] all = CardDataBase.GetCardList();    // カード情報を全て取得する。
@@ -94,8 +106,8 @@ public class SceneDeck : MonoBehaviour
 
             // マイデッキ
             m_aMyDeckCard[i].GetComponent<ScreenOutAppeared>().SetNextPos(new Vector3(StartX + (150 * (i % 5)), StartY + (i / 5) * -185, 0.0f));
-            
-            
+
+
 
         }
 
@@ -443,8 +455,9 @@ public class SceneDeck : MonoBehaviour
 
         Vector3 EffectPos = new Vector3(0, 0, 0);
 
-        // 握ってるカードがファイターなら
-        if (GraspCard.cardData.cardType == CardType.Fighter)
+        // 握ってるカードがファイターor効果持ちファイターなら
+        if (GraspCard.cardData.cardType == CardType.Fighter ||
+            GraspCard.cardData.cardType == CardType.AbilityFighter)
         {
             // パワーと同じ場所の所へ書き換え
             int iGraspCardPower = GraspCard.cardData.power;
@@ -474,7 +487,7 @@ public class SceneDeck : MonoBehaviour
         {
             // イベントゾーンを書き換え
             int iStartIndex = PlayerDeckData.numStriker + PlayerDeckData.numJoker;
-            
+
             // イベント
             for (int i = 0; i < PlayerDeckData.numEvent; i++)
             {
@@ -536,7 +549,7 @@ public class SceneDeck : MonoBehaviour
                     m_aCollectCard[i].GetComponent<uGUICard>().cardData.cardType == CardType.Connect ||
                     m_aCollectCard[i].GetComponent<uGUICard>().cardData.cardType == CardType.Intercept)
                 {
-                    int  iEventIndex = PlayerDeckData.numStriker + PlayerDeckData.numJoker;
+                    int iEventIndex = PlayerDeckData.numStriker + PlayerDeckData.numJoker;
                     bool bIDCheakOK = true;
                     for (int i2 = 0; i2 < PlayerDeckData.numEvent; i2++)
                     {
@@ -545,17 +558,17 @@ public class SceneDeck : MonoBehaviour
                         {
                             bIDCheakOK = false;// デッキに同じIDあり
                         }
-                        
+
                     }
 
                     // IDがデッキになかったら
                     if (bIDCheakOK == true)
-                    {  
+                    {
                         // 満杯マークや
                         m_aCollectCard[i].GetComponent<uGUICard>().EventFullInfo_On();
                     }
-                    
-                  
+
+
                 }
 
             }
@@ -595,7 +608,7 @@ public class SceneDeck : MonoBehaviour
                 {
                     //int iEventIndex = i++;  
                     // 消した後のカード達を動かしずらす処理 
-                    for (int iEventIndex = i++; iEventIndex < PlayerDeckData.deckMax ; iEventIndex++)
+                    for (int iEventIndex = i++; iEventIndex < PlayerDeckData.deckMax; iEventIndex++)
                     {
 
                         // 最後の配列の場合
@@ -605,7 +618,7 @@ public class SceneDeck : MonoBehaviour
                             m_aMyDeckCard[iEventIndex].GetComponent<uGUICard>().MissingCard();
 
                         }
-                        else 
+                        else
                         {
                             // まず次のデータを今のデータに保存
                             m_aMyDeckCard[iEventIndex].GetComponent<uGUICard>().SetCardData(m_aMyDeckCard[iEventIndex + 1].GetComponent<uGUICard>().cardData);
@@ -619,7 +632,7 @@ public class SceneDeck : MonoBehaviour
                                                                                                           // アニメーション常に実行(磁力の力だ！)
                             m_aMyDeckCard[iEventIndex].GetComponent<ScreenOutAppeared>().Action();
                         }
-                        
+
 
 
                     }
@@ -630,8 +643,8 @@ public class SceneDeck : MonoBehaviour
             }
 
         }
-        
-        
+
+
 
         //+-----------------------------------------------------------------------
         // (11/13)(TODO)この処理だと全部取ってきて重いので何とかする。
@@ -714,10 +727,10 @@ public class SceneDeck : MonoBehaviour
     }
 
     // デッキにイベント満タンか
-    public bool EventCardFullTankCheak() 
+    public bool EventCardFullTankCheak()
     {
-    //がんばれ
-    //きょくとかシーン遷移とか急いでSICみたいに形にしろ！くそソースコードいいから
+        //がんばれ
+        //きょくとかシーン遷移とか急いでSICみたいに形にしろ！くそソースコードいいから
 
         // イベントカード上限いっぱいならカードを暗くする
         int iEventIndex = PlayerDeckData.numStriker + PlayerDeckData.numJoker;
@@ -736,6 +749,27 @@ public class SceneDeck : MonoBehaviour
         return true;    // 満タンや
     }
 
+
+    // なんかのボタン達に触れた時
+    public void ClickAnyButton(int no)
+    {
+        // シーンチェンジを行っていたら反応させない
+        //if (m_bSceneChange) return;
+
+        AnyButton tagAny;
+
+        // セレクトナンバー設定
+        tagAny.Index = no;
+
+        // メッセージ作成
+        var message = new MessageInfo();
+        message.messageType = MessageType.ClickAnyButton;
+
+        // エクストラインフォに構造体を詰め込む
+        message.SetExtraInfo(tagAny);
+
+        HandleMessge(message);
+    }
 
     public bool HandleMessge(MessageInfo message)
     {

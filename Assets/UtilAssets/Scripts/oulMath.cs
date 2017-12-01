@@ -5,10 +5,10 @@ using UnityEngine;
 public static class oulMath
 {
     // ビルボード計算
-    static public void Billboard(ref Transform transform)
+    static public void Billboard(Transform transform)
     {
         Vector3 p = Camera.main.transform.position;
-        p.y = transform.position.y;
+        //p.y = transform.position.y;
         transform.LookAt(p);
     }
 

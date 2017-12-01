@@ -24,12 +24,12 @@ public static class oulAudio
 
     public enum seID
     {
-        Cursor0,
-        FullCombo,
-        FullComboVoice,
-        Cool,
-        Nice,
-        Bad
+        //Cursor0,
+        //FullCombo,
+        //FullComboVoice,
+        //Cool,
+        //Nice,
+        //Bad
     }
 
     // 定数
@@ -63,7 +63,7 @@ public static class oulAudio
     //===============================================
     public static void Initialize()
     {
-        //LoadSE("Super0", "Customizes/SE/Super0");
+        LoadSE("Ketudoramu", "SE/Ketudoramu");
         //LoadSE("Trigger0", "Customizes/SE/Trigger0");
         //LoadSE("Wolf", "Sound/SE/wolf");
         //LoadSE("UnlimitedWolf", "Sound/SE/unlimited_wolf");
@@ -78,11 +78,12 @@ public static class oulAudio
         //LoadSE("CatchRealSheep", "Sound/SE/catch");
         //LoadSE("FatIn", "Sound/SE/fat_in");
         //LoadSE("BeFat", "Sound/SE/be_fat");
-        foreach(string str in System.Enum.GetNames(typeof(seID)))
-        {
-            LoadSE(str, "Sound/SE/" + str);
-        }
-        //LoadBGM("Main", "Musics/ShadowWorld/Music1");
+        //foreach(string str in System.Enum.GetNames(typeof(seID)))
+        //{
+        //    LoadSE(str, "Sound/SE/" + str);
+        //}
+        LoadBGM("CollectionBGM", "BGM/Collect");
+        LoadBGM("CollectionBGM", "BGM/tori");
 
         // 定数
         //constant = GameObject.Find("Util").GetComponent<Constant>();

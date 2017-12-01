@@ -6,6 +6,7 @@
 		_ScrollU("ScrollU", Range(0,1)) = 0
 		_ScrollV("ScrollV", Range(0,1)) = 0
 		_Color("Main Color", Color) = (1,1,1,1)
+		_MaskTex("MaskTexture", 2D) = "white" {}
 	}
 	SubShader
 	{
@@ -43,6 +44,8 @@
 			float _ScrollU;
 			float _ScrollV;
 
+			sampler2D _MaskTex;
+
 			// SetValueで設定される値
 			fixed4 _Color;
 			
@@ -70,6 +73,10 @@
 
 				// sample the texture
 				fixed4 col = tex2D(_MainTex, i.uv + float2(_ScrollU, _ScrollV)) * _Color;
+				
+				// マスク考慮
+				col.a *= tex2D(_MainTex, i.uv).a;
+
 				return col;
 			}
 			ENDCG
