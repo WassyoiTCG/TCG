@@ -60,6 +60,9 @@ public class SceneMenu : MonoBehaviour {
         // 追加1126 システムの初期化をする(WinMainのInitApp)
         oulSystem.Initialize();
 
+        // ネットワークオブジェクト取得
+        networkManager = GameObject.Find("NetworkManager").GetComponent<oulNetwork>();
+
         m_bSceneChange = false;
         //  a.GetComponent<ScreenOutAppeared>().Action();
 

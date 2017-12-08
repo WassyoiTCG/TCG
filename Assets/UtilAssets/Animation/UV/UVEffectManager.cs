@@ -11,6 +11,12 @@ public enum UV_EFFECT_TYPE
 
 public class UVEffectManager : MonoBehaviour {
 
+
+    // [メモ]
+    // UnassignedReferenceException: The Variable 変数名 of 'コンポーネント名' has not been assigned.
+    // マネージャーをゲームオブジェクトとして読み込むときはHierarchyに
+    // 置いてからHierarchy場のマネージャーをアタッチする。
+
     //+------------------------------------------
     //      メンバ変数
     //+------------------------------------------
@@ -30,7 +36,6 @@ public class UVEffectManager : MonoBehaviour {
 
     // Use this for initialization
     public void Awake() {
-
 
     }
 

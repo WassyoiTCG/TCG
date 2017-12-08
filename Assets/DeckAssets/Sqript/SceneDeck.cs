@@ -57,6 +57,7 @@ public class SceneDeck : MonoBehaviour
     // Use this for initialization
     void Start()
     {
+        SelectData.iDeckCollectLineNo = 0;
 
         //TouchCardObj.GetComponent<uGUICard>().SetCardData(CardDataBase.GetCardData(4)); 
         //Arrow.SetActive(false);

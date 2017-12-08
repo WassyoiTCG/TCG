@@ -89,6 +89,9 @@ public class ScreenOutAppeared : BaseAnim2D
     {
         base.Action();
 
+        // Appeared系は絶対Actionしても座標初期化するな。
+        // やるならAction前にSetで書き換える 
+        
         // m_fRate = 0.0f;
         // SetAlpha(0);
 

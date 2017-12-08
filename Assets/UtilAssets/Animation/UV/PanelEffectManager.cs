@@ -5,12 +5,17 @@ using UnityEngine;
 
 public enum PANEL_EFFECT_TYPE
 {
-    DAMAGE, ABILITY,
+    DAMAGE, ABILITY,STAR,ORANGE_LIGHT,
     END
 }
 
 public class PanelEffectManager : MonoBehaviour
 {
+
+    // [メモ]
+    // UnassignedReferenceException: The Variable 変数名 of 'コンポーネント名' has not been assigned.
+    // マネージャーをゲームオブジェクトとして読み込むときはHierarchyに
+    // 置いてからHierarchy場のマネージャーをアタッチする。
 
     //+------------------------------------------
     //      メンバ変数
@@ -21,6 +26,8 @@ public class PanelEffectManager : MonoBehaviour
     // メモ　Findはなるべくつかはないようにするため必要なObj全部作る
     public GameObject Damage;
     public GameObject Ability;
+    public GameObject Star;
+    public GameObject OrangeLight;
 
     // private static readonly int iNameHashTag = Animator.StringToHash("Positive");
     private const int iNameHashTag = 0;// 決め打ちで0ハッシュタグ0番目のアニメーションを発動
@@ -32,7 +39,6 @@ public class PanelEffectManager : MonoBehaviour
     // Use this for initialization
     public void Awake()
     {
-
 
     }
 
@@ -47,11 +53,23 @@ public class PanelEffectManager : MonoBehaviour
         {
             case PANEL_EFFECT_TYPE.DAMAGE:
                 oulMath.Billboard(Damage.transform);
+                Damage.SetActive(true);
                 Damage.GetComponent<Animator>().Play(iNameHashTag, 0, 0.0f);
                 break;
             case PANEL_EFFECT_TYPE.ABILITY:
                 oulMath.Billboard(Ability.transform);
+                Ability.SetActive(true);
                 Ability.GetComponent<Animator>().Play(iNameHashTag, 0, 0.0f);
+                break;
+            case PANEL_EFFECT_TYPE.STAR:
+                oulMath.Billboard(Star.transform);
+                Star.SetActive(true);
+                Star.GetComponent<Animator>().Play(iNameHashTag, 0, 0.0f);
+                break;
+            case PANEL_EFFECT_TYPE.ORANGE_LIGHT:
+                oulMath.Billboard(OrangeLight.transform);
+                OrangeLight.SetActive(true);
+                OrangeLight.GetComponent<Animator>().Play(iNameHashTag, 0, 0.0f);
                 break;
             case PANEL_EFFECT_TYPE.END:
             default:

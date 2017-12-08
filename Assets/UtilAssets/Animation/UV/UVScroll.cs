@@ -27,6 +27,9 @@ public class UVScroll : oul3DAnimBase
         // ベース初期化(rendererもここで取得している)
         base.Awake();
 
+        // 最初は描画しないようにする
+        gameObject.SetActive(false);
+        
         //renderer.sharedMaterial.SetTextureOffset("_MainTex", Vector2.zero);
         UV = Vector2.zero;
 

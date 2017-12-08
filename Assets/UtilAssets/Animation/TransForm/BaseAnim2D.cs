@@ -10,7 +10,8 @@ public abstract class BaseAnim2D : MonoBehaviour
 {
     //  Unity場で変更する値
     [Range(0, 360)]
-    public int m_iDelayFrame = 0;    // ディレイ
+    public int m_iDelayFrameMax = 0;    // 設定したディレイ
+    private int m_iDelayFrame = 0;    // ディレイ
     //[Range(0, 360)]
     //public int m_iEndFrame = 120;    // 終りのフレーム
 
@@ -20,7 +21,7 @@ public abstract class BaseAnim2D : MonoBehaviour
     protected bool  m_bFirstUpdateCheak;  // 最初更新したあとかチェック
     protected Image m_pImage;
     protected int   m_iCurrentFrame;      // 現在のフレーム
-      
+    protected bool  m_bRoop;              // ループ用
 
     //   // Use this for initialization
     //   void Start () {		
@@ -37,7 +38,9 @@ public abstract class BaseAnim2D : MonoBehaviour
         
         m_bFirstUpdateCheak = false;
         m_iCurrentFrame = 0;
-        
+
+        m_bRoop = false;
+
         m_pImage = GetComponent<Image>();
         if (!m_pImage) Debug.LogWarning("2DAnim: Imageがない");
 
@@ -61,11 +64,41 @@ public abstract class BaseAnim2D : MonoBehaviour
         gameObject.SetActive(true);
 
         //m_iDelayFrame = delay;
+        m_iDelayFrame = m_iDelayFrameMax;
         m_bActionFlag = true; /* 実行フラグOn */
         m_bEndFlag = false; // エンドフラグ
         m_bFirstUpdateCheak = false;
 
+        m_bRoop = false;
+
         m_iCurrentFrame = 0; // 現在のフレーム初期化
+    }
+
+    // [12/04] ループ用のフラグ立てるだけ。
+    public virtual void ActionRoop(/*int delay*/)// ディレイはUnity場で設定
+    {
+        //(10/28) ディレイ考慮のためActionCheakに
+
+        //　★★　ActiveがTrueの時始めてawekが呼ばれる
+        //        必ずゲームオブジェクトをアクティブにしてから始める
+        gameObject.SetActive(true);
+
+        //m_iDelayFrame = delay;
+        m_iDelayFrame = m_iDelayFrameMax;
+        m_bActionFlag = true; /* 実行フラグOn */
+        m_bEndFlag = false; // エンドフラグ
+        m_bFirstUpdateCheak = false;
+
+        m_bRoop = true;
+
+        m_iCurrentFrame = 0; // 現在のフレーム初期化
+    }
+
+    public virtual void StopRoop()
+    {
+        //
+        Debug.LogWarning("オーバーライドしてくれめんす");
+     
     }
 
     // エンドフラグ
@@ -74,7 +107,7 @@ public abstract class BaseAnim2D : MonoBehaviour
     // ディレイをプログラムでも設定できるように
     public virtual void SetDelayFrame(int iDelay)
     {
-        m_iDelayFrame = iDelay;
+        m_iDelayFrameMax = iDelay;
     }
     
     // 止める
@@ -122,6 +155,11 @@ public abstract class BaseAnim2D : MonoBehaviour
     public void SetScale(float scale)
     {
         transform.localScale = new Vector3(scale, scale, scale);
+    }
+
+    public void SetScale(Vector3 vScale)
+    {
+        transform.localScale = vScale;
     }
 
     // 

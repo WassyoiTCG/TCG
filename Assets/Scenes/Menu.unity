@@ -218,7 +218,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1c2c2cf21a0d15949b517293b3e9cecf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_iDelayFrame: 0
+  m_iDelayFrameMax: 0
   fStartScale: 0.25
   fEndScale: 1
   fVelocity: 0.15
@@ -493,7 +493,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 03098dda86863b745bfc5606f4195a89, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_iDelayFrame: 0
+  m_iDelayFrameMax: 0
   fSpeed: 0.3
   vNextVector: {x: 0, y: 410, z: 0}
 --- !u!1 &365184176
@@ -543,7 +543,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 03098dda86863b745bfc5606f4195a89, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_iDelayFrame: 0
+  m_iDelayFrameMax: 0
   fSpeed: 0.1
   vNextVector: {x: -920, y: 0, z: 0}
 --- !u!114 &365184179
@@ -634,7 +634,7 @@ MonoBehaviour:
   BlackPanel: {fileID: 0}
   NetBattleGroup: {fileID: 0}
   m_bSceneChange: 0
-  networkManager: {fileID: 1228814920}
+  networkManager: {fileID: 0}
   ipInput: {fileID: 1093271527}
 --- !u!4 &431579625
 Transform:
@@ -871,7 +871,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 03098dda86863b745bfc5606f4195a89, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_iDelayFrame: 24
+  m_iDelayFrameMax: 0
   fSpeed: 0.4
   vNextVector: {x: 0, y: 300, z: 0}
 --- !u!1 &619898513
@@ -1003,7 +1003,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 03098dda86863b745bfc5606f4195a89, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_iDelayFrame: 0
+  m_iDelayFrameMax: 0
   fSpeed: 0.1
   vNextVector: {x: -920, y: 0, z: 0}
 --- !u!114 &713017218
@@ -1087,7 +1087,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1c2c2cf21a0d15949b517293b3e9cecf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_iDelayFrame: 0
+  m_iDelayFrameMax: 0
   fStartScale: 0.25
   fEndScale: 1
   fVelocity: 0.15
@@ -1224,7 +1224,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 03098dda86863b745bfc5606f4195a89, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_iDelayFrame: 0
+  m_iDelayFrameMax: 0
   fSpeed: 0.1
   vNextVector: {x: 0, y: -200, z: 0}
 --- !u!114 &821794546
@@ -1308,7 +1308,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1c2c2cf21a0d15949b517293b3e9cecf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_iDelayFrame: 0
+  m_iDelayFrameMax: 0
   fStartScale: 0.25
   fEndScale: 1
   fVelocity: 0.15
@@ -1693,7 +1693,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 03098dda86863b745bfc5606f4195a89, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_iDelayFrame: 0
+  m_iDelayFrameMax: 0
   fSpeed: 0.1
   vNextVector: {x: -920, y: 0, z: 0}
 --- !u!114 &1227121231
@@ -1989,7 +1989,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1c2c2cf21a0d15949b517293b3e9cecf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_iDelayFrame: 0
+  m_iDelayFrameMax: 0
   fStartScale: 0.25
   fEndScale: 1
   fVelocity: 0.15
@@ -2127,7 +2127,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 03098dda86863b745bfc5606f4195a89, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_iDelayFrame: 12
+  m_iDelayFrameMax: 0
   fSpeed: 0.4
   vNextVector: {x: 0, y: 300, z: 0}
 --- !u!1 &1346802471
@@ -2178,7 +2178,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1c2c2cf21a0d15949b517293b3e9cecf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_iDelayFrame: 0
+  m_iDelayFrameMax: 0
   fStartScale: 0.25
   fEndScale: 1
   fVelocity: 0.15
@@ -2436,7 +2436,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 03098dda86863b745bfc5606f4195a89, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_iDelayFrame: 0
+  m_iDelayFrameMax: 0
   fSpeed: 0.1
   vNextVector: {x: -920, y: 0, z: 0}
 --- !u!114 &1422342301
@@ -2605,7 +2605,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 03098dda86863b745bfc5606f4195a89, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_iDelayFrame: 48
+  m_iDelayFrameMax: 0
   fSpeed: 0.4
   vNextVector: {x: 0, y: 300, z: 0}
 --- !u!1 &1677334314
@@ -2777,7 +2777,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1c2c2cf21a0d15949b517293b3e9cecf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_iDelayFrame: 0
+  m_iDelayFrameMax: 0
   fStartScale: 0.25
   fEndScale: 1
   fVelocity: 0.15
@@ -2915,7 +2915,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 03098dda86863b745bfc5606f4195a89, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_iDelayFrame: 48
+  m_iDelayFrameMax: 0
   fSpeed: 0.4
   vNextVector: {x: 0, y: 300, z: 0}
 --- !u!114 &1769249015
@@ -3194,7 +3194,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 03098dda86863b745bfc5606f4195a89, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_iDelayFrame: 0
+  m_iDelayFrameMax: 0
   fSpeed: 0.3
   vNextVector: {x: -300, y: 400, z: 0}
 --- !u!114 &1840398962
@@ -3409,7 +3409,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 03098dda86863b745bfc5606f4195a89, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_iDelayFrame: 0
+  m_iDelayFrameMax: 0
   fSpeed: 0.1
   vNextVector: {x: -920, y: 0, z: 0}
 --- !u!114 &1913528980
@@ -3632,7 +3632,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 03098dda86863b745bfc5606f4195a89, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_iDelayFrame: 0
+  m_iDelayFrameMax: 0
   fSpeed: 0.1
   vNextVector: {x: -920, y: 0, z: 0}
 --- !u!114 &2016066941
@@ -3801,7 +3801,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 03098dda86863b745bfc5606f4195a89, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_iDelayFrame: 0
+  m_iDelayFrameMax: 0
   fSpeed: 0.4
   vNextVector: {x: 0, y: 300, z: 0}
 --- !u!1 &2068040571
@@ -3860,7 +3860,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 03098dda86863b745bfc5606f4195a89, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_iDelayFrame: 0
+  m_iDelayFrameMax: 0
   fSpeed: 0.3
   vNextVector: {x: 0, y: 600, z: 0}
 --- !u!114 &2068040575
@@ -4023,7 +4023,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 03098dda86863b745bfc5606f4195a89, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_iDelayFrame: 36
+  m_iDelayFrameMax: 0
   fSpeed: 0.4
   vNextVector: {x: 0, y: 300, z: 0}
 --- !u!1 &2076765207
@@ -4074,7 +4074,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1c2c2cf21a0d15949b517293b3e9cecf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_iDelayFrame: 0
+  m_iDelayFrameMax: 0
   fStartScale: 0.25
   fEndScale: 1
   fVelocity: 0.15

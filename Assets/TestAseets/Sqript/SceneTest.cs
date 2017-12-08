@@ -10,6 +10,10 @@ public class SceneTest : MonoBehaviour
     public GameObject Card;
     public GameObject UVEffectManager;
     public GameObject Panel;
+    public GameObject TurnEndEffects;
+
+    public GameObject UVMgr;
+    public GameObject PanelMgr;
 
     //+------------------------------
     // Use this for initialization
@@ -50,7 +54,7 @@ public class SceneTest : MonoBehaviour
         if (Input.GetKey(KeyCode.V))
         {
             //UVEffect.GetComponent<UVScroll>().Action();
-            transform.GetComponent<UVEffectManager>().
+            UVMgr.GetComponent<UVEffectManager>().
             Action(UV_EFFECT_TYPE.UP_STATUS, new Vector3(0, 0, 0), new Vector3(0, 0, 90));
 
         }
@@ -58,14 +62,14 @@ public class SceneTest : MonoBehaviour
         if (Input.GetKey(KeyCode.B))
         {
             //UVEffect.GetComponent<UVScroll>().Action();
-            transform.GetComponent<UVEffectManager>().
+            UVMgr.GetComponent<UVEffectManager>().
             Action(UV_EFFECT_TYPE.DOWN_STATUS, new Vector3(0, 0, 0), new Vector3(0, 0, 0));
         }
 
         if (Input.GetKey(KeyCode.N))
         {
             //UVEffect.GetComponent<UVScroll>().Action();
-            transform.GetComponent<UVEffectManager>().
+            UVMgr.GetComponent<UVEffectManager>().
             Action(UV_EFFECT_TYPE.SUMMON, new Vector3(0, 0, 0), new Vector3(0, 0, 0));
         }
 
@@ -76,7 +80,7 @@ public class SceneTest : MonoBehaviour
             //int iNameHashTag = 0;// 決め打ち
             //Panel.GetComponent<Animator>().Play(iNameHashTag/*"anim"*/, 0,0);
 
-            transform.GetComponent<PanelEffectManager>().
+            PanelMgr.GetComponent<PanelEffectManager>().
             Action(PANEL_EFFECT_TYPE.ABILITY, new Vector3(0, 0, 0), new Vector3(0, 0, 0));
 
         }
@@ -88,11 +92,50 @@ public class SceneTest : MonoBehaviour
             //int iNameHashTag = 0;// 決め打ち
             //Panel.GetComponent<Animator>().Play(iNameHashTag/*"anim"*/, 0,0);
 
-            transform.GetComponent<PanelEffectManager>().
+            PanelMgr.GetComponent<PanelEffectManager>().
             Action(PANEL_EFFECT_TYPE.DAMAGE, new Vector3(0, 0, 0), new Vector3(0, 0, 0));
 
         }
+        if (Input.GetKey(KeyCode.I))
+        {
+            //Panel.GetComponent<Animator>().enabled = true;
 
+            //int iNameHashTag = 0;// 決め打ち
+            //Panel.GetComponent<Animator>().Play(iNameHashTag/*"anim"*/, 0,0);
+
+            PanelMgr.GetComponent<PanelEffectManager>().
+            Action(PANEL_EFFECT_TYPE.STAR, new Vector3(0, 0, 0), new Vector3(0, 0, 0));
+
+        }
+        if (Input.GetKey(KeyCode.U))
+        {
+            //Panel.GetComponent<Animator>().enabled = true;
+
+            //int iNameHashTag = 0;// 決め打ち
+            //Panel.GetComponent<Animator>().Play(iNameHashTag/*"anim"*/, 0,0);
+
+            PanelMgr.GetComponent<PanelEffectManager>().
+            Action(PANEL_EFFECT_TYPE.ORANGE_LIGHT, new Vector3(0, 0, 0), new Vector3(0, 0, 0));
+
+        }
+
+        if (Input.GetKey(KeyCode.F))
+        {
+            TurnEndEffects.GetComponent<TurnEndEffects>().Action(TURN_END_TYPE.MAIN);
+        }
+
+        if (Input.GetKey(KeyCode.G))
+        {
+            TurnEndEffects.GetComponent<TurnEndEffects>().Action(TURN_END_TYPE.BATTLE);
+        }
+        if (Input.GetKey(KeyCode.H))
+        {
+            TurnEndEffects.GetComponent<TurnEndEffects>().Action(TURN_END_TYPE.WINNER);
+        }
+        if (Input.GetKey(KeyCode.J))
+        {
+            TurnEndEffects.GetComponent<TurnEndEffects>().Action(TURN_END_TYPE.LOSER);
+        }
 
         Card.GetComponent<ScreenOutAppeared>().SelfUpdate();
         Card.GetComponent<Rotation>().SelfUpdate();

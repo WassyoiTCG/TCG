@@ -14,7 +14,7 @@ public class Ripple : BaseAnim2D
     [Range(0.0f, 10.0f)]
     public float fStartScale = 0;
 
-    [Range(-0.1f, 0.1f)]
+    [Range(-0.2f, 0.2f)]
     public float fAddScale = 0.05f;// 広がる力
 
     //private float fAddScale = 0.0f;
@@ -40,6 +40,7 @@ public class Ripple : BaseAnim2D
         // アクションフラグがたっていないと返す
         if (!ActionCheck())
         {
+            gameObject.SetActive(false);
             return; // 更新させない
         }
         else
@@ -52,8 +53,16 @@ public class Ripple : BaseAnim2D
         m_iCurrentFrame++;
         if (m_iCurrentFrame >= iEndFrame)
         {
-            m_bActionFlag = false;
-            m_bEndFlag = true; // 終りフラグON
+            // ループ中なら初期に戻り∞ループ 
+            if (m_bRoop == true)
+            {
+                m_iCurrentFrame = 0;
+            }else 
+            {
+                m_bActionFlag = false;
+                m_bEndFlag = true; // 終りフラグON
+            }
+
         }
 
 
@@ -70,7 +79,10 @@ public class Ripple : BaseAnim2D
     public override void Action()
     {
         base.Action();
-        
+
+        // ★↑でActive状態時に
+        // 情報を変えてから描画させないように消す
+        gameObject.SetActive(false);
 
         // 初期スケール
         m_pImage.transform.localScale =
@@ -80,6 +92,20 @@ public class Ripple : BaseAnim2D
         //SetAlpha(0.0f);
         // 
         //gameObject.SetActive(false);
+    }
+
+    public override void ActionRoop()
+    {
+        base.ActionRoop();
+
+        // ★↑でActive状態時に
+        // 情報を変えてから描画させないように消す
+        gameObject.SetActive(false);
+
+        // 初期スケール
+        m_pImage.transform.localScale =
+         new Vector3(fStartScale, fStartScale, fStartScale);
+         
     }
 
     // 止める
@@ -92,6 +118,16 @@ public class Ripple : BaseAnim2D
         
     }
 
+    // ループ止める
+    public override void StopRoop()
+    {
+        m_bActionFlag = false;
+
+        // このクラスは描画も止める
+        gameObject.SetActive(false);
+
+        m_bRoop = false;
+    }
 
 
 }

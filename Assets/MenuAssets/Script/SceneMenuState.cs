@@ -903,6 +903,8 @@ namespace SceneMenuState
 
             // 黒背景
             e.BlackPanel.SetActive(true);
+
+
         }
 
         public override void Execute(SceneMenu e)
@@ -915,11 +917,12 @@ namespace SceneMenuState
                 // シーンメインにいく
                 SceneManager.LoadScene("Main");
             }
+            
         }
 
         public override void Exit(SceneMenu e)
         {
-
+         
         }
 
         public override bool OnMessage(SceneMenu e, MessageInfo message)
@@ -982,6 +985,7 @@ namespace SceneMenuState
 
             // 黒背景
             e.BlackPanel.SetActive(true);
+
         }
 
         public override void Execute(SceneMenu e)
@@ -998,7 +1002,7 @@ namespace SceneMenuState
 
         public override void Exit(SceneMenu e)
         {
-
+  
         }
 
         public override bool OnMessage(SceneMenu e, MessageInfo message)
@@ -1027,6 +1031,7 @@ namespace SceneMenuState
                         default:
                             //+-------------------------------------------------------------------
                             // もどる
+                            Debug.Log("c");
                             e.m_pStateMachine.ChangeState(SceneMenuState.BattleSelect.GetInstance());
                             break;
                     }

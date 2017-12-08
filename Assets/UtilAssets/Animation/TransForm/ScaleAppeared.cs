@@ -10,7 +10,8 @@ public class ScaleAppeared : BaseAnim2D
     public float fSpeed = 0.3f;
     //[Range(0.0f, 10.0f)]
     public Vector3 vNextScale = new Vector3(0.0f, 0.0f, 0.0f);     // 目標の大きさ
-  
+    private Vector3 vAwakeScale;
+    
     //+-------------------------------
 
     //+ メンバ変数---------------------
@@ -22,6 +23,7 @@ public class ScaleAppeared : BaseAnim2D
     {
         base.Awake();
 
+        vAwakeScale = transform.localScale;
     }
 
     // Update is called once per frame
@@ -41,10 +43,10 @@ public class ScaleAppeared : BaseAnim2D
         float fPrevSpeedParam = 1.0f - fSpeed;
         vCurrentScale = vNextScale * fSpeed + vCurrentScale * fPrevSpeedParam;
 
-        // 0.1以下の誤差は無くす処理
-        if (0.9f >= Mathf.Abs(vCurrentScale.x - vNextScale.x) &&
-            0.9f >= Mathf.Abs(vCurrentScale.y - vNextScale.y) &&
-            0.9f >= Mathf.Abs(vCurrentScale.z - vNextScale.z))
+        // 0.01以下の誤差は無くす処理
+        if (0.01f >= Mathf.Abs(vCurrentScale.x - vNextScale.x) &&
+            0.01f >= Mathf.Abs(vCurrentScale.y - vNextScale.y) &&
+            0.01f >= Mathf.Abs(vCurrentScale.z - vNextScale.z))
         {
             vCurrentScale = vNextScale;
 
@@ -60,6 +62,9 @@ public class ScaleAppeared : BaseAnim2D
     public override void Action()
     {
         base.Action();
+
+        // Appeared系は絶対Actionしても座標初期化するな。
+        // やるならAction前にSetで書き換える 
 
         // m_fRate = 0.0f;
         // SetAlpha(0);
@@ -97,4 +102,9 @@ public class ScaleAppeared : BaseAnim2D
         fSpeed = fRate;
     }
 
+    // 初期スケールを渡す
+    public Vector3 GetAwakScale()
+    {
+        return vAwakeScale;
+    }
 }
