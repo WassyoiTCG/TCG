@@ -15,6 +15,8 @@ public class SceneTest : MonoBehaviour
     public GameObject UVMgr;
     public GameObject PanelMgr;
 
+    public GameObject ClickEf;
+
     //+------------------------------
     // Use this for initialization
     void Start()
@@ -117,6 +119,13 @@ public class SceneTest : MonoBehaviour
             PanelMgr.GetComponent<PanelEffectManager>().
             Action(PANEL_EFFECT_TYPE.ORANGE_LIGHT, new Vector3(0, 0, 0), new Vector3(0, 0, 0));
 
+        }
+
+
+        if (Input.GetKey(KeyCode.Y))
+        {
+            ClickEf.SetActive(true);
+            ClickEf.GetComponent<Animator>().Play(0, 0, 0.0f);
         }
 
         if (Input.GetKey(KeyCode.F))
