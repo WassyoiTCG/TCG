@@ -220,7 +220,7 @@ GameObject:
   serializedVersion: 5
   m_Component:
   - component: {fileID: 224975178617859060}
-  - component: {fileID: 114531907965976618}
+  - component: {fileID: 114321727432735592}
   - component: {fileID: 222230460419957270}
   - component: {fileID: 114515757614852694}
   - component: {fileID: 114630462427102798}
@@ -406,6 +406,30 @@ MonoBehaviour:
   m_FillAmount: 1
   m_FillClockwise: 1
   m_FillOrigin: 0
+--- !u!114 &114321727432735592
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1881893698474400}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5e5c024f653b1ce42b73944b41110501, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  BlackPanel: {fileID: 1885629790346230}
+  BlueRing: {fileID: 1236238996608726}
+  OrangeRing: {fileID: 1551752275668692}
+  Font_BattlePhase: {fileID: 1386441181763732}
+  Font_BattlePhaseRip: {fileID: 1818253100818886}
+  Font_MainPhase: {fileID: 1677979426900288}
+  Font_MainPhaseRip: {fileID: 1543745641770386}
+  StarDust: {fileID: 1091568580888960}
+  Font_Winner: {fileID: 1724077595881076}
+  Font_Loser: {fileID: 1961227592692950}
+  OrangeFrash: {fileID: 1124257505706684}
+  BlueFrash: {fileID: 1406358623945982}
+  Font_WinnerRip: {fileID: 1180865989401646}
 --- !u!114 &114327021985771200
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -529,30 +553,6 @@ MonoBehaviour:
   m_FillAmount: 1
   m_FillClockwise: 1
   m_FillOrigin: 0
---- !u!114 &114531907965976618
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1881893698474400}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 770492ba4389d1a4d87a6a3f1a22b1a6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  BlackPanel: {fileID: 1885629790346230}
-  BlueRing: {fileID: 1236238996608726}
-  OrangeRing: {fileID: 1551752275668692}
-  Font_BattlePhase: {fileID: 1386441181763732}
-  Font_BattlePhaseRip: {fileID: 1818253100818886}
-  Font_MainPhase: {fileID: 1677979426900288}
-  Font_MainPhaseRip: {fileID: 1543745641770386}
-  StarDust: {fileID: 1091568580888960}
-  Font_Winner: {fileID: 1724077595881076}
-  Font_Loser: {fileID: 1961227592692950}
-  OrangeFrash: {fileID: 1124257505706684}
-  BlueFrash: {fileID: 1406358623945982}
-  Font_WinnerRip: {fileID: 1180865989401646}
 --- !u!114 &114580282422902984
 MonoBehaviour:
   m_ObjectHideFlags: 1

@@ -101,6 +101,7 @@
     <Compile Include="Assets\CardGameAssets\Scripts\Card\uGUICard.cs" />
     <Compile Include="Assets\CardGameAssets\Scripts\Data\PalyerData.cs" />
     <Compile Include="Assets\CardGameAssets\Scripts\Data\SelectData.cs" />
+    <Compile Include="Assets\CardGameAssets\Scripts\Effect\TurnEndEffects.cs" />
     <Compile Include="Assets\CardGameAssets\Scripts\Network\oulNetwork.cs" />
     <Compile Include="Assets\CardGameAssets\Scripts\Player\AIController.cs" />
     <Compile Include="Assets\CardGameAssets\Scripts\Player\Player.cs" />
@@ -114,32 +115,8 @@
     <Compile Include="Assets\CardGameAssets\Scripts\UI\UIManager.cs" />
     <Compile Include="Assets\DeckAssets\Sqript\SceneDeck.cs" />
     <Compile Include="Assets\DeckAssets\Sqript\SceneDeckState.cs" />
-    <Compile Include="Assets\MenuAssets\Anim2D\AlphaWave.cs" />
-    <Compile Include="Assets\MenuAssets\Anim2D\BaseAnim2D.cs" />
-    <Compile Include="Assets\MenuAssets\Anim2D\BoyonAppeared.cs" />
-    <Compile Include="Assets\MenuAssets\Anim2D\Ripple.cs" />
-    <Compile Include="Assets\MenuAssets\Anim2D\ScaleAppeared.cs" />
-    <Compile Include="Assets\MenuAssets\Anim2D\ScreenOutAppeared.cs" />
-    <Compile Include="Assets\MenuAssets\Anim2D\Shake.cs" />
     <Compile Include="Assets\MenuAssets\Script\SceneMenu.cs" />
     <Compile Include="Assets\MenuAssets\Script\SceneMenuState.cs" />
-    <Compile Include="Assets\NetworkLobby\Lobby\Scripts\DraggablePanel.cs" />
-    <Compile Include="Assets\NetworkLobby\Lobby\Scripts\EventSystemChecker.cs" />
-    <Compile Include="Assets\NetworkLobby\Lobby\Scripts\Lobby\LobbyCountdownPanel.cs" />
-    <Compile Include="Assets\NetworkLobby\Lobby\Scripts\Lobby\LobbyHook.cs" />
-    <Compile Include="Assets\NetworkLobby\Lobby\Scripts\Lobby\LobbyInfoPanel.cs" />
-    <Compile Include="Assets\NetworkLobby\Lobby\Scripts\Lobby\LobbyMainMenu.cs" />
-    <Compile Include="Assets\NetworkLobby\Lobby\Scripts\Lobby\LobbyManager.cs" />
-    <Compile Include="Assets\NetworkLobby\Lobby\Scripts\Lobby\LobbyPlayer.cs" />
-    <Compile Include="Assets\NetworkLobby\Lobby\Scripts\Lobby\LobbyPlayerList.cs" />
-    <Compile Include="Assets\NetworkLobby\Lobby\Scripts\Lobby\LobbyServerEntry.cs" />
-    <Compile Include="Assets\NetworkLobby\Lobby\Scripts\Lobby\LobbyServerList.cs" />
-    <Compile Include="Assets\NetworkLobby\Lobby\Scripts\Lobby\LobbyTopPanel.cs" />
-    <Compile Include="Assets\NetworkLobby\SampleScenes\Scripts\NetworkAsteroid.cs" />
-    <Compile Include="Assets\NetworkLobby\SampleScenes\Scripts\NetworkGameManager.cs" />
-    <Compile Include="Assets\NetworkLobby\SampleScenes\Scripts\NetworkLobbyHook.cs" />
-    <Compile Include="Assets\NetworkLobby\SampleScenes\Scripts\NetworkSpaceship.cs" />
-    <Compile Include="Assets\NetworkLobby\SampleScenes\Scripts\NetworkSpaceshipBullet.cs" />
     <Compile Include="Assets\PostProcessing\Runtime\Attributes\GetSetAttribute.cs" />
     <Compile Include="Assets\PostProcessing\Runtime\Attributes\MinAttribute.cs" />
     <Compile Include="Assets\PostProcessing\Runtime\Attributes\TrackballAttribute.cs" />
@@ -185,6 +162,21 @@
     <Compile Include="Assets\PostProcessing\Runtime\Utils\MaterialFactory.cs" />
     <Compile Include="Assets\PostProcessing\Runtime\Utils\RenderTextureFactory.cs" />
     <Compile Include="Assets\PostProcessing\Utilities\CustomMotionTexture\ExampleWheelController.cs" />
+    <Compile Include="Assets\TestAseets\Sqript\SceneTest.cs" />
+    <Compile Include="Assets\UtilAssets\Animation\TransForm\AlphaMove.cs" />
+    <Compile Include="Assets\UtilAssets\Animation\TransForm\AlphaWave.cs" />
+    <Compile Include="Assets\UtilAssets\Animation\TransForm\BaseAnim2D.cs" />
+    <Compile Include="Assets\UtilAssets\Animation\TransForm\BoyonAppeared.cs" />
+    <Compile Include="Assets\UtilAssets\Animation\TransForm\Ripple.cs" />
+    <Compile Include="Assets\UtilAssets\Animation\TransForm\Rotation.cs" />
+    <Compile Include="Assets\UtilAssets\Animation\TransForm\ScaleAppeared.cs" />
+    <Compile Include="Assets\UtilAssets\Animation\TransForm\ScreenOutAppeared.cs" />
+    <Compile Include="Assets\UtilAssets\Animation\TransForm\Shake.cs" />
+    <Compile Include="Assets\UtilAssets\Animation\UV\oul3DAnimBase.cs" />
+    <Compile Include="Assets\UtilAssets\Animation\UV\PanelAnim.cs" />
+    <Compile Include="Assets\UtilAssets\Animation\UV\PanelEffectManager.cs" />
+    <Compile Include="Assets\UtilAssets\Animation\UV\UVEffectManager.cs" />
+    <Compile Include="Assets\UtilAssets\Animation\UV\UVScroll.cs" />
     <Compile Include="Assets\UtilAssets\Scripts\BaseEntity\BaseEntityMessage.cs" />
     <Compile Include="Assets\UtilAssets\Scripts\BaseEntity\BaseEntityState.cs" />
     <Compile Include="Assets\UtilAssets\Scripts\BaseEntity\BaseEntityStateMachine.cs" />
@@ -211,9 +203,6 @@
     <Compile Include="Assets\UtilAssets\Shaders\ImageEffects\Scripts\RadialBlur.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Assets\NetworkLobby\Fonts\OpenSans\License!.txt" />
-    <None Include="Assets\NetworkLobby\Lobby\Documentation.txt" />
-    <None Include="Assets\NetworkLobby\Lobby\Instruction.txt" />
     <None Include="Assets\PostProcessing\Editor Resources\Monitors\HistogramCompute.compute" />
     <None Include="Assets\PostProcessing\Editor Resources\Monitors\HistogramRender.shader" />
     <None Include="Assets\PostProcessing\Editor Resources\Monitors\ParadeRender.shader" />
@@ -262,6 +251,7 @@
     <None Include="Assets\UtilAssets\Shaders\ImageEffects\Shaders\RadialBlur.shader" />
     <None Include="Assets\UtilAssets\Shaders\SpriteZ.shader" />
     <None Include="Assets\UtilAssets\Shaders\UVMove.shader" />
+    <None Include="Assets\UtilAssets\Shaders\UVMove_Add.shader" />
     <None Include="Assets\UtilAssets\Shaders\UnlitTransparentColored.shader" />
     <None Include="Assets\UtilAssets\Shaders\WhiteSprite.shader" />
   </ItemGroup>

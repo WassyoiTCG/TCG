@@ -414,7 +414,7 @@ namespace CardObjectState
             card.timer = 0;
 
             // 負けるモーションセット
-            card.animator.SetBool("LoseFlag", true);
+            card.animator.SetBool("DamageFlag", true);
         }
 
         public override void Execute(Card card)
@@ -443,7 +443,7 @@ namespace CardObjectState
         public override void Exit(Card card)
         {
             // 負けるモーション解除
-            card.animator.SetBool("LoseFlag", false);
+            card.animator.SetBool("DamageFlag", false);
         }
 
         public override bool OnMessage(Card card, MessageInfo message)
