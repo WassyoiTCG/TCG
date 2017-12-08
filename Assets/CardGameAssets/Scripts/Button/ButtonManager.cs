@@ -101,12 +101,26 @@ public class ButtonManager : MonoBehaviour
 
     }
 
+    // パスボタン押したとき
     public void OnClickSetStrikerPass()
     {
         MessageManager.Dispatch(myPlayerID, MessageType.SetStrikerPass, null);
 
         // 別のところでもこのメッセージを送るので、非表示処理はここでしない
 
+    }
+
+    // 数字選択ボタン押したとき
+    public void OnClickNumberButton(int number)
+    {
+        SelectNumberInfo info = new SelectNumberInfo();
+        info.selectNumber = number;
+
+        // 数字選択メッセージ送信
+        MessageManager.Dispatch(myPlayerID, MessageType.SelectNumber, info);
+
+        // ボタン非表示
+        uiManager.DisAppearSelectNumberUI();
     }
 
     public void OnClickRestart()

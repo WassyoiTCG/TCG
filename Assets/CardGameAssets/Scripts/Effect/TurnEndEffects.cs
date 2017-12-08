@@ -72,7 +72,7 @@ public class TurnEndEffects : MonoBehaviour
     void Update()
     {
         // 休憩中よ
-        if (m_eType == TURN_END_TYPE.LEST) { m_iSelfFrame = 0; return; } 
+        if (m_eType == TURN_END_TYPE.LEST) { m_iSelfFrame = 0; return; }
 
         // フレーム更新
         m_iSelfFrame++;
@@ -102,7 +102,7 @@ public class TurnEndEffects : MonoBehaviour
         // 敗者
         Font_Loser.GetComponent<ScreenOutAppeared>().SelfUpdate();
         Font_Loser.GetComponent<AlphaMove>().SelfUpdate();
-        
+
         const int iScaleAnim = 52;
         switch (m_eType)
         {
@@ -140,16 +140,26 @@ public class TurnEndEffects : MonoBehaviour
                     OrangeRing.GetComponent<Ripple>().Action();
                     StarDust.GetComponent<Ripple>().Action();
                 }
-
+                // (TODO)仮で直打ち
+                if (m_iSelfFrame >= 120)
+                {
+                    m_eType = TURN_END_TYPE.LEST;
+                    Debug.Log("演出終了- TurnEndEffects");
+                }
                 break;
             case TURN_END_TYPE.LOSER:
-
+                // (TODO)仮で直打ち
+                if (m_iSelfFrame >= 120)
+                {
+                    m_eType = TURN_END_TYPE.LEST;
+                    Debug.Log("演出終了- TurnEndEffects");
+                }
                 break;
             case TURN_END_TYPE.LEST:
-            
+
                 break;
             case TURN_END_TYPE.END:
-            
+
                 break;
             default:
                 break;
@@ -172,8 +182,8 @@ public class TurnEndEffects : MonoBehaviour
         // Stop();
 
         // フレーム初期化
-        m_iSelfFrame =0;
-        
+        m_iSelfFrame = 0;
+
         // タイプによりエフェクト発動
 
         m_eType = eType;
@@ -237,7 +247,7 @@ public class TurnEndEffects : MonoBehaviour
 
                 Font_Loser.GetComponent<ScreenOutAppeared>().Action();
                 Font_Loser.GetComponent<AlphaMove>().Action();
-                
+
                 Vector3 vAwakePos = Font_Loser.GetComponent<ScreenOutAppeared>().GetAwakPos();
                 Font_Loser.GetComponent<ScreenOutAppeared>().SetPos(vAwakePos);
 
@@ -258,7 +268,6 @@ public class TurnEndEffects : MonoBehaviour
 
     }
 
-    
-    TURN_END_TYPE GetTrunEndType() { return m_eType; }// Lestだったら○○とか
 
+    public TURN_END_TYPE GetTrunEndType() { return m_eType; }// Lestだったら○○とか
 }

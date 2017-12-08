@@ -83,8 +83,10 @@ namespace SceneMainState
                     }
                     return false;
             }
+            if (pMain.playerManager.HandleMessage(message)) return true;
+            if (pMain.abilityManager.HandleMessage(message)) return true;
 
-            return pMain.playerManager.HandleMessage(message);
+            return false;
         }
     }
 
@@ -223,7 +225,7 @@ namespace SceneMainState
             if (pMain.playerManager.isStateEnd()/* && pMain.playerManager.isSyncDeckOK()*/)
             {
                 // ステートチェンジ
-                pMain.stateMachine.ChangeState(PointDraw.GetInstance());
+                pMain.stateMachine.ChangeState(MainPhase.GetInstance());
             }
         }
 
@@ -235,6 +237,37 @@ namespace SceneMainState
             // デッキ同期フラグリセット
             pMain.playerManager.SyncDeckOff();
         }
+
+        public override bool OnMessage(SceneMain pMain, MessageInfo message)
+        {
+            return false;
+        }
+    }
+
+    public class MainPhase : BaseEntityState<SceneMain>
+    {
+        // Singleton.
+        static MainPhase instance;
+        public static MainPhase GetInstance() { if (instance == null) { instance = new MainPhase(); } return instance; }
+
+        public override void Enter(SceneMain pMain)
+        {
+            // メインフェーズエフェクト発動
+            pMain.turnEndEffect.Action(TURN_END_TYPE.MAIN);
+        }
+
+        public override void Execute(SceneMain pMain)
+        {
+            // 演出終わったら
+            if(pMain.turnEndEffect.GetTrunEndType() == TURN_END_TYPE.LEST)
+            {
+                // ポイントドローステートへ
+                pMain.stateMachine.ChangeState(PointDraw.GetInstance());
+            }
+        }
+
+        public override void Exit(SceneMain pMain)
+        { }
 
         public override bool OnMessage(SceneMain pMain, MessageInfo message)
         {
@@ -293,14 +326,14 @@ namespace SceneMainState
 
         public override void Enter(SceneMain pMain)
         {
-            // 初回ドロー
-            if (pMain.turn++ == 0)
-            {
-                pMain.playerManager.SetState(PlayerState.Draw.GetInstance());
-                return;
-            }
+            //// 初回ドロー
+            //if (pMain.turn++ == 0)
+            //{
+            //    pMain.playerManager.SetState(PlayerState.Draw.GetInstance());
+            //    return;
+            //}
             // 2ターンごとドロー
-            if (pMain.turn % 2 == 0)
+            if (++pMain.turn % 2 == 1)
             {
                 pMain.playerManager.SetState(PlayerState.Draw.GetInstance());
                 return;
@@ -352,18 +385,21 @@ namespace SceneMainState
             if (pMain.playerManager.isSetStrikerEnd())
             {
                 // ステートチェンジ
-                pMain.stateMachine.ChangeState(BeforeStrikerOpen.GetInstance());
+                pMain.stateMachine.ChangeState(BattlePhase.GetInstance());
             }
 
-            // 時間切れなったら
-            if (pMain.uiManager.isTimerEnd())
-            {
-                // 時間切れメッセージ
-                //MessageManager.Dispatch(pMain.playerManager.GetMyPlayerID(), MessageType.SetStrikerTimeOver, null);
+            //// 時間切れなったら
+            //if (pMain.uiManager.isTimerEnd())
+            //{
+            //    // 時間切れメッセージ
+            //    //MessageManager.Dispatch(pMain.playerManager.GetMyPlayerID(), MessageType.SetStrikerTimeOver, null);
 
-                // 時間切れ処理
-                pMain.playerManager.GetMyPlayer().SetStrikerTimeOver();
-            }
+            //    // 効果処理中なら待つ
+            //    if (!pMain.abilityManager.isAbilityEnd()) return;
+
+            //    // 時間切れ処理
+            //    pMain.playerManager.GetMyPlayer().SetStrikerTimeOver();
+            //}
         }
 
         public override void Exit(SceneMain pMain)
@@ -384,22 +420,29 @@ namespace SceneMainState
         }
     }
 
-    // ストライカーを開ける前のステート
+    // バトルフェーズエフェクトを発動するステート
 
-    public class BeforeStrikerOpen : BaseEntityState<SceneMain>
+    public class BattlePhase : BaseEntityState<SceneMain>
     {
         // Singleton.
-        static BeforeStrikerOpen instance;
-        public static BeforeStrikerOpen GetInstance() { if (instance == null) { instance = new BeforeStrikerOpen(); } return instance; }
+        static BattlePhase instance;
+        public static BattlePhase GetInstance() { if (instance == null) { instance = new BattlePhase(); } return instance; }
 
         public override void Enter(SceneMain pMain)
         {
-            // ステートチェンジ
-            pMain.stateMachine.ChangeState(StrikerOpen.GetInstance());
+            // バトルフェーズエフェクト発動
+            pMain.turnEndEffect.Action(TURN_END_TYPE.BATTLE);
         }
 
         public override void Execute(SceneMain pMain)
-        { }
+        {
+            // 演出終わったら
+            if (pMain.turnEndEffect.GetTrunEndType() == TURN_END_TYPE.LEST)
+            {
+                // カードオープンステートへ
+                pMain.stateMachine.ChangeState(StrikerOpen.GetInstance());
+            }
+        }
 
         public override void Exit(SceneMain pMain)
         { }
@@ -434,12 +477,42 @@ namespace SceneMainState
             if ((timer += Time.deltaTime) > 2)
             {
                 // ステートチェンジ
-                pMain.stateMachine.ChangeState(SetIntercept.GetInstance());
+                pMain.stateMachine.ChangeState(CardAttack.GetInstance());
             }
         }
 
         public override void Exit(SceneMain pMain)
         { }
+
+        public override bool OnMessage(SceneMain pMain, MessageInfo message)
+        {
+            return false;
+        }
+    }
+
+    // カードの攻撃モーションが発動するステート
+    public class CardAttack : BaseEntityState<SceneMain>
+    {
+        // Singleton.
+        static CardAttack instance;
+        public static CardAttack GetInstance() { if (instance == null) { instance = new CardAttack(); } return instance; }
+
+        public override void Enter(SceneMain pMain)
+        {
+            // ストライカー攻撃モーション発動
+            pMain.playerManager.AttackStriker();
+        }
+
+        public override void Execute(SceneMain pMain)
+        {
+            // 今は速攻でインターセプトセットステートに行く
+            pMain.stateMachine.ChangeState(SetIntercept.GetInstance());
+        }
+
+        public override void Exit(SceneMain pMain)
+        {
+
+        }
 
         public override bool OnMessage(SceneMain pMain, MessageInfo message)
         {
@@ -466,7 +539,7 @@ namespace SceneMainState
             if (!pMain.playerManager.isHaveInterceptCard())
             {
                 // ステートチェンジ
-                pMain.stateMachine.ChangeState(StrikerAbility.GetInstance());
+                pMain.stateMachine.ChangeState(StrikerBattleResult.GetInstance());
 
                 return;
             }
@@ -479,6 +552,7 @@ namespace SceneMainState
             if (!myPlayer.isHaveInterceptCard())
             {
                 myPlayer.isPushedJunbiKanryo = true;
+                return;
             }
 
             pMain.uiManager.AppearStrikerOK(false);  // falseにするとパスが出る
@@ -518,7 +592,7 @@ namespace SceneMainState
                     if (pMain.abilityManager.isAbilityEnd())
                     {
                         // ステートチェンジ
-                        pMain.stateMachine.ChangeState(StrikerAbility.GetInstance());
+                        pMain.stateMachine.ChangeState(StrikerBattleResult.GetInstance());
                     }
                     break;
             }
@@ -529,40 +603,6 @@ namespace SceneMainState
             // タイマーストップ
             pMain.uiManager.StopTimer();
         }
-
-        public override bool OnMessage(SceneMain pMain, MessageInfo message)
-        {
-            return false;
-        }
-    }
-
-    // ストライカーのアビリティが発動するステート
-    public class StrikerAbility : BaseEntityState<SceneMain>
-    {
-        // Singleton.
-        static StrikerAbility instance;
-        public static StrikerAbility GetInstance() { if (instance == null) { instance = new StrikerAbility(); } return instance; }
-
-        //float timer;
-
-        public override void Enter(SceneMain pMain)
-        {
-            // プレイヤーステート変更(効果持ちモンスターのバトル後発動効果の処理)
-            pMain.playerManager.SetState(PlayerState.StrikerAbility.GetInstance());
-        }
-
-        public override void Execute(SceneMain pMain)
-        {
-            // 効果処理が終わったら
-            if (pMain.abilityManager.isAbilityEnd())
-            {
-                // ステートチェンジ
-                pMain.stateMachine.ChangeState(StrikerBattleResult.GetInstance());
-            }
-        }
-
-        public override void Exit(SceneMain pMain)
-        { }
 
         public override bool OnMessage(SceneMain pMain, MessageInfo message)
         {
@@ -595,7 +635,7 @@ namespace SceneMainState
                 pMain.aikoPoint.Add(pMain.pointManager.GetCurrentPoint());
 
             // ステートチェンジ
-            pMain.stateMachine.ChangeState(TurnEnd.GetInstance());
+            pMain.stateMachine.ChangeState(StrikerAfterBattleAbility.GetInstance());
         }
 
         public override void Execute(SceneMain pMain)
@@ -610,6 +650,42 @@ namespace SceneMainState
         }
     }
 
+    // ストライカーのアビリティ(バトル後)が発動するステート
+    public class StrikerAfterBattleAbility : BaseEntityState<SceneMain>
+    {
+        // Singleton.
+        static StrikerAfterBattleAbility instance;
+        public static StrikerAfterBattleAbility GetInstance() { if (instance == null) { instance = new StrikerAfterBattleAbility(); } return instance; }
+
+        //float timer;
+
+        public override void Enter(SceneMain pMain)
+        {
+            // プレイヤーステート変更(効果持ちモンスターのバトル後発動効果の処理)
+            pMain.playerManager.SetState(PlayerState.StrikerAfterBattleAbility.GetInstance());
+        }
+
+        public override void Execute(SceneMain pMain)
+        {
+            // 効果処理が終わったら
+            if (pMain.abilityManager.isAbilityEnd())
+            {
+                // ステートチェンジ
+                pMain.stateMachine.ChangeState(TurnEnd.GetInstance());
+            }
+        }
+
+        public override void Exit(SceneMain pMain)
+        { }
+
+        public override bool OnMessage(SceneMain pMain, MessageInfo message)
+        {
+            return false;
+        }
+    }
+
+
+
     // ターンエンド(出したストライカーを墓地に送ったり)
     public class TurnEnd : BaseEntityState<SceneMain>
     {
@@ -621,11 +697,77 @@ namespace SceneMainState
         {
             // ステートチェンジ
             pMain.playerManager.SetState(PlayerState.TurnEnd.GetInstance());
-            pMain.stateMachine.ChangeState(PointDraw.GetInstance());
+
+            // メインフェーズ演出に戻る
+            pMain.stateMachine.ChangeState(MainPhase.GetInstance());
         }
 
         public override void Execute(SceneMain pMain)
         { }
+
+        public override void Exit(SceneMain pMain)
+        { }
+
+        public override bool OnMessage(SceneMain pMain, MessageInfo message)
+        {
+            return false;
+        }
+    }
+
+    // 勝ったぜ
+    public class Winner : BaseEntityState<SceneMain>
+    {
+        // Singleton.
+        static Winner instance;
+        public static Winner GetInstance() { if (instance == null) { instance = new Winner(); } return instance; }
+
+        public override void Enter(SceneMain pMain)
+        {
+            // Winnerエフェクト発動
+            pMain.turnEndEffect.Action(TURN_END_TYPE.WINNER);
+        }
+
+        public override void Execute(SceneMain pMain)
+        {
+            // 演出終わったら
+            if (pMain.turnEndEffect.GetTrunEndType() == TURN_END_TYPE.LEST)
+            {
+                // 終了ステートへ
+                pMain.stateMachine.ChangeState(Finish.GetInstance());
+            }
+        }
+
+        public override void Exit(SceneMain pMain)
+        { }
+
+        public override bool OnMessage(SceneMain pMain, MessageInfo message)
+        {
+            return false;
+        }
+    }
+
+    // ルナの負けだよ
+    public class Loser : BaseEntityState<SceneMain>
+    {
+        // Singleton.
+        static Loser instance;
+        public static Loser GetInstance() { if (instance == null) { instance = new Loser(); } return instance; }
+
+        public override void Enter(SceneMain pMain)
+        {
+            // Loserエフェクト発動
+            pMain.turnEndEffect.Action(TURN_END_TYPE.LOSER);
+        }
+
+        public override void Execute(SceneMain pMain)
+        {
+            // 演出終わったら
+            if (pMain.turnEndEffect.GetTrunEndType() == TURN_END_TYPE.LEST)
+            {
+                // 終了ステートへ
+                pMain.stateMachine.ChangeState(Finish.GetInstance());
+            }
+        }
 
         public override void Exit(SceneMain pMain)
         { }

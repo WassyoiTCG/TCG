@@ -116,10 +116,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 404bbb85b19a49243af4e2363e7eb169, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cardPrefab: {fileID: 114100196248749878, guid: 6af55d116d982664891bdead15a54ec3,
+  cardPrefab: {fileID: 114997848351653900, guid: 6af55d116d982664891bdead15a54ec3,
     type: 2}
-  handShift: {x: 0, y: 4.7, z: -5}
-  handCardDir: {x: 0, y: 0.573, z: 0.819}
+  handShift: {x: 0, y: 4.7, z: 5}
+  handCardDir: {x: 0, y: 0.5, z: 0.866}
+  cemeteryPosition: {x: 0, y: 0, z: 0}
   strikerFrame: {fileID: 2800000, guid: 4ee7088eaa4765844ab701d0b90cba48, type: 3}
   abilityStrikerFrame: {fileID: 2800000, guid: 0202a5622c3d9844d9c3b5b92af61c61, type: 3}
   jokerFrame: {fileID: 2800000, guid: 81ae543e0786c63479e49e805d5712d8, type: 3}

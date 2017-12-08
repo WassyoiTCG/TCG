@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -18,9 +19,9 @@ public class CardObjectManager : MonoBehaviour
     public Vector3 handShift;           // カード位置補正
     public Vector3 handCardDir;         // カードの向き(法線的な)
 
-    readonly Vector3 yamahudaField = new Vector3(15, 0, -15);      // 山札の位置
-    readonly Vector3 strikerField = new Vector3(0, 0, -10);     // ストライカーカードをセットする位置
-    readonly Vector3 eventField = new Vector3(-5, 0, -10);       // イベントカードをセットする位置
+    readonly Vector3 yamahudaField = new Vector3(15, 0, -7);      // 山札の位置
+    readonly Vector3 strikerField = new Vector3(0, 0, -4);     // ストライカーカードをセットする位置
+    readonly Vector3 eventField = new Vector3(-5, 0, -4);       // イベントカードをセットする位置
 
     public Vector3 cemeteryPosition = Vector3.zero;
 
@@ -140,19 +141,21 @@ public class CardObjectManager : MonoBehaviour
 
     public Card DequeueCemetery(int cemeteryNo)
     {
+        if (cemeteryNo == (int)IDType.NONE) return null;
+
         Card draw = null;
         if (cemeteryNo < cemeteryCards.Count)
         {
             draw = cemeteryCards[cemeteryNo];
             cemeteryCards.Remove(draw);
-            draw.gameObject.SetActive(false);
+            draw.gameObject.SetActive(true);
         }
         else Debug.Log("墓地無いクマ");
         return draw;
     }
 
     // 手札をストライカーセット状態にする(コネクトとインターセプトを選択不可に)
-    public void ChangeHandSetStrikerMode()
+    public void ChangeHandSetStrikerMode(Player player)
     {
         foreach(Card card in handCards)
         {
@@ -160,19 +163,27 @@ public class CardObjectManager : MonoBehaviour
             {
                 // ストライカー系は無条件で選択可能
                 case CardType.Fighter:
+                    card.SetNotSelectFlag(false);
+                    break;
                 case CardType.AbilityFighter:
+                    {
+                        card.SetNotSelectFlag(false);
+                    }
+                    break;
                 case CardType.Joker:
                     card.SetNotSelectFlag(false);
                     break;
 
                 case CardType.Support:
                 case CardType.Connect:
-                    // はつどう条件を満たしているなら(今日は休みますならジョーカーが手札にあるかとか)
-                    if (card.cardData.GetEventCard().abilityData.HatsudouOK())
                     {
-                        card.SetNotSelectFlag(false);
+                        // はつどう条件を満たしているなら(今日は休みますならジョーカーが手札にあるかとか)
+                        if (card.cardData.GetEventCard().abilityData.HatsudouOK(player))
+                        {
+                            card.SetNotSelectFlag(false);
+                        }
+                        else card.SetNotSelectFlag(true);
                     }
-                    else card.SetNotSelectFlag(true);
                     break;
 
                     // インターセプトは無条件で選択不可能
@@ -183,7 +194,7 @@ public class CardObjectManager : MonoBehaviour
         }
     }
 
-    public void ChangeHandSetInterceptMode()
+    public void ChangeHandSetInterceptMode(Player player)
     {
         foreach (Card card in handCards)
         {
@@ -201,7 +212,7 @@ public class CardObjectManager : MonoBehaviour
                 // インターセプト
                 case CardType.Intercept:
                     // はつどう条件を満たしているなら(今日は休みますならジョーカーが手札にあるかとか)
-                    if (card.cardData.interceptCard.abilityData.HatsudouOK())
+                    if (card.cardData.interceptCard.abilityData.HatsudouOK(player))
                     {
                         card.SetNotSelectFlag(false);
                     }
@@ -266,15 +277,29 @@ public class CardObjectManager : MonoBehaviour
         // 逆サイド処理
         if (card.isMyPlayerSide == false)
         {
-            card.SetUraomote(false);
+            // チートモード
+            if(false)
+            {
+                card.SetUraomote(true);
+                angle.x = 0;
+                angle.y = 0;
+                position.z = 14;
+            }
+            else
+            {
+                card.SetUraomote(false);
+                angle.x = 180;
+                position.z = -position.z;
+            }
+
 
             position.x = -position.x;
             position.y = 1;
-            position.z = -position.z;
             shift.z = -shift.z;
             dir.z = -dir.z;
-            angle.x = 180;
 
+
+            position.z += shift.z;
             card.cacheTransform.localPosition = position;
             card.cacheTransform.localEulerAngles = angle;
 
@@ -392,8 +417,14 @@ public class CardObjectManager : MonoBehaviour
                 }
                 break;
 
+            case CardType.Support:
+                //// フィールドにおいてるイベントのカード
+                //fieldEventCard = card;
+                // サポート発動モード移動設定
+                card.SetSupport();
+                break;
             case CardType.Intercept:
-                // フィールドにおいてるストライカーのカード
+                // フィールドにおいてるイベントのカード
                 fieldEventCard = card;
                 // カードを指定の位置にセット
                 position = eventField;
@@ -407,7 +438,7 @@ public class CardObjectManager : MonoBehaviour
 
                 // 表にする
                 angle.z = 0;
-                fieldStrikerCard.SetUraomote(true);
+                fieldEventCard.SetUraomote(true);
 
                 // セットのステートにさせる
                 fieldEventCard.FieldSet(position, angle);
@@ -442,7 +473,10 @@ public class CardObjectManager : MonoBehaviour
             var position = Vector3.zero;
             var angle = fieldStrikerCard.cacheTransform.localEulerAngles;
             angle.x = 0;
+
+            // 裏にする
             angle.z = 180;
+            fieldStrikerCard.SetUraomote(false);
 
             // カードを指定の位置にセット
             position = strikerField;
@@ -529,6 +563,7 @@ public class CardObjectManager : MonoBehaviour
             else card = yamahudaCards[i];
 
             card.isMyPlayerSide = isMyPlayer;
+
             //card.SetCardData(yamahuda[i]);
         }
 
@@ -542,6 +577,8 @@ public class CardObjectManager : MonoBehaviour
 
         foreach (CardData card in cards)
         {
+            if (card == null) continue;
+
             Card draw;
             if (yamahudaCards.Count > 0)
             {
@@ -560,6 +597,9 @@ public class CardObjectManager : MonoBehaviour
 
             // カードの動きをドローモードにする
             draw.Draw(index, orgNumHand + cards.Length);
+
+            // 手札位置更新
+            UpdateHandPosition();
         }
 
     }

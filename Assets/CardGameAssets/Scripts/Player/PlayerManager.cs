@@ -39,22 +39,22 @@ public class PlayerManager : MonoBehaviour
             player.isSyncDeck = false;
     }
 
-    public Player GetPlayer(int id)
-    {
-        foreach (Player player in players)
-            if (player.playerID == id) return player;
+    //public Player GetPlayer(int id)
+    //{
+    //    foreach (Player player in players)
+    //        if (player.playerID == id) return player;
 
-        Debug.LogWarning("プレイヤー取得null");
-        return null;
-    }
-    public Player GetAitePlayer(int id)
-    {
-        foreach (Player player in players)
-            if (player.playerID != id) return player;
+    //    Debug.LogWarning("プレイヤー取得null");
+    //    return null;
+    //}
+    //public Player GetAitePlayer(int id)
+    //{
+    //    foreach (Player player in players)
+    //        if (player.playerID != id) return player;
 
-        Debug.LogWarning("プレイヤー取得null");
-        return null;
-    }
+    //    Debug.LogWarning("プレイヤー取得null");
+    //    return null;
+    //}
 
     // 自分が操作しているプレイヤーのIDを取得
     public int GetMyPlayerID()
@@ -146,6 +146,12 @@ public class PlayerManager : MonoBehaviour
             player.OpenStriker();
     }
 
+    public void AttackStriker()
+    {
+        foreach (Player player in players)
+            player.AttackStriker();
+    }
+
     public void ActionIntercept()
     {
         var card0 = players[0].GetFieldEventCard();
@@ -157,17 +163,17 @@ public class PlayerManager : MonoBehaviour
 
             var ability = card1.interceptCard.abilityData;
             // 効果の条件を満たしているかどうか(爪痕とかのチェック)
-            if (!ability.HatsudouOK()) return;
+            if (!ability.HatsudouOK(players[1])) return;
             // 効果発動!
-            abilityManager.PushAbility(ability, players[1].playerID);
+            abilityManager.PushAbility(ability, players[1].isMyPlayer);
         }
         else if(card1 == null)
         {
             var ability = card0.interceptCard.abilityData;
             // 効果の条件を満たしているかどうか(爪痕とかのチェック)
-            if (!ability.HatsudouOK()) return;
+            if (!ability.HatsudouOK(players[0])) return;
             // 効果発動!
-            abilityManager.PushAbility(ability, players[0].playerID);
+            abilityManager.PushAbility(ability, players[0].isMyPlayer);
         }
         else
         {
@@ -179,15 +185,15 @@ public class PlayerManager : MonoBehaviour
             }
 
             var ability0 = card0.interceptCard.abilityData;
-            var ability1 = card0.interceptCard.abilityData;
-            if (!ability0.HatsudouOK())
+            var ability1 = card1.interceptCard.abilityData;
+            if (!ability0.HatsudouOK(players[0]))
             {
-                if (!ability1.HatsudouOK()) return;
-                abilityManager.PushAbility(ability1, players[1].playerID);
+                if (!ability1.HatsudouOK(players[1])) return;
+                abilityManager.PushAbility(ability1, players[1].isMyPlayer);
             }
-            else if (!ability1.HatsudouOK())
+            else if (!ability1.HatsudouOK(players[1]))
             {
-                abilityManager.PushAbility(ability0, players[0].playerID);
+                abilityManager.PushAbility(ability0, players[0].isMyPlayer);
             }
             // 両方発動できる
             else
@@ -195,13 +201,13 @@ public class PlayerManager : MonoBehaviour
                 // パワーの高い方から処理する
                 if (card0.power > card1.power)
                 {
-                    abilityManager.PushAbility(ability0, players[0].playerID);
-                    abilityManager.PushAbility(ability1, players[1].playerID);
+                    abilityManager.PushAbility(ability0, players[0].isMyPlayer);
+                    abilityManager.PushAbility(ability1, players[1].isMyPlayer);
                 }
                 else
                 {
-                    abilityManager.PushAbility(ability1, players[1].playerID);
-                    abilityManager.PushAbility(ability0, players[0].playerID);
+                    abilityManager.PushAbility(ability1, players[1].isMyPlayer);
+                    abilityManager.PushAbility(ability0, players[0].isMyPlayer);
                 }
             }
         }
@@ -253,14 +259,14 @@ public class PlayerManager : MonoBehaviour
                 return false;
 
             // byte[]→構造体
-            SetCardInfo setCardInfo = new SetCardInfo();
-            message.GetExtraInfo<SetCardInfo>(ref setCardInfo);
+            SelectCardIndexInfo setCardInfo = new SelectCardIndexInfo();
+            message.GetExtraInfo<SelectCardIndexInfo>(ref setCardInfo);
             //IntPtr ptr = Marshal.AllocHGlobal(Marshal.SizeOf(setCardInfo));
             //Marshal.Copy(message.exInfo, 0, ptr, Marshal.SizeOf(setCardInfo));
             //setCardInfo = (SetCardInfo)Marshal.PtrToStructure(ptr, setCardInfo.GetType());
             //Marshal.FreeHGlobal(ptr);
 
-            Debug.Log("受信: プレイヤー" + message.fromPlayerID + "が手札" + setCardInfo.handNo + "のカードをセットしました");
+            Debug.Log("受信: プレイヤー" + message.fromPlayerID + "が手札" + setCardInfo.index + "のカードをセットしました");
 
             players[message.fromPlayerID].SetCard(setCardInfo);
             // ボタン表示
@@ -268,16 +274,30 @@ public class PlayerManager : MonoBehaviour
                 uiManager.EnableSetStrikerButton();
             return true;
         }
-        if(message.messageType == MessageType.SetIntercept)
+        if (message.messageType == MessageType.SetSupport)
         {
             if (message.exInfo == null)
                 return false;
 
             // byte[]→構造体
-            SetCardInfo setCardInfo = new SetCardInfo();
-            message.GetExtraInfo<SetCardInfo>(ref setCardInfo);
+            SelectCardIndexInfo setCardInfo = new SelectCardIndexInfo();
+            message.GetExtraInfo<SelectCardIndexInfo>(ref setCardInfo);
 
-            Debug.Log("受信: プレイヤー" + message.fromPlayerID + "が手札" + setCardInfo.handNo + "のカードをセットしました");
+            Debug.Log("受信: プレイヤー" + message.fromPlayerID + "が手札" + setCardInfo.index + "のサポートカードを発動");
+
+            players[message.fromPlayerID].SetSupport(setCardInfo);
+            return true;
+        }
+        if (message.messageType == MessageType.SetIntercept)
+        {
+            if (message.exInfo == null)
+                return false;
+
+            // byte[]→構造体
+            SelectCardIndexInfo setCardInfo = new SelectCardIndexInfo();
+            message.GetExtraInfo<SelectCardIndexInfo>(ref setCardInfo);
+
+            Debug.Log("受信: プレイヤー" + message.fromPlayerID + "が手札" + setCardInfo.index + "のインターセプトカードを発動");
 
             players[message.fromPlayerID].SetIntercept(setCardInfo);
             // ステート終了
@@ -374,21 +394,21 @@ public class PlayerManager : MonoBehaviour
         }
 
         // ジョーカー判定
-        else if (card0.cardType == CardType.Joker)
+        else if (card0.cardData.cardType == CardType.Joker)
         {
             // 相打ち処理
-            if (card1.cardType == CardType.Joker) return -1;
+            if (card1.cardData.cardType == CardType.Joker) return -1;
 
-            if (card1.power == 10)
+            if (card1.cardData.power == 10)
                 winnerPlayerID = 0;
             
             else
                 winnerPlayerID = 1;
             
         }
-        else if (card1.cardType == CardType.Joker)
+        else if (card1.cardData.cardType == CardType.Joker)
         {
-            if (card0.power == 10)
+            if (card0.cardData.power == 10)
                 winnerPlayerID = 1;
 
             else
@@ -404,10 +424,17 @@ public class PlayerManager : MonoBehaviour
             if (power0 == power1) return -1;
 
             if (power0 > power1)
+            {
                 winnerPlayerID = 0;
-            
-            else if(power1 > power0)
+                // カード負けるモーション
+                card1.Lose();
+            }
+            else if (power1 > power0)
+            {
                 winnerPlayerID = 1;
+                // カード負けるモーション
+                card0.Lose();
+            }
         }
 
         return winnerPlayerID;

@@ -8,13 +8,14 @@ namespace Cost
     // 発動チェック関数を作りたかったので自前で作る
     public abstract class Base
     {
+        protected int step;
         protected bool endFlag;
 
-        public virtual void Enter(CardAbilityData abilityData) { endFlag = false; }
+        public virtual void Enter(CardAbilityData abilityData) { step = 0; endFlag = false; }
         public abstract void Execute(CardAbilityData abilityData);
         public abstract bool OnMessage(CardAbilityData abilityData, MessageInfo message);
         // 発動条件を満たしているかどうか(主にイベントカードが出せるかどうかに使う)
-        public abstract bool HatsudouCheck(CardAbilityData abilityData);
+        public abstract bool HatsudouCheck(/*CardAbilityData abilityData*/Player player);
         public bool EndCheck() { return endFlag; }
     }
 
@@ -43,9 +44,10 @@ namespace Cost
             return false;
         }
 
-        public override bool HatsudouCheck(CardAbilityData abilityData) { return true; }
+        public override bool HatsudouCheck(Player player) { return true; }
     }
 
+    // 勝利の雄たけび
     public class Otakebi : Base
     {
         static Otakebi instance;
@@ -83,16 +85,22 @@ namespace Cost
                     abilityData.isJoukenOK = false;
                     break;
             }
+
+            // 条件満たしていないなら終了
+            if (!abilityData.isJoukenOK)
+            {
+                endFlag = true;
+                return;
+            }
+
+            // Ability列車 勝利の雄たけびの成功時
+
         }
 
         public override void Execute(CardAbilityData abilityData)
         {
-            if(!abilityData.isJoukenOK)
-            {
-                endFlag = true;
-            }
-            // 演出終了
-            if(true)
+            // Ability列車 勝利の雄たけびの演出終了判定
+            if (true)
             {
                 endFlag = true;
             }
@@ -103,9 +111,10 @@ namespace Cost
             return false;
         }
 
-        public override bool HatsudouCheck(CardAbilityData abilityData) { return true; }
+        public override bool HatsudouCheck(Player player) { return true; }
     }
 
+    // 爪痕
     public class Tsumeato : Base
     {
         static Tsumeato instance;
@@ -143,15 +152,22 @@ namespace Cost
                     abilityData.isJoukenOK = false;
                     break;
             }
+
+
+            // 条件満たしていないなら終了
+            if (!abilityData.isJoukenOK)
+            {
+                endFlag = true;
+                return;
+            }
+
+            // Ability列車 爪痕の成功時
+
         }
 
         public override void Execute(CardAbilityData abilityData)
         {
-            if (!abilityData.isJoukenOK)
-            {
-                endFlag = true;
-            }
-            // 演出終了
+            // Ability列車 爪痕の演出終了判定
             if (true)
             {
                 endFlag = true;
@@ -163,7 +179,7 @@ namespace Cost
             return false;
         }
 
-        public override bool HatsudouCheck(CardAbilityData abilityData) { return true; }
+        public override bool HatsudouCheck(Player player) { return true; }
     }
 
     //public class Sousai : BaseEntityState<CardAbilityData>
@@ -178,6 +194,7 @@ namespace Cost
     //    }
     //}
 
+    // バースト
     public class Burst : Base
     {
         static Burst instance;
@@ -191,6 +208,8 @@ namespace Cost
         {
             step = 0;
             drawCard = null;
+
+            // Ability列車 バースト発動した瞬間
         }
 
         public override void Execute(CardAbilityData abilityData)
@@ -202,7 +221,7 @@ namespace Cost
                 case 0:
                     // ドロー！
                     drawCard = abilityData.myPlayer.deckManager.DequeueYamahuda();
-                    drawCard.ShowDraw();
+                    drawCard.ShowDraw(0.75f, true);
 
                     //// データ上で引いたカードを墓地に送る
                     //abilityData.myPlayer.deckManager.AddBochi(drawCard.cardData);
@@ -211,6 +230,7 @@ namespace Cost
                     break;
 
                 case 1:
+                    // カードの動き終わったら
                     if (!drawCard.isInMovingState())
                     {
                         // 引いたカードを墓地に送る動き
@@ -238,6 +258,7 @@ namespace Cost
 
                     // コスト処理終了
                     endFlag = true;
+                    abilityData.isJoukenOK = true;
                     break;
             }
         }
@@ -247,10 +268,13 @@ namespace Cost
             return false;
         }
 
-        public override bool HatsudouCheck(CardAbilityData abilityData)
+        public override bool HatsudouCheck(Player player)
         {
+            // 山札が1以上のときに発動可能
             // 墓地にジョーカーがいたら発動OK
-            return abilityData.myPlayer.deckManager.isExistBochiCardType(CardType.Joker);
+            return (
+                player.deckManager.isExistBochiCardType(CardType.Joker) &&
+                player.deckManager.GetNumYamahuda() > 0);
         }
     }
 
@@ -271,7 +295,9 @@ namespace Cost
             drawCard = null;
 
             // 数字選択UI表示
-            CardAbilityData.uiManager.DisAppearSelectNumberUI();
+            CardAbilityData.uiManager.AppearSelectNumberUI(abilityData.myPlayer.deckManager);
+
+            // Ability列車 宝箱発動した瞬間
         }
 
         public override void Execute(CardAbilityData abilityData)
@@ -285,7 +311,7 @@ namespace Cost
                     // ドロー！モンスターカード！が終わったら
                     // ドロー！
                     drawCard = abilityData.myPlayer.deckManager.DequeueYamahuda();
-                    drawCard.ShowDraw();
+                    drawCard.ShowDraw(0.75f, true);
 
                     // データ上で引いたカードを墓地に送る
                     //abilityData.myPlayer.deckManager.AddBochi(drawCard.cardData);
@@ -331,7 +357,7 @@ namespace Cost
                         abilityData.myPlayer.deckManager.AddBochi(drawCard);
 
                         // 引いたカードを墓地に送る動き
-                        drawCard.MoveToCemetery();
+                        //drawCard.MoveToCemetery();
 
                         // 失敗時の効果に移行
                         abilityData.skillNumber = abilityData.c_value1;
@@ -339,6 +365,7 @@ namespace Cost
 
                     // コスト処理終了
                     endFlag = true;
+                    abilityData.isJoukenOK = true;
                     break;
             }
         }
@@ -364,9 +391,14 @@ namespace Cost
             return false;
         }
 
-        public override bool HatsudouCheck(CardAbilityData abilityData){ return true; }
+        public override bool HatsudouCheck(Player player)
+        {
+            // 山札が1以上のときに発動可能
+            return (player.deckManager.GetNumYamahuda() > 0);
+        }
     }
 
+    // 起死回生の一手
     public class Kisikaisei : Base
     {
         static Kisikaisei instance;
@@ -415,6 +447,7 @@ namespace Cost
 
                     // コスト処理終了
                     endFlag = true;
+                    abilityData.isJoukenOK = true;
                     break;
             }
         }
@@ -440,23 +473,45 @@ namespace Cost
             return false;
         }
 
-        public override bool HatsudouCheck(CardAbilityData abilityData){ return true; }
+        public override bool HatsudouCheck(Player player) { return true; }
     }
 
+    // 仲間と共に
     public class Nakama : Base
     {
         static Nakama instance;
         public static Nakama GetInstance() { if (instance == null) { instance = new Nakama(); } return instance; }
 
+        float timer;
         int step;
-        CardData drawCard;
+        Card drawCard;
 
         public override void Enter(CardAbilityData abilityData)
         {
             base.Enter(abilityData);
 
+            timer = 0;
             step = 0;
             drawCard = null;
+
+            // 墓地からドローする番号を決定(無造作)
+            if (abilityData.isMyPlayer || !SelectData.isNetworkBattle)
+            {
+                SelectCardIndexInfo info = new SelectCardIndexInfo();
+                info.index = abilityData.myPlayer.deckManager.GetCemeteryRandomNumberStriker();
+                if (info.index == (int)IDType.NONE)
+                {
+                    Debug.LogWarning("墓地にストライカーがいないのに引こうとしている。事前にその効果を発動しないようにしましょう。");
+
+                    // 終了
+                    endFlag = true;
+                    return;
+                }
+                // メッセージ送信
+                MessageManager.Dispatch(abilityData.myPlayer.playerID, MessageType.SelectCemetery, info);
+            }
+
+            // Ability列車 仲間と共に発動した瞬間
         }
 
         public override void Execute(CardAbilityData abilityData)
@@ -464,19 +519,61 @@ namespace Cost
             switch (step)
             {
                 case 0:
-                    // 墓地から無造作にストライカーを引く
-                    drawCard = abilityData.myPlayer.deckManager.DrawBochiStriker();
+                    // メッセージ待ち
+                    break;
+                case 1:
+                    // 例外処理
+                    if(!drawCard)
+                    {
+                        Debug.LogWarning("墓地にストライカーがいないのに引こうとしている。事前にその効果を発動しないようにしましょう。");
 
-                    Debug.Assert(drawCard != null, "墓地にストライカーがいないのに引こうとしている。事前にその効果を発動しないようにしましょう。");
+                        // 終了
+                        endFlag = true;
+
+                        return;
+                    }
+
+                    // パワーを足す用の変数に格納
+                    abilityData.delvValue0 = drawCard.cardData.power;
+
+                    // 見せる用のドローの動きにする
+                    drawCard.ShowDraw(0.75f, true);
 
                     step++;
                     break;
-                case 1:
-                    // パワーを足す用の変数に格納
-                    abilityData.delvValue0 = drawCard.power;
+                case 2:
+                    // ドローの動きが終わったら
+                    if (!drawCard.isInMovingState())
+                    {
+                        step++;
+                    }
+                    break;
 
-                    // 終了
-                    endFlag = true;
+                case 3:
+                    // 若干待ってみる
+                    if((timer+= Time.deltaTime) > 2)
+                    {
+                        step++;
+                    }
+                    break;
+                case 4:
+
+                    // 引いたカードを墓地に送る
+                    abilityData.myPlayer.deckManager.AddBochi(drawCard);
+
+                    // 引いたカードを墓地に送る動き
+                    drawCard.MoveToCemetery();
+
+                    step++;
+                    break;
+                case 5:
+                    // ドローの動きが終わったら
+                    if (!drawCard.isInMovingState())
+                    {
+                        // 終了
+                        endFlag = true;
+                        abilityData.isJoukenOK = true;
+                    }
                     break;
             }
         }
@@ -484,13 +581,146 @@ namespace Cost
 
         public override bool OnMessage(CardAbilityData abilityData, MessageInfo message)
         {
+            switch (message.messageType)
+            {
+                case MessageType.SelectCemetery:
+                    {
+                        SelectCardIndexInfo selectCardIndexInfo = new SelectCardIndexInfo();
+                        message.GetExtraInfo<SelectCardIndexInfo>(ref selectCardIndexInfo);
+
+                        // 墓地から無造作にストライカーを引く
+                        drawCard = abilityData.myPlayer.deckManager.DequeCemetery(selectCardIndexInfo.index);
+
+                        // 次のステップへ
+                        step++;
+                    }
+                    break;
+            }
+
             return false;
         }
 
-        public override bool HatsudouCheck(CardAbilityData abilityData)
+        public override bool HatsudouCheck(Player player)
         {
+            // 墓地にストライカー系がいないと発動できない
+            if (player.deckManager.isExistBochiCardType(CardType.Fighter)) { return (player.jissainoPower == 1); }
+            if (player.deckManager.isExistBochiCardType(CardType.AbilityFighter)) { return (player.jissainoPower == 1); }
+            if (player.deckManager.isExistBochiCardType(CardType.Joker)) { return (player.jissainoPower == 1); }
+
+            return false;
+
             // 実際のパワーが1の人だったら発動OK
-            return (abilityData.myPlayer.jissainoPower == 1);
+            //return (abilityData.myPlayer.jissainoPower == 1);
+        }
+    }
+
+    // パワーxのストライカーが
+    public class PowerStriker : Base
+    {
+        static PowerStriker instance;
+        public static PowerStriker GetInstance() { if (instance == null) { instance = new PowerStriker(); } return instance; }
+
+        Card suteCard;
+
+        public override void Enter(CardAbilityData abilityData)
+        {
+            base.Enter(abilityData);
+
+            suteCard = null;
+
+            Func<int, int, bool> check;
+            switch (abilityData.c_value1)
+            {
+                case 0:
+                    check = (a, b) => { return (a == b); };
+                    break;
+
+                case 1:
+                    check = (a, b) => { return (a >= b); };
+                    break;
+
+                case 2:
+                    check = (a, b) => { return (a <= b); };
+                    break;
+
+                default:
+                    Debug.LogWarning("おかしいおかしい");
+                    endFlag = true;
+                    return;
+            }
+
+            // (TODO)手札からドローする番号を決定(無造作)
+            if (abilityData.isMyPlayer || !SelectData.isNetworkBattle)
+            {
+                var deckManager = abilityData.myPlayer.deckManager;
+                for (int i = 0; i < deckManager.GetNumHand(); i++)
+                {
+                    var card = deckManager.GetHandCard(i);
+                    if (card.isEventCard()) continue;
+                    // 条件満たしたら
+                    if (check(card.power, abilityData.c_value0))
+                    {
+                        SelectCardIndexInfo info = new SelectCardIndexInfo();
+                        info.index = i;
+                        // メッセージ送信
+                        MessageManager.Dispatch(abilityData.myPlayer.playerID, MessageType.SelectHand, info);
+                        return;
+                    }
+                }
+
+                Debug.LogWarning("パワーコストのモンスター持ってないのに発動しようとした。事前にその効果を発動しないようにしましょう。");
+
+                // 終了
+                endFlag = true;
+                return;
+            }
+        }
+
+        public override void Execute(CardAbilityData abilityData)
+        {
+            switch(step)
+            {
+                case 0: // カード選択中
+                    break;
+                case 1: // 捨てカード移動中
+                    if(!suteCard.isInMovingState())
+                    {
+                        // 墓地に行く
+                        suteCard.MoveToCemetery();
+                        step++;
+                    }
+                    break;
+                case 2: // 墓地に行くカードの動きが終わったら
+                    if(!suteCard.isInMovingState())
+                    {
+                        // 終了
+                        abilityData.isJoukenOK = true;
+                        endFlag = true;
+                    }
+                    break;
+            }
+        }
+
+        public override bool OnMessage(CardAbilityData abilityData, MessageInfo message)
+        {
+            switch(message.messageType)
+            {
+                case MessageType.SelectHand:
+                    {
+                        SelectCardIndexInfo info = new SelectCardIndexInfo();
+                        message.GetExtraInfo<SelectCardIndexInfo>(ref info);
+                        suteCard = abilityData.myPlayer.deckManager.DequeueHand(info.index);
+                        suteCard.ShowDraw(0.75f, false);
+                        step++;
+                    }
+                    return true;
+            }
+            return false;
+        }
+
+        public override bool HatsudouCheck(Player player)
+        {
+            return false;
         }
     }
 }
@@ -498,16 +728,50 @@ namespace Cost
 
 namespace Skill
 {
+    public enum Result
+    {
+        None,       // 特に問題なし
+        EndGame,    // HPが0になったとかでゲーム終了
+    }
+
     public abstract class Base
     {
         protected bool endFlag;
+        protected int step;
 
-        public virtual void Enter(CardAbilityData abilityData) { endFlag = false; }
-        public abstract void Execute(CardAbilityData abilityData);
+        public virtual void Enter(CardAbilityData abilityData) { step = 0; endFlag = false; }
+        public abstract Result Execute(CardAbilityData abilityData);
         public abstract void Exit(CardAbilityData abilityData);
         public abstract bool OnMessage(CardAbilityData abilityData, MessageInfo message);
         // 終了チェック
         public bool EndCheck() { return endFlag; }
+    }
+
+    // 効果なし
+    public class None : Base
+    {
+        static None instance;
+        public static None GetInstance() { if (instance == null) { instance = new None(); } return instance; }
+
+        public override void Enter(CardAbilityData abilityData){ base.Enter(abilityData); }
+
+        public override Result Execute(CardAbilityData abilityData)
+        {
+            // 無条件終了
+            endFlag = true;
+
+            return Result.None;
+        }
+
+        public override void Exit(CardAbilityData abilityData)
+        {
+
+        }
+
+        public override bool OnMessage(CardAbilityData abilityData, MessageInfo message)
+        {
+            return false;
+        }
     }
 
 
@@ -579,55 +843,96 @@ namespace Skill
         public override void Enter(CardAbilityData abilityData)
         {
             base.Enter(abilityData);
-
-            var skillData = abilityData.GetCurrentSkillData();
-
-            // ※s_value0=演算タイプ, s_value1=演算する値, s_value2=効果の対象
-            var arithmetic = (Arithmetic)skillData.s_value0;
-            var value = ValueChange.GetCheckRefValue(abilityData, skillData.s_value1);
-            var abilityTarget = (AbilityTarget)skillData.s_value2;
-
-            switch (abilityTarget)
-            {
-                case AbilityTarget.Me:
-                    Enzan(abilityData.myPlayer, CardAbilityData.uiManager, arithmetic, value);
-                    break;
-
-                case AbilityTarget.You:
-                    Enzan(abilityData.youPlayer, CardAbilityData.uiManager, arithmetic, value);
-                    break;
-
-                case AbilityTarget.Select:
-                    break;
-
-                case AbilityTarget.All:
-                    Enzan(abilityData.myPlayer, CardAbilityData.uiManager, arithmetic, value);
-                    Enzan(abilityData.youPlayer, CardAbilityData.uiManager, arithmetic, value);
-                    break;
-
-                default:
-                    Debug.LogWarning("スコア変更で意図しない値:" + (int)abilityTarget);
-                    break;
-            }
         }
 
-        void Enzan(Player player, UIManager uiManager, Arithmetic arithmetic, int value)
+        bool Enzan(Player player, UIManager uiManager, Arithmetic arithmetic, int value)
         {
+            Card strikerCard = player.cardObjectManager.fieldStrikerCard;
+            if (strikerCard != null)
+            {
+                // Ability列車 ライフ変化
+                Vector3 strikerPosition = strikerCard.cacheTransform.localPosition;
+                switch (arithmetic)
+                {
+                    case Arithmetic.Addition:
+                        // 足し算なので回復
+                        break;
+
+                    case Arithmetic.Subtraction:
+                        // 引き算なのでダメージ
+                        break;
+
+                    case Arithmetic.Multiplication:
+                        // 掛け算(あまり使わない)
+                        break;
+
+                    case Arithmetic.Division:
+                        // 割り算(あまり使わない)
+                        break;
+                }
+            }
+
             // 現在のスコアを取ってきて
             var score = uiManager.GetScore(player.isMyPlayer);
             // 演算して
-            score = ValueChange.Enzan(arithmetic, score, value);
+            var newScore = ValueChange.Enzan(arithmetic, score, value);
             // セット
-            uiManager.SetHP(player.isMyPlayer, score);
+            uiManager.SetHP(player.isMyPlayer, newScore);
+
+            var isEnd = (newScore <= 0 && score > 0);
+            return isEnd;
         }
 
-        public override void Execute(CardAbilityData abilityData)
+        public override Result Execute(CardAbilityData abilityData)
         {
-            // 効果のエフェクトが終了したら
-            if(true)
+            switch(step)
             {
-                endFlag = true;
+                case 0:
+                    {
+                        var skillData = abilityData.GetCurrentSkillData();
+
+                        // ※s_iValue0=演算タイプ, s_iValue1=演算する値, s_iValue2=効果の対象
+                        var arithmetic = (Arithmetic)skillData.s_iValue0;
+                        var value = ValueChange.GetCheckRefValue(abilityData, skillData.s_iValue1);
+                        var abilityTarget = (AbilityTarget)skillData.s_iValue2;
+
+                        switch (abilityTarget)
+                        {
+                            case AbilityTarget.Me:
+                                if (Enzan(abilityData.myPlayer, CardAbilityData.uiManager, arithmetic, value)) return Result.EndGame;
+                                break;
+
+                            case AbilityTarget.You:
+                                if (Enzan(abilityData.youPlayer, CardAbilityData.uiManager, arithmetic, value)) return Result.EndGame;
+                                break;
+
+                            case AbilityTarget.Select:
+                                break;
+
+                            case AbilityTarget.All:
+                                if (Enzan(abilityData.myPlayer, CardAbilityData.uiManager, arithmetic, value)) return Result.EndGame;
+                                if (Enzan(abilityData.youPlayer, CardAbilityData.uiManager, arithmetic, value)) return Result.EndGame;
+                                break;
+
+                            default:
+                                Debug.LogWarning("スコア変更で意図しない値:" + (int)abilityTarget);
+                                break;
+                        }
+
+                        step++;
+                    }
+                    break;
+
+                case 1:
+                    // Ability列車 ライフ変化の演出が終わったら
+                    if (true)
+                    {
+                        endFlag = true;
+                    }
+                    break;
             }
+
+            return Result.None;
         }
 
         public override void Exit(CardAbilityData abilityData)
@@ -653,10 +958,10 @@ namespace Skill
 
             var skillData = abilityData.GetCurrentSkillData();
 
-            // ※s_value0=演算タイプ, s_value1=演算する値, s_value2=効果の対象
-            var arithmetic = (Arithmetic)skillData.s_value0;
-            var value = ValueChange.GetCheckRefValue(abilityData, skillData.s_value1);
-            var abilityTarget = (AbilityTarget)skillData.s_value2;
+            // ※s_iValue0=演算タイプ, s_iValue1=演算する値, s_iValue2=効果の対象
+            var arithmetic = (Arithmetic)skillData.s_iValue0;
+            var value = ValueChange.GetCheckRefValue(abilityData, skillData.s_iValue1);
+            var abilityTarget = (AbilityTarget)skillData.s_iValue2;
 
             switch(abilityTarget)
             {
@@ -684,19 +989,45 @@ namespace Skill
 
         void Enzan(Player player, Arithmetic arithmetic, int value)
         {
+            Card strikerCard = player.cardObjectManager.fieldStrikerCard;
+            if (strikerCard != null)
+            {
+                // Ability列車 パワー変化
+                Vector3 strikerPosition = strikerCard.cacheTransform.localPosition;
+                switch (arithmetic)
+                {
+                    case Arithmetic.Addition:
+                        // パワー加算エフェクト
+                        break;
+
+                    case Arithmetic.Subtraction:
+                        // パワー減算エフェクト
+                        break;
+
+                    case Arithmetic.Multiplication:
+                        // 掛け算(パワー0にするだったらvalueが0になってる)
+                        break;
+
+                    case Arithmetic.Division:
+                        // 割り算(あまり使わない)
+                        break;
+                }
+            }
+
             // 現在のパワーを取ってきて
             var power = player.jissainoPower;
             // 演算する
             player.jissainoPower = ValueChange.Enzan(arithmetic, power, value);
         }
 
-        public override void Execute(CardAbilityData abilityData)
+        public override Result Execute(CardAbilityData abilityData)
         {
-            // 効果のエフェクトが終了したら
+            // Ability列車 パワー変化の演出が終わったら
             if (true)
             {
                 endFlag = true;
             }
+            return Result.None;
         }
 
         public override void Exit(CardAbilityData abilityData)
@@ -723,45 +1054,45 @@ namespace Skill
 
             }
 
-            bool Check(MaskData data, CardData card)
-            {
-                switch (data.maskType)
-                {
-                    case MaskType.Power:
-                        break;
-                    case MaskType.Syuzoku:
-                        break;
-                    case MaskType.Name:
-                        break;
-                    default:
-                        break;
-                }
+            //bool Check(MaskData data, CardData card)
+            //{
+            //    switch (data.maskType)
+            //    {
+            //        case MaskType.Power:
+            //            break;
+            //        case MaskType.Syuzoku:
+            //            break;
+            //        case MaskType.Name:
+            //            break;
+            //        default:
+            //            break;
+            //    }
 
-                return false;
-            }
+            //    return false;
+            //}
 
-            public enum MaskType
-            {
-                Power,      // パワー
-                Syuzoku,    // 種族
-                Name,       // ボーイと名のつくなど
-            }
-            public struct MaskData
-            {
-                public MaskType maskType;  // タイプ
-                public string value;       // マスクに使う値
-            }
-            public MaskData[] maskDatas;
+            //public enum MaskType
+            //{
+            //    Power,      // パワー
+            //    Syuzoku,    // 種族
+            //    Name,       // ボーイと名のつくなど
+            //}
+            //public struct MaskData
+            //{
+            //    public MaskType maskType;  // タイプ
+            //    public string value;       // マスクに使う値
+            //}
+            //public MaskData[] maskDatas;
 
-            public void SearchCards(CardData[] cards)
-            {
-                //Queue<CardData> queue;
+            //public void SearchCards(CardData[] cards)
+            //{
+            //    //Queue<CardData> queue;
 
-                //foreach(CardData card in cards)
-                //{
-                //    if()
-                //}
-            }
+            //    //foreach(CardData card in cards)
+            //    //{
+            //    //    if()
+            //    //}
+            //}
         }
 
         //public AbilityTarget fromTarget;    // 対象
@@ -793,6 +1124,34 @@ namespace Skill
         }
         //SearchType searchType;
 
+        public enum SearchSitei
+        {
+            PlayerSelect,   // プレイヤー指定
+            Random,         // 無造作
+            Highest,        // 最も高い
+            Lowest          // 最も低い
+        }
+
+        public enum SearchMask
+        {
+            NoneLimit,          // 指定なし
+            AllStriker,         // ストライカー全般
+            NoAbilityStriker,   // 効果なしストライカー
+            AbilityStriker,     // 効果ありストライカー
+            Joker,              // ジョーカー
+            Support,            // サポート
+            Connect,            // コネクト
+            Intercept,          // インターセプト
+        }
+
+        public enum Siborikomi
+        {
+            Power,      // パワー
+            Syuzoku,    // 種族
+            Name,       // ボーイと名のつくなど
+        }
+
+
         Card drawCard;
 
         public override void Enter(CardAbilityData abilityData)
@@ -804,11 +1163,15 @@ namespace Skill
             drawCard = null;
             
             // ※value0=どこから, value1=誰の, value2=どこに, value3=誰の
-            var fromPlace = (From)skillData.s_value0;
-            var fromTarget = (AbilityTarget)skillData.s_value1;
-            var searchType = (SearchType)skillData.s_value2;
-            var toPlace = (To)skillData.s_value3;
-            var toTarget =  (AbilityTarget)skillData.s_value4;
+            var fromPlace = (From)skillData.s_iValue0;
+            var fromTarget = (AbilityTarget)skillData.s_iValue1;
+            var searchType = (SearchType)skillData.s_iValue2;
+            var toPlace = (To)skillData.s_iValue3;
+            var toTarget =  (AbilityTarget)skillData.s_iValue4;
+            var searchSitei = (SearchSitei)skillData.s_iValue5;
+            var searchMask = (SearchMask)skillData.s_iValue6;
+            var siborikomi = (Siborikomi)skillData.s_iValue7;
+            var siborikomiValue = skillData.s_sValue0;
 
             if (fromPlace != From.NewCreate)
             {
@@ -821,7 +1184,23 @@ namespace Skill
                         // 手札から無造作に
                         if (searchType == SearchType.None)
                         {
-                            drawCard = fromPlayer.deckManager.DequeueHand();
+                            int numHand = abilityData.myPlayer.deckManager.GetNumHand();
+                            if (numHand <= 0)
+                            {
+                                endFlag = true;
+                                return;
+                            }
+
+                            if (abilityData.isMyPlayer || !SelectData.isNetworkBattle)
+                            {
+                                int r = UnityEngine.Random.Range(0, numHand - 1);
+                                SelectCardIndexInfo info = new SelectCardIndexInfo();
+                                info.index = r;
+
+                                // メッセージ送信
+                                MessageManager.Dispatch(abilityData.myPlayer.playerID, MessageType.SelectHand, info);
+                            }
+
                         }
                         else if(searchType == SearchType.Saati)
                         {
@@ -834,7 +1213,22 @@ namespace Skill
                         // 墓地から無造作に
                         if (searchType == SearchType.None)
                         {
-                            drawCard = fromPlayer.deckManager.DequeCemetery();
+                            int numCemetery = abilityData.myPlayer.deckManager.GetNumCemetery();
+                            if (numCemetery <= 0)
+                            {
+                                endFlag = true;
+                                return;
+                            }
+
+                            if (abilityData.isMyPlayer || !SelectData.isNetworkBattle)
+                            {
+                                int r = UnityEngine.Random.Range(0, numCemetery - 1);
+                                SelectCardIndexInfo info = new SelectCardIndexInfo();
+                                info.index = r;
+
+                                // メッセージ送信
+                                MessageManager.Dispatch(abilityData.myPlayer.playerID, MessageType.SelectHand, info);
+                            }
                         }
                         else if (searchType == SearchType.Saati)
                         {
@@ -857,6 +1251,14 @@ namespace Skill
                         }
                         break;
                     case From.CemeteryOrDeck:
+                        if(searchType != SearchType.Saati)
+                        {
+                            Debug.LogWarning("墓地または山札なのに無造作になっている");
+
+                            return;
+                        }
+
+
                         break;
                     default:
                         Debug.LogError("FromTypeで想定されない値");
@@ -869,6 +1271,8 @@ namespace Skill
                 // もふりとか、生成系の処理
                 //drawCard = 
             }
+
+            if (drawCard == null) return;
 
             // Toの処理
             var toPlayer = abilityData.GetPlayerByAbilitiTarget(toTarget);
@@ -896,16 +1300,21 @@ namespace Skill
             }
         }
 
-        public override void Execute(CardAbilityData abilityData)
+        public override Result Execute(CardAbilityData abilityData)
         {
-            // カードの動きが終わるまで待つ
-            if (drawCard.isInMovingState()) return;
-
-            // 効果のエフェクトが終了したら
-            if (true)
+            switch(step)
             {
-                endFlag = true;
+                case 0:// メッセージ待ち
+                    //break;
+                case 1:
+                    // カードの動きが終わるまで待つ
+                    if (drawCard.isInMovingState())
+                    {
+                        return Result.None;
+                    }
+                    break;
             }
+            return Result.None;
         }
 
         public override void Exit(CardAbilityData abilityData)
@@ -915,6 +1324,28 @@ namespace Skill
 
         public override bool OnMessage(CardAbilityData abilityData, MessageInfo message)
         {
+            switch(message.messageType)
+            {
+                case MessageType.SelectHand:
+                    {
+                        SelectCardIndexInfo info = new SelectCardIndexInfo();
+                        message.GetExtraInfo<SelectCardIndexInfo>(ref info);
+                        drawCard = abilityData.myPlayer.deckManager.DequeueHand(info.index);
+                        drawCard.ShowDraw(0.75f, false);
+                        step++;
+                    }
+                    break;
+
+                case MessageType.SelectCemetery:
+                    {
+                        SelectCardIndexInfo info = new SelectCardIndexInfo();
+                        message.GetExtraInfo<SelectCardIndexInfo>(ref info);
+                        drawCard = abilityData.myPlayer.deckManager.DequeCemetery(info.index);
+                        drawCard.ShowDraw(0.75f, false);
+                        step++;
+                    }
+                    break;
+            }
             return false;
         }
     }
@@ -937,12 +1368,13 @@ public class CardAbilityData
     public bool isJoukenOK; // Costを抜けた後にこれがtrueだったら効果を発動する(主にストライカーの爪痕とかに使う)
     public bool endFlag;    // 効果が終了したフラグ
 
-    public int playerID;                    // この効果を発動しようとしているプレイヤーのID
+    public bool isMyPlayer;                    // この効果を発動しようとしているプレイヤーが画面的に自分かどうか
     public static UIManager uiManager;
     public static PlayerManager playerManager;
     public Player myPlayer, youPlayer;      // 自分と相手のプレイヤーの実体
 
     public AbilityTriggerType abilityTriggerType;  // 発動トリガー
+    public int lifeCost;                           // 支払うライフの値
     public CostType costType;                      // 条件(コスト)
     public int c_value0;
     public int c_value1;
@@ -955,16 +1387,19 @@ public class CardAbilityData
         public Skill.Base skill;        // 効果委譲クラス(複数あり)
         public int nextSkillNumber;     // 次に発動する効果(ないなら終了)
         public AbilityType abilityType;                           // 効果のタイプ
-        public int s_value0;
-        public int s_value1;
-        public int s_value2;
-        public int s_value3;
-        public int s_value4;
-        public int s_value5;
-        public int s_value6;
-        public int s_value7;
-        public int s_value8;
-        public int s_value9;
+        public int s_iValue0;
+        public int s_iValue1;
+        public int s_iValue2;
+        public int s_iValue3;
+        public int s_iValue4;
+        public int s_iValue5;
+        public int s_iValue6;
+        public int s_iValue7;
+        public int s_iValue8;
+        public int s_iValue9;
+        public string s_sValue0;
+        public string s_sValue1;
+        public string s_sValue2;
     }
     public SkillData[] skillDatas;
     public SkillData GetCurrentSkillData() { return skillDatas[skillNumber]; }
@@ -984,6 +1419,7 @@ public class CardAbilityData
     public int delvValue1;
     public int delvValue2;
     public int delvValue3;
+    //private CardAbilityData ability;
 
     public Player GetPlayerByAbilitiTarget(AbilityTarget target)
     {
@@ -1007,8 +1443,19 @@ public class CardAbilityData
         if (!uiManager) uiManager = GameObject.Find("UIManager").GetComponent<UIManager>();
         if (!playerManager) playerManager = GameObject.Find("PlayerManager").GetComponent<PlayerManager>();
 
-        myPlayer = playerManager.GetPlayer(playerID);
-        youPlayer = playerManager.GetAitePlayer(playerID);
+        if (isMyPlayer)
+        {
+            myPlayer = playerManager.GetMyPlayer();
+            youPlayer = playerManager.GetCPUPlayer();
+        }
+        else
+        {
+            myPlayer = playerManager.GetCPUPlayer();
+            youPlayer = playerManager.GetMyPlayer();
+        }
+
+        // ライフコストを支払う
+        if (lifeCost > 0) uiManager.Damage(isMyPlayer, lifeCost);
 
         // コスト実行
         cost.Enter(this);
@@ -1018,7 +1465,7 @@ public class CardAbilityData
         skillNumber = 0;
     }
 
-    public void Update()
+    public void Update(CardAbilityManager abilityManager)
     {
         if (endFlag) return;
 
@@ -1064,20 +1511,75 @@ public class CardAbilityData
                         }
                         return;
                     }
-                    GetCurrentSkillData().skill.Execute(this);
+                    switch (GetCurrentSkillData().skill.Execute(this))
+                    {
+                        case Skill.Result.EndGame:
+                            // 終了処理
+                            currentSkill.skill.Exit(this);
+                            abilityManager.sceneMain.Finish();
+                            endFlag = true;
+                            // 空
+                            abilityManager.Restart();
+                            break;
+                    }
+                    
                 }
                 break;
         }
     }
 
+    public bool HandleMessage(MessageInfo message)
+    {
+        if (endFlag) return false;
+
+        switch (state)
+        {
+            case State.Cost:
+                return cost.OnMessage(this, message);
+
+            case State.Ability:
+                return GetCurrentSkillData().skill.OnMessage(this, message);
+        }
+
+        return false;
+    }
+
+    // 発動プレイヤー設定
+    //public void SetMyPlayerFlag(bool isMyPlayer)
+    //{
+    //    if (!playerManager) playerManager = GameObject.Find("PlayerManager").GetComponent<PlayerManager>();
+
+    //    this.isMyPlayer = isMyPlayer;
+    //    if(isMyPlayer)
+    //    {
+    //        myPlayer = playerManager.GetMyPlayer();
+    //        youPlayer = playerManager.GetCPUPlayer();
+    //    }
+    //    else
+    //    {
+    //        myPlayer = playerManager.GetCPUPlayer();
+    //        youPlayer = playerManager.GetMyPlayer();
+    //    }
+    //}
+
     // 発動してもいいかチェック(主にイベントカード)
-    public bool HatsudouOK() { return cost.HatsudouCheck(this); }
+    public bool HatsudouOK(Player player)
+    {
+        if (!uiManager) uiManager = GameObject.Find("UIManager").GetComponent<UIManager>();
+
+        // ライフがコスト以下だと発動できない
+        var life = (player.isMyPlayer) ? uiManager.myHP : uiManager.cpuHP;
+        if (life <= lifeCost) return false;
+
+        return cost.HatsudouCheck(player);
+    }
 }
 
 public class CardAbilityManager : MonoBehaviour
 {
     Queue<CardAbilityData> abilityQueue = new Queue<CardAbilityData>();     // アビリティタスク
     CardAbilityData excutionAbility;                                        // 現在実行しているアビリティ
+    public SceneMain sceneMain;
 
     void Start()
     {
@@ -1100,7 +1602,7 @@ public class CardAbilityManager : MonoBehaviour
                 excutionAbility = null;
                 return;
             }
-            excutionAbility.Update();
+            excutionAbility.Update(this);
         }
 
         else if(abilityQueue.Count > 0)
@@ -1109,21 +1611,34 @@ public class CardAbilityManager : MonoBehaviour
             // 効果実行
             excutionAbility.Action();
             //Debug.Log("効果発動: " + excutionAbility.abilityType.ToString() + ", values: " +
-            //    excutionAbility.s_value0 + ", " + excutionAbility.s_value1 + ", " + excutionAbility.s_value2 + ", " + excutionAbility.s_value3 + ", " +
-            //    excutionAbility.s_value4 + ", " + excutionAbility.s_value5 + ", " + excutionAbility.s_value6 + ", " + excutionAbility.s_value7 + ", " +
-            //    excutionAbility.s_value8 + ", " + excutionAbility.s_value9);
+            //    excutionAbility.s_iValue0 + ", " + excutionAbility.s_iValue1 + ", " + excutionAbility.s_iValue2 + ", " + excutionAbility.s_iValue3 + ", " +
+            //    excutionAbility.s_iValue4 + ", " + excutionAbility.s_iValue5 + ", " + excutionAbility.s_iValue6 + ", " + excutionAbility.s_iValue7 + ", " +
+            //    excutionAbility.s_iValue8 + ", " + excutionAbility.s_iValue9);
         }
+
+        // ここにexcutionAbility.を書いてはいけない
     }
 
-    public void PushAbility(CardAbilityData ability, int playerID)
+    public void PushAbility(CardAbilityData ability, bool isMyPlayer)
     {
-        ability.playerID = playerID;
-        abilityQueue.Enqueue(ability);
+        // ★★★嫌な予感がする…(参照)
+        var abilityData = new CardAbilityData();
+        abilityData = ability;
+        abilityData.isMyPlayer = isMyPlayer;
+        abilityQueue.Enqueue(abilityData);
     }
 
     // 全ての効果の処理が終わったかどうかの判定
     public bool isAbilityEnd()
     {
         return (abilityQueue.Count == 0 && excutionAbility == null);
+    }
+
+    // メッセージ受信
+    public bool HandleMessage(MessageInfo message)
+    {
+        if (excutionAbility == null) return false;
+
+        return excutionAbility.HandleMessage(message);
     }
 }

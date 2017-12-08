@@ -35,9 +35,9 @@ public class PlayerController : NetworkBehaviour
         // マッチング待機中表示
         uiManager.AppearMatchingWait();
 
-        var temp = myPlayer.cardObjectManager.handCardDir.y;
-        myPlayer.cardObjectManager.handCardDir.y = myPlayer.cardObjectManager.handCardDir.z;
-        myPlayer.cardObjectManager.handCardDir.z = temp;
+        //var temp = myPlayer.cardObjectManager.handCardDir.y;
+        //myPlayer.cardObjectManager.handCardDir.y = myPlayer.cardObjectManager.handCardDir.z;
+        //myPlayer.cardObjectManager.handCardDir.z = temp;
     }
 
 
@@ -196,8 +196,14 @@ public class PlayerController : NetworkBehaviour
                 // マウスクリック放したら
                 if (oulInput.GetTouchState() == oulInput.TouchState.Ended)
                 {
+                    // ★サポートカード処理はメッセージ受信時に行う
+                    if(holdCard.cardData.cardType == CardType.Support)
+                    {
+                        SendSetCard(holdHandNo, MessageType.SetSupport);
+                    }
+
                     // フィールドをセット
-                    if(isFieldCardHold)
+                    else if(isFieldCardHold)
                     {
                         myPlayer.cardObjectManager.ReFieldSetStriker(true);
                     }
@@ -212,12 +218,12 @@ public class PlayerController : NetworkBehaviour
                         MessageManager.Dispatch(myPlayer.playerID, MessageType.BackToHand, exInfo);
 
                         // カードセット
-                        SendSetCard(holdHandNo);
+                        SendSetCard(holdHandNo, MessageType.SetStriker);
                     }
 
                     else
                     {
-                        SendSetCard(holdHandNo);
+                        SendSetCard(holdHandNo, MessageType.SetStriker);
                     }
 
                     // 掴んでるカードを離す
@@ -392,8 +398,8 @@ public class PlayerController : NetworkBehaviour
                 if (oulInput.GetTouchState() == oulInput.TouchState.Ended)
                 {
                     // ex構造体作成
-                    SetCardInfo exInfo = new SetCardInfo();
-                    exInfo.handNo = holdHandNo;
+                    SelectCardIndexInfo exInfo = new SelectCardIndexInfo();
+                    exInfo.index = holdHandNo;
                     // メッセージ送信
                     MessageManager.Dispatch(myPlayer.playerID, MessageType.SetIntercept, exInfo);
 
@@ -498,7 +504,7 @@ public class PlayerController : NetworkBehaviour
             {
                 if (holdCard.cardData.isStrikerCard())
                 {
-                    SendSetCard(holdHandNo);
+                    SendSetCard(holdHandNo, MessageType.SetStriker);
                     // したのでメッセージおくる
                     MessageManager.Dispatch(myPlayer.playerID, MessageType.SetStrikerOK, null);
 
@@ -521,7 +527,7 @@ public class PlayerController : NetworkBehaviour
                 {
                     if (myPlayer.deckManager.GetHandCard(i).isStrikerCard())
                     {
-                        SendSetCard(i);
+                        SendSetCard(i, MessageType.SetStriker);
                         break;
                     }
                 }
@@ -531,12 +537,12 @@ public class PlayerController : NetworkBehaviour
         MessageManager.Dispatch(myPlayer.playerID, MessageType.SetStrikerOK, null);
     }
 
-    void SendSetCard(int handNo)
+    void SendSetCard(int handNo, MessageType messageType)
     {
         // ex構造体作成
-        SetCardInfo exInfo = new SetCardInfo();
-        exInfo.handNo = handNo;
+        SelectCardIndexInfo exInfo = new SelectCardIndexInfo();
+        exInfo.index = handNo;
         // メッセージ送信
-        MessageManager.Dispatch(myPlayer.playerID, MessageType.SetStriker, exInfo);
+        MessageManager.Dispatch(myPlayer.playerID, messageType, exInfo);
     }
 }

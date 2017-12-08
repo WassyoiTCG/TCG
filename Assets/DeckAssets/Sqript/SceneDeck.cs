@@ -68,10 +68,10 @@ public class SceneDeck : MonoBehaviour
         m_bCardTap = false;
 
         // (TODO)(A列車)システム初期化  を全て共通に  
-        // oulSystem;
+        oulSystem.Initialize();
 
         // カードのデータベースを初期化
-        CardDataBase.Start();
+        //CardDataBase.Start();
 
         CardData data = CardDataBase.GetCardData(3);    // ID0番目のカードデータを取ってくる。
         CardData[] all = CardDataBase.GetCardList();    // カード情報を全て取得する。

@@ -40,6 +40,7 @@ public enum CostType
     Treasure,   // 宝箱
     Nakama,     // 仲間と共に
     Kisikaisei, // 起死回生の一手
+    PowerStriker,   // パワーxのストライカーが手札にあるか
 }
 
 
@@ -168,7 +169,8 @@ public class InterceptCard : EventCard
 // (11/14)(TODO)-1はカードが存在しない
 public enum IDType
 {
-    NONE = -1//  無し
+    NONE = -1,      //  無し
+    RANDOM = -2,    // 無造作フラグ
 }
 
 
@@ -193,6 +195,21 @@ public class CardData
 
     public FighterCard GetFighterCard() { if (cardType == CardType.Fighter) return fighterCard; else if (cardType == CardType.AbilityFighter) return abilityFighterCard; else return null; }
     public EventCard GetEventCard() { if (cardType == CardType.Support) return supportCard; else if (cardType == CardType.Connect) return connectCard; else if (cardType == CardType.Intercept) return interceptCard; else return null; }
+    public CardAbilityData GetAbilityData()
+    {
+        switch (cardType)
+        {
+            case CardType.AbilityFighter:
+                return abilityFighterCard.abilityData;
+            case CardType.Support:
+                return supportCard.abilityData;
+            case CardType.Connect:
+                return connectCard.abilityData;
+            case CardType.Intercept:
+                return interceptCard.abilityData;
+        }
+        return null;
+    }
     public bool isStrikerCard() { return (cardType == CardType.Fighter || cardType == CardType.AbilityFighter /*|| cardType == CardType.Joker*/); }
     public bool isEventCard() { return (cardType == CardType.Support || cardType == CardType.Connect || cardType == CardType.Intercept); }
 }
@@ -244,7 +261,7 @@ public static class CardDataBase
     static BitVector32 sortBitMask;
     static int[] bitMaskIndices;
 
-    public static string[] SyuzokuString = new string[] { "戦士", "ナイト", "ソーサラー", "獣", "植物", "昆虫", "魚", "鳥", "アンデッド", "岩石", "マシン", "魔物", "ドラゴン", "精霊", "天使", "悪魔", "マスター" };
+    public static string[] SyuzokuString = new string[] { "戦士", "ナイト", "ソーサラー", "獣", "植物", "虫", "魚", "鳥", "アンデッド", "岩石", "マシン", "魔物", "ドラゴン", "精霊", "天使", "悪魔", "マスター" };
 
     static bool isInit = false;
 
@@ -521,11 +538,13 @@ public static class CardDataBase
 
             // キャラ画像
             var texture = PngLoader.LoadPNG(path + "/image.png");
-            if (texture) cardDatas[i].image = /*texture;*/  Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f)); 
+            if (texture) cardDatas[i].image = /*texture;*/  Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
+
+            //Debug.Log("カードID" + i + "番の読み込みが完了");
         }
     }
 
-    static void LoadAbility(TextLoader loader, out CardAbilityData abilityData)
+    static bool LoadAbility(TextLoader loader, out CardAbilityData abilityData)
     {
         // 効果
         abilityData = new CardAbilityData();
@@ -533,6 +552,9 @@ public static class CardDataBase
         /* 1行目 */
         // 発動タイミング
         abilityData.abilityTriggerType = (AbilityTriggerType)loader.ReadInt();
+
+        // 必要ライフポイント
+        abilityData.lifeCost = loader.ReadInt();
         // 発動条件
         abilityData.costType = (CostType)loader.ReadInt();
         switch (abilityData.costType)
@@ -561,9 +583,12 @@ public static class CardDataBase
             case CostType.Kisikaisei:
                 abilityData.cost = new Cost.Kisikaisei();
                 break;
-            default:
-                Debug.LogWarning("超すとおかしいクマ");
+            case CostType.PowerStriker:
+                abilityData.cost = new Cost.PowerStriker();
                 break;
+            default:
+                Debug.LogWarning("超すとおかしいクマ" + (int)abilityData.costType);
+                return false;
         }
         // 汎用数値
         abilityData.c_value0 = loader.ReadInt();
@@ -573,6 +598,12 @@ public static class CardDataBase
         // 効果個数
         abilityData.numSkill = loader.ReadInt();
         abilityData.skillDatas = new CardAbilityData.SkillData[abilityData.numSkill];
+
+        //Debug.Log("abilityTriggerType:" + abilityData.abilityTriggerType);
+        //Debug.Log("lifeCost:" + abilityData.lifeCost);
+        //Debug.Log("costType:" + abilityData.costType);
+        //Debug.Log("s_iValues:" + abilityData.c_value0 + "," + abilityData.c_value1);
+        //Debug.Log("numSkill:" + abilityData.numSkill);
 
         /* 3行目 */
         // 効果のタイプ
@@ -585,6 +616,9 @@ public static class CardDataBase
             skillData.abilityType = (AbilityType)loader.ReadInt();
             switch (skillData.abilityType)
             {
+                case AbilityType.None:
+                    skillData.skill = new Skill.None();
+                    break;
                 case AbilityType.GettingPoint:
                     skillData.skill = new Skill.Score();
                     break;
@@ -604,17 +638,58 @@ public static class CardDataBase
                     break;
             }
             // 汎用数値
-            skillData.s_value0 = loader.ReadInt();
-            skillData.s_value1 = loader.ReadInt();
-            skillData.s_value2 = loader.ReadInt();
-            skillData.s_value3 = loader.ReadInt();
-            skillData.s_value4 = loader.ReadInt();
-            skillData.s_value5 = loader.ReadInt();
-            skillData.s_value6 = loader.ReadInt();
-            skillData.s_value7 = loader.ReadInt();
-            skillData.s_value8 = loader.ReadInt();
-            skillData.s_value9 = loader.ReadInt();
+            skillData.s_iValue0 = loader.ReadInt();
+            skillData.s_iValue1 = loader.ReadInt();
+            skillData.s_iValue2 = loader.ReadInt();
+            skillData.s_iValue3 = loader.ReadInt();
+            skillData.s_iValue4 = loader.ReadInt();
+            skillData.s_iValue5 = loader.ReadInt();
+            skillData.s_iValue6 = loader.ReadInt();
+            skillData.s_iValue7 = loader.ReadInt();
+            skillData.s_iValue8 = loader.ReadInt();
+            skillData.s_iValue9 = loader.ReadInt();
+
+            // 汎用文字列値の個数
+            int numStringValue = loader.ReadInt();
+
+            // これはひどい
+            for (int j = 0; j < numStringValue; j++)
+            {
+                switch (j)
+                {
+                    case 0:
+                        skillData.s_sValue0 = loader.ReadDoubleQuotation();
+                        break;
+                    case 1:
+                        skillData.s_sValue1 = loader.ReadDoubleQuotation();
+                        break;
+                    case 2:
+                        skillData.s_sValue2 = loader.ReadDoubleQuotation();
+                        break;
+                    default:
+                        Debug.LogWarning("3個以上文字列型の値を読み込もうとしている(現状の上限)");
+                        break;
+                }
+
+            }
+
+            //Debug.Log("Skill" + i + ".nextSkillNumber:" + skillData.nextSkillNumber);
+            //Debug.Log("Skill" + i + ".abilityType:" + skillData.abilityType);
+            //Debug.Log("Skill" + i + ".s_iValues:" +
+            //     skillData.s_iValue0 + "," +
+            //     skillData.s_iValue1 + "," +
+            //     skillData.s_iValue2 + "," +
+            //     skillData.s_iValue3 + "," +
+            //     skillData.s_iValue4 + "," +
+            //     skillData.s_iValue5 + "," +
+            //     skillData.s_iValue6 + "," +
+            //     skillData.s_iValue7 + "," +
+            //     skillData.s_iValue8 + "," +
+            //     skillData.s_iValue9);
         }
+
+        return true;
+
     }
 
     //static Syuzoku[] BitToEnumArraySyuzoku(ushort wSyuzoku)

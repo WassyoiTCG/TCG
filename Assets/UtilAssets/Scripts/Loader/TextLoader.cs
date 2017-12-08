@@ -238,7 +238,7 @@ public class TextLoader
             そのため漢字の始めと終わりに制御コードが不要になりました。
         */
         //return (Encoding.GetEncoding("shift_jis").GetByteCount(fileBuf, index, 1) == 2);
-        if (index < fileBuf.Length - 1)
+        if (index < fileBuf.Length - 2)
         {
             char digit1 = fileBuf[index], digit2 = fileBuf[index + 1];
             if ((digit1 >= 0x81 && digit1 <= 0x9f) || (digit1 >= 0xe0 && digit1 <= 0xef))

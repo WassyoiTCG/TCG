@@ -5,6 +5,8 @@ using UnityEngine.UI;
 
 public class Card : MonoBehaviour
 {
+    public Animator animator;
+
     public Canvas canvas;
 
     //public Image cardFrameImage;
@@ -15,9 +17,9 @@ public class Card : MonoBehaviour
     public Text cardNameText;
     public Text syuzokuText;
     //public Image cardImage;
-    public MeshRenderer cardFrameRenderer;
-    public MeshRenderer cardSleeveRenderer;
-    public MeshRenderer cardImageRenderer;
+    public Renderer cardFrameRenderer;
+    public Renderer cardSleeveRenderer;
+    public Renderer cardImageRenderer;
 
     public bool isMyPlayerSide;
     public bool isSetField = false;
@@ -185,7 +187,7 @@ public class Card : MonoBehaviour
         uraomoteFlag = value;
         if (value)
         {
-            fighterPowerFrame.gameObject.SetActive(true);
+            if(cardData.cardType != CardType.Support) fighterPowerFrame.gameObject.SetActive(true);
             canvas.gameObject.SetActive(true);
         }
         else
@@ -212,28 +214,52 @@ public class Card : MonoBehaviour
         SetOrder(handNumber);
         nextPosition = cacheTransform.localPosition;
         nextAngle = cacheTransform.localEulerAngles;
-
+        //// 時間指定
+        //CardObjectState.Draw.GetInstance().endTime = 0.75f;
         // ステートてぇんじ
         stateMachine.ChangeState(CardObjectState.Draw.GetInstance());
     }
 
     // 宝箱とか見せる用の位置に移動するドロー
-    public void ShowDraw()
+    public void ShowDraw(float endTime, bool urakarahajimaru)
+    {
+        // デッキにいる位置を保存
+        startPosition = cacheTransform.localPosition;
+        startAngle = cacheTransform.localEulerAngles;
+        if(urakarahajimaru)startAngle.z = 180;
+
+        var showDrawTransform = GameObject.Find("Main Camera/ShowDrawTransform").transform;
+        Debug.Assert(showDrawTransform, "メインカメラの名前変わってるかも");
+
+        // 最前面
+        SetOrder(114);
+
+        // 座標指定
+        nextPosition = showDrawTransform.position;
+        nextAngle = showDrawTransform.eulerAngles;
+        //// 時間指定
+        //CardObjectState.Draw.GetInstance().endTime = endTime;
+        // ステートてぇんじ
+        stateMachine.ChangeState(CardObjectState.Draw.GetInstance());
+    }
+
+    public void SetSupport()
     {
         // デッキにいる位置を保存
         startPosition = cacheTransform.localPosition;
         startAngle = cacheTransform.localEulerAngles;
 
-        // 手札の位置
-        cardObjectManager.MakeHandTransform(0, 1, this);
+        var showDrawTransform = GameObject.Find("Main Camera/ShowDrawTransform").transform;
+        Debug.Assert(showDrawTransform, "メインカメラの名前変わってるかも");
+
         // 最前面
         SetOrder(114);
-        nextPosition = cacheTransform.localPosition;
-        nextPosition.x = 0;
-        nextPosition.z += 2;
-        nextAngle = cacheTransform.localEulerAngles;
+
+        // 座標指定
+        nextPosition = showDrawTransform.position;
+        nextAngle = showDrawTransform.eulerAngles;
         // ステートてぇんじ
-        stateMachine.ChangeState(CardObjectState.Draw.GetInstance());
+        stateMachine.ChangeState(CardObjectState.SetSupport.GetInstance());
     }
 
     public void Marigan(Vector3 handPosition, Vector3 handAngle)
@@ -249,11 +275,27 @@ public class Card : MonoBehaviour
 
     public void FieldSet(Vector3 fieldPosition, Vector3 angle)
     {
+        // 開始位置設定
+        startPosition = nextPosition + new Vector3(Mathf.Sin(angle.y * Mathf.Deg2Rad), 0, Mathf.Cos(angle.y * Mathf.Deg2Rad)) * 50;
+        //startPosition = cacheTransform.localPosition;
         nextPosition = fieldPosition;
-        cacheTransform.localEulerAngles = angle;
+        startAngle = nextAngle = angle;
 
         // ステートてぇんじ
         stateMachine.ChangeState(CardObjectState.Set.GetInstance());
+    }
+
+    // 攻撃モーション発動(勝ち)
+    public void Attack()
+    {
+        // ステートてぇんじ
+        stateMachine.ChangeState(CardObjectState.Attack.GetInstance());
+    }
+
+    public void Lose()
+    {
+        // ステートてぇんじ
+        stateMachine.ChangeState(CardObjectState.Lose.GetInstance());
     }
 
     // 墓地に移動して消える

@@ -31,6 +31,7 @@ public class SceneMain : MonoBehaviour
     public UIManager uiManager;                                 // UI管理さん
     public PlayerManager playerManager;                         // プレイヤー管理さん
     public CardAbilityManager abilityManager;                   // 効果管理さん
+    public TurnEndEffects turnEndEffect;                        // フェーズ演出さん
     public Text pointText;                                      // ポイントのテキスト
     public Text restPointText;                                  // 残りポイントのテキスト
     public PointCardManager pointManager { get; private set; }  // ポイント山札
@@ -91,15 +92,13 @@ public class SceneMain : MonoBehaviour
         var cpuScore = playerManager.uiManager.cpuHP;
         if (myScore > cpuScore)
         {
-            pointText.text = "あなたの勝ち";
+            stateMachine.ChangeState(SceneMainState.Winner.GetInstance());
         }
         else if (myScore < cpuScore)
         {
-            pointText.text = "あなたの負け";
+            stateMachine.ChangeState(SceneMainState.Loser.GetInstance());
         }
-        else pointText.text = "引き分け";
-
-        stateMachine.ChangeState(SceneMainState.Finish.GetInstance());
+        else stateMachine.ChangeState(SceneMainState.Winner.GetInstance());
     }
 
     public void Restart()

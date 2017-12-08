@@ -193,21 +193,21 @@ namespace CardObjectState
         }
     }
 
-    // セットするときの
+    // フィールドにセットするときにいるステート
     public class Set : BaseEntityState<Card>
     {
         static Set instance;
         public static Set GetInstance() { if (instance == null) { instance = new Set(); } return instance; }
 
-        readonly float moveDist = 50;
+        //readonly float moveDist = 50;
         readonly float moveTime = 0.5f;
 
         public override void Enter(Card card)
         {
             // 裏にする
-            var angle = card.cacheTransform.localEulerAngles.y * Mathf.Deg2Rad;
-            card.startPosition = card.nextPosition + new Vector3(Mathf.Sin(angle), 0, Mathf.Cos(angle)) * moveDist;
+            //var angle = card.cacheTransform.localEulerAngles.y * Mathf.Deg2Rad;
             card.cacheTransform.localPosition = card.startPosition;
+            card.cacheTransform.localEulerAngles = card.startAngle;
 
             // まだセットしてない
             card.isSetField = false;
@@ -244,6 +244,63 @@ namespace CardObjectState
         }
     }
 
+    // サポートセット時
+    public class SetSupport : BaseEntityState<Card>
+    {
+        static SetSupport instance;
+        public static SetSupport GetInstance() { if (instance == null) { instance = new SetSupport(); } return instance; }
+
+        readonly float endTime = 0.5f;
+
+        public override void Enter(Card card)
+        {
+            card.timer = 0;
+
+            card.cacheTransform.localPosition = card.startPosition;
+            card.cacheTransform.localEulerAngles = card.startAngle;
+        }
+
+        public override void Execute(Card card)
+        {
+            if ((card.timer += Time.deltaTime) > endTime)
+            {
+                card.timer = endTime;
+
+                // ★移動終わってカードの効果発動
+                var abilityManager = GameObject.Find("GameMain/AbilityManager").GetComponent<CardAbilityManager>();
+                abilityManager.PushAbility(card.cardData.supportCard.abilityData, card.isMyPlayerSide);
+
+                // ステートチェンジ
+                card.MoveToCemetery();
+                return;
+            }
+
+            var rate = card.timer / endTime;
+
+            // 座標
+            card.cacheTransform.localPosition = oulMath.LerpVector(card.startPosition, card.nextPosition, rate);
+
+            // アングルも変える
+            var angle = Vector3.zero;
+            angle.x = Mathf.LerpAngle(card.startAngle.x, card.nextAngle.x, rate);
+            angle.y = Mathf.LerpAngle(card.startAngle.y, card.nextAngle.y, rate);
+            angle.z = Mathf.LerpAngle(card.startAngle.z, card.nextAngle.z, rate);
+            card.cacheTransform.localEulerAngles = angle;
+
+            // 半分過ぎたらとりあえずて感じで
+            if (rate > 0.5f) card.SetUraomote(true);
+        }
+
+        public override void Exit(Card card)
+        { }
+
+        public override bool OnMessage(Card card, MessageInfo message)
+        {
+            return false;
+        }
+    }
+
+
     // 裏から表になる
     public class Open : BaseEntityState<Card>
     {
@@ -251,7 +308,7 @@ namespace CardObjectState
         static Open instance;
         public static Open GetInstance() { if (instance == null) { instance = new Open(); } return instance; }
 
-        readonly float endTime = 0.75f;
+        readonly float endTime = 0.5f;
 
         public override void Enter(Card card)
         {
@@ -302,6 +359,92 @@ namespace CardObjectState
 
         public override void Exit(Card card)
         { }
+
+        public override bool OnMessage(Card card, MessageInfo message)
+        {
+            return false;
+        }
+    }
+
+    // 攻撃モーション
+    public class Attack : BaseEntityState<Card>
+    {
+        // Singleton.
+        static Attack instance;
+        public static Attack GetInstance() { if (instance == null) { instance = new Attack(); } return instance; }
+
+        public override void Enter(Card card)
+        {
+            card.timer = 0;
+
+            // アタックモーションセット
+            card.animator.SetBool("AttackFlag", true);
+        }
+
+        public override void Execute(Card card)
+        {
+            // モーション終了判定
+            if(card.animator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 1)
+            {
+                card.ChangeState(None.GetInstance());
+            }
+        }
+
+        public override void Exit(Card card)
+        {
+            // 攻撃モーション解除
+            //card.animator.SetBool("AttackFlag", false);
+        }
+
+        public override bool OnMessage(Card card, MessageInfo message)
+        {
+            return false;
+        }
+    }
+
+    // 負けるモーション
+    public class Lose : BaseEntityState<Card>
+    {
+        // Singleton.
+        static Lose instance;
+        public static Lose GetInstance() { if (instance == null) { instance = new Lose(); } return instance; }
+
+        public override void Enter(Card card)
+        {
+            card.timer = 0;
+
+            // 負けるモーションセット
+            card.animator.SetBool("LoseFlag", true);
+        }
+
+        public override void Execute(Card card)
+        {
+            // 負けてるモーション中
+            //if(card.animator.GetBool("DamageFlag"))
+            {
+                // モーション終了判定
+                if (card.animator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 1)
+                {
+                    card.ChangeState(None.GetInstance());
+                }
+                return;
+            }
+
+            //// ぶつかった瞬間フレーム
+            //if (card.animator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 1)
+            //{
+            //    // 攻撃フラグ解除
+            //    card.animator.SetBool("AttackFlag", false);
+            //    // 負けるモーション発動
+            //    card.animator.SetBool("DamageFlag", true);
+            //}
+        }
+
+        public override void Exit(Card card)
+        {
+            // 負けるモーション解除
+            card.animator.SetBool("LoseFlag", false);
+        }
 
         public override bool OnMessage(Card card, MessageInfo message)
         {

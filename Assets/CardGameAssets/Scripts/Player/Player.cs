@@ -18,7 +18,7 @@ public class Player : MonoBehaviour
     public PlayerManager playerManager { get; private set; }     // プレイヤー管理する人の実体
 
     public static readonly int noSetStrikerPower = -1;
-    readonly int firstDrawCount = 7;                            // 最初のドローする枚数
+    readonly int firstDrawCount = 6;                            // 最初のドローする枚数
 
     public int playerID;    // ネット的なID
     public bool isMyPlayer; // 自分が操作しているプレイヤーかどうか
@@ -38,7 +38,7 @@ public class Player : MonoBehaviour
         var striker = GetFieldStrikerCard();
         if (striker != null)
         {
-            jissainoPower = striker.power;
+            jissainoPower = striker.cardData.power;
         }
         else jissainoPower = noSetStrikerPower;
     }
@@ -295,14 +295,19 @@ public class Player : MonoBehaviour
     //    playerManager.uiManager.UpdateDeckUI(deckManager, isMyPlayer);
     //}
 
-    public void SetCard(SetCardInfo info)
+    public void SetCard(SelectCardIndexInfo info)
     {
-        deckManager.FieldSet(info.handNo);
+        deckManager.FieldSet(info.index);
     }
 
-    public void SetIntercept(SetCardInfo info)
+    public void SetSupport(SelectCardIndexInfo info)
     {
-        deckManager.SetIntercept(info.handNo);
+        deckManager.SetSupport(info.index);
+    }
+
+    public void SetIntercept(SelectCardIndexInfo info)
+    {
+        deckManager.SetIntercept(info.index);
     }
 
     public void BackToHand(BackToHandInfo info)
@@ -331,6 +336,12 @@ public class Player : MonoBehaviour
         if (card) card.Open();
     }
 
+    public void AttackStriker()
+    {
+        var card = cardObjectManager.fieldStrikerCard;
+        if (card) card.Attack();
+    }
+
     // 手札や山札の情報のセット
     public void SyncDeck(SyncDeckInfo syncData)
     {
@@ -340,9 +351,9 @@ public class Player : MonoBehaviour
         deckManager.Sync(syncData);
     }
 
-    public CardData GetFieldStrikerCard()
+    public Card GetFieldStrikerCard()
     {
-        return deckManager.fieldStrikerCard;
+        return cardObjectManager.fieldStrikerCard;
     }
 
     public CardData GetFieldEventCard()

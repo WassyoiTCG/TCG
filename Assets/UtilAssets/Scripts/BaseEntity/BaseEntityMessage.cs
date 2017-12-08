@@ -22,13 +22,16 @@ public enum MessageType
     //OfflinePlay,    // オフライン対戦プレイ選択
     SyncDeck,       // 山札・手札・墓地・追放情報の同期
     SyncPoint,      // ポイント情報の同期
-    SetStriker,     // カードをセット
+    SetStriker,     // ストライカーカードをセット
+    SetSupport,     // サポートカード発動
     SetIntercept,   // インターセプト発動
     BackToHand,     // セットしたカードを手札に戻す動作
     SetStrikerOK,   // ストライカーセット完了
     SetStrikerPass, // ストライカーセットをパス
     Marigan,        // マリガン
     NoMarigan,      // マリガンなし
+    SelectHand,     // 手札選択(ランダムで選択も含む)
+    SelectCemetery, // 墓地選択(ランダムで選択も含む)黒魔術兄貴とか仲間と共にとか
     SelectNumber,   // 数字選択
     Restart,        // もう一度
     EndGame,        // ゲーム終了
@@ -67,15 +70,20 @@ public struct PointInfo
     public int[] points;
 }
 
-public struct SetCardInfo
+public struct SelectCardIndexInfo
 {
-    public int handNo;  // 手札の何番目のカードがセットされたか
+    public int index;  // 手札・山札・墓地の何番目のカード
 }
 
 public struct BackToHandInfo
 {
     public int iCardType;
 }
+
+//public struct SelectCemeteryInfo
+//{
+//    public int selectCemeteryNumber;
+//}
 
 public struct SelectNumberInfo
 {

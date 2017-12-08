@@ -130,7 +130,7 @@ namespace PlayerState
             if(player.isMyPlayer)
             {
                 // インターセプトを選択不可能に
-                player.cardObjectManager.ChangeHandSetStrikerMode();
+                player.cardObjectManager.ChangeHandSetStrikerMode(player);
             }
         }
 
@@ -162,7 +162,7 @@ namespace PlayerState
             if (player.isMyPlayer)
             {
                 // インターセプトを選択可能に
-                player.cardObjectManager.ChangeHandSetInterceptMode();
+                player.cardObjectManager.ChangeHandSetInterceptMode(player);
             }
         }
 
@@ -181,26 +181,26 @@ namespace PlayerState
     }
 
 
-    public class StrikerAbility : BaseEntityState<Player>
+    public class StrikerAfterBattleAbility : BaseEntityState<Player>
     {
         // Singleton.
-        static StrikerAbility instance;
-        public static StrikerAbility GetInstance() { if (instance == null) { instance = new StrikerAbility(); } return instance; }
+        static StrikerAfterBattleAbility instance;
+        public static StrikerAfterBattleAbility GetInstance() { if (instance == null) { instance = new StrikerAfterBattleAbility(); } return instance; }
 
         public override void Enter(Player player)
         {
             // 出したストライカーが効果持ちでなおかつバトル後効果発動なら
             var card = player.GetFieldStrikerCard();
             if (card == null) return;
-            if (card.cardType != CardType.AbilityFighter) return;
-            var ability = card.abilityFighterCard.abilityData;
+            if (card.cardData.cardType != CardType.AbilityFighter) return;
+            var ability = card.cardData.abilityFighterCard.abilityData;
             if (ability.abilityTriggerType != AbilityTriggerType.AfterBattle) return;
 
             // 効果の条件を満たしているかどうか(爪痕とかのチェック)
-            if (!ability.HatsudouOK()) return;
+            if (!ability.HatsudouOK(player)) return;
 
             // 効果発動!
-            GameObject.Find("GameMain/AbilityManager").GetComponent<CardAbilityManager>().PushAbility(ability, player.playerID);
+            GameObject.Find("GameMain/AbilityManager").GetComponent<CardAbilityManager>().PushAbility(ability, player.isMyPlayer);
         }
 
         public override void Execute(Player player)

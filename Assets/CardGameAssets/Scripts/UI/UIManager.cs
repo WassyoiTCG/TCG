@@ -49,6 +49,7 @@ public class UIManager : MonoBehaviour
     public GameObject connectingUI;
 
     public GameObject selectNumberUI;   // 宝箱とかの
+    public Button[] numberButtons = new Button[11];
 
     public void Restart()
     {
@@ -62,6 +63,15 @@ public class UIManager : MonoBehaviour
 
     void Update()
     {
+        // HPへらす
+        if(Input.GetKeyDown(KeyCode.Alpha1))
+        {
+            myHP = 1;
+            myHPNumber.SetNumber(myHP);
+            cpuHP = 1;
+            cpuHPNumber.SetNumber(cpuHP);
+        }
+
         // 補間処理
         lerpMyHP = Mathf.Lerp(lerpMyHP, (float)myHP, 0.5f);
         lerpCPUHP = Mathf.Lerp(lerpCPUHP, (float)cpuHP, 0.5f);
@@ -236,7 +246,7 @@ public class UIManager : MonoBehaviour
     {
         var numHand = deckManager.GetNumHand();
         var numYamahuda = deckManager.GetNumYamahuda();
-        var numBochi = deckManager.GetNumBochi();
+        var numBochi = deckManager.GetNumCemetery();
         var numTsuihou = deckManager.GetNumTsuihou();
 
         if (isMyPlayer)
@@ -334,9 +344,21 @@ public class UIManager : MonoBehaviour
         connectingUI.SetActive(false);
     }
 
-    public void AppearSelectNumberUI()
+    public void AppearSelectNumberUI(DeckManager deckManager)
     {
         selectNumberUI.SetActive(true);
+
+        // 全部選択不可能
+        foreach (Button numberButton in numberButtons) numberButton.interactable = false;
+
+        // 山札にあるカードが選択できる
+        foreach(CardData card in deckManager.GetYamahuda())
+        {
+            // イベントカードはスルー
+            if (card.isEventCard()) continue;
+            // ボタン有効化
+            numberButtons[card.power].interactable = true;
+        }
     }
 
     public void DisAppearSelectNumberUI()
