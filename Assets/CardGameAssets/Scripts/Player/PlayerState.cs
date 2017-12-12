@@ -135,7 +135,14 @@ namespace PlayerState
         }
 
         public override void Execute(Player player)
-        { }
+        {
+            var striker = player.GetFieldStrikerCard();
+            if (striker != null)
+            {
+                player.jissainoPower = striker.cardData.power;
+            }
+            else player.jissainoPower = Player.noSetStrikerPower;
+        }
 
         public override void Exit(Player player)
         {
@@ -174,6 +181,42 @@ namespace PlayerState
         {
             player.playerManager.uiManager.DisAppearWaitYouUI();
         }
+
+        public override bool OnMessage(Player player, MessageInfo message)
+        {
+            return false;
+        }
+    }
+
+    public class StrikerBeforeBattleAbility : BaseEntityState<Player>
+    {
+        // Singleton.
+        static StrikerBeforeBattleAbility instance;
+        public static StrikerBeforeBattleAbility GetInstance() { if (instance == null) { instance = new StrikerBeforeBattleAbility(); } return instance; }
+
+        public override void Enter(Player player)
+        {
+            // 出したストライカーが効果持ちでなおかつバトル後効果発動なら
+            var card = player.GetFieldStrikerCard();
+            if (card == null) return;
+            if (card.cardData.cardType != CardType.AbilityFighter) return;
+            var ability = card.cardData.abilityFighterCard.abilityData;
+            if (ability.abilityTriggerType != AbilityTriggerType.BeforeBattle) return;
+
+            // 効果の条件を満たしているかどうか(爪痕とかのチェック)
+            if (!ability.HatsudouOK(player)) return;
+
+            // 効果発動!
+            GameObject.Find("GameMain/AbilityManager").GetComponent<CardAbilityManager>().PushAbility(ability, player.isMyPlayer);
+        }
+
+        public override void Execute(Player player)
+        {
+
+        }
+
+        public override void Exit(Player player)
+        { }
 
         public override bool OnMessage(Player player, MessageInfo message)
         {

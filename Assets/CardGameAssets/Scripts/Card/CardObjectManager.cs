@@ -13,6 +13,7 @@ public class CardObjectManager : MonoBehaviour
     List<Card> handCards = new List<Card>();        // 手札のカード
     List<Card> yamahudaCards = new List<Card>();    // 山札のカード
     List<Card> cemeteryCards = new List<Card>();    // 墓地のカード
+    Queue<Card> expulsionCards = new Queue<Card>(); // 追放のカード
     public Card fieldStrikerCard { get; private set; }
     public Card fieldEventCard { get; private set; }
 
@@ -270,10 +271,8 @@ public class CardObjectManager : MonoBehaviour
         var angle = Vector3.zero;
         angle.y = 180;
 
-        const float width = 3;
+        const float width = 2;
         position.x = width * handNo - (numHand * width / 2) + (width / 2);
-        position.x += 0.7f;
-        //+ (width * handNo - (numHand * width / 2) + (width / 2)) / 4;
         position.z = -20.0f;
 
         // 逆サイド処理
@@ -519,13 +518,23 @@ public class CardObjectManager : MonoBehaviour
 
     public void AddHand(Card card)
     {
+        // 手札に加える
         handCards.Add(card);
+        // カードをドローの動きにする
         card.Draw(handCards.Count - 1, handCards.Count);
+        // 手札位置更新
+        UpdateHandPosition();
     }
 
     public void AddCemetery(Card card)
     {
         cemeteryCards.Add(card);
+        card.MoveToCemetery();
+    }
+
+    public void AddExpulsion(Card card)
+    {
+        expulsionCards.Enqueue(card);
         card.MoveToCemetery();
     }
 

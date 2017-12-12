@@ -433,6 +433,8 @@ public class PlayerManager : MonoBehaviour
             var power0 = players[0].jissainoPower;
             var power1 = players[1].jissainoPower;
 
+            Debug.Log(power0 + " vs " + power1);
+
             // 相打ち処理
             if (power0 == power1) return -1;
 

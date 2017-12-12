@@ -40,7 +40,8 @@ public enum CostType
     Treasure,   // 宝箱
     Nakama,     // 仲間と共に
     Kisikaisei, // 起死回生の一手
-    PowerStriker,   // パワーxのストライカーが手札にあるか
+    YouStrikerPower,    // 相手ストライカーのパワーがx
+    PowerStriker,       // パワーxのストライカーが手札にあるか
 }
 
 
@@ -212,6 +213,12 @@ public class CardData
     }
     public bool isStrikerCard() { return (cardType == CardType.Fighter || cardType == CardType.AbilityFighter /*|| cardType == CardType.Joker*/); }
     public bool isEventCard() { return (cardType == CardType.Support || cardType == CardType.Connect || cardType == CardType.Intercept); }
+}
+
+public enum CardMoveFlag
+{
+    Draw,
+    ShowDraw,
 }
 
 public static class CardDataBase
@@ -463,7 +470,7 @@ public static class CardDataBase
                     if (str == "") continue;
                     if (str.ToCharArray()[0] == '[') break;
 
-                    cardDatas[i].abilityText += str;
+                    cardDatas[i].abilityText += str + "\r\n";
                 }
 
                 // フレーバーテキスト
@@ -474,7 +481,7 @@ public static class CardDataBase
                     if (str == "") continue;
                     if (str.ToCharArray()[0] == '[') break;
 
-                    cardDatas[i].flavorText += str;
+                    cardDatas[i].flavorText += str + "\r\n";
                 }
 
                 // パワー
@@ -583,6 +590,9 @@ public static class CardDataBase
             case CostType.Kisikaisei:
                 abilityData.cost = new Cost.Kisikaisei();
                 break;
+            case CostType.YouStrikerPower:
+                abilityData.cost = new Cost.YouStrikerPower();
+                break;
             case CostType.PowerStriker:
                 abilityData.cost = new Cost.PowerStriker();
                 break;
@@ -593,6 +603,8 @@ public static class CardDataBase
         // 汎用数値
         abilityData.c_value0 = loader.ReadInt();
         abilityData.c_value1 = loader.ReadInt();
+        abilityData.c_value2 = loader.ReadInt();
+        abilityData.c_value3 = loader.ReadInt();
 
         /* 2行目 */
         // 効果個数
@@ -626,8 +638,7 @@ public static class CardDataBase
                     skillData.skill = new Skill.Power();
                     break;
                 case AbilityType.CardMove:
-                    //skillData.skill = new Skill.CardMove();
-                    Debug.LogWarning("未実装: カード動かす");
+                    skillData.skill = new Skill.CardMove();
                     break;
                 case AbilityType.Lose:
                     Debug.LogWarning("未実装: 無条件敗北");

@@ -30,6 +30,7 @@ public enum MessageType
     SetStrikerPass, // ストライカーセットをパス
     Marigan,        // マリガン
     NoMarigan,      // マリガンなし
+    SelectYamahuda, // 山札選択
     SelectHand,     // 手札選択(ランダムで選択も含む)
     SelectCemetery, // 墓地選択(ランダムで選択も含む)黒魔術兄貴とか仲間と共にとか
     SelectNumber,   // 数字選択
@@ -72,7 +73,8 @@ public struct PointInfo
 
 public struct SelectCardIndexInfo
 {
-    public int index;  // 手札・山札・墓地の何番目のカード
+    public int index;       // 手札・山札・墓地の何番目のカード
+    public int iMoveFlag;   // カード移動の種類
 }
 
 public struct BackToHandInfo

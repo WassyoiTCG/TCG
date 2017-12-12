@@ -15,7 +15,7 @@ namespace Cost
         public abstract void Execute(CardAbilityData abilityData);
         public abstract bool OnMessage(CardAbilityData abilityData, MessageInfo message);
         // 発動条件を満たしているかどうか(主にイベントカードが出せるかどうかに使う)
-        public abstract bool HatsudouCheck(/*CardAbilityData abilityData*/Player player);
+        public abstract bool HatsudouCheck(CardAbilityData abilityData, Player player);
         public bool EndCheck() { return endFlag; }
     }
 
@@ -44,7 +44,7 @@ namespace Cost
             return false;
         }
 
-        public override bool HatsudouCheck(Player player) { return true; }
+        public override bool HatsudouCheck(CardAbilityData abilityData, Player player) { return true; }
     }
 
     // 勝利の雄たけび
@@ -111,7 +111,7 @@ namespace Cost
             return false;
         }
 
-        public override bool HatsudouCheck(Player player) { return true; }
+        public override bool HatsudouCheck(CardAbilityData abilityData, Player player) { return true; }
     }
 
     // 爪痕
@@ -179,7 +179,7 @@ namespace Cost
             return false;
         }
 
-        public override bool HatsudouCheck(Player player) { return true; }
+        public override bool HatsudouCheck(CardAbilityData abilityData, Player player) { return true; }
     }
 
     //public class Sousai : BaseEntityState<CardAbilityData>
@@ -201,7 +201,7 @@ namespace Cost
         public static Burst GetInstance() { if (instance == null) { instance = new Burst(); } return instance; }
 
 
-        //int step;
+        int step;
         Card drawCard;
 
         public override void Enter(CardAbilityData abilityData)
@@ -268,7 +268,7 @@ namespace Cost
             return false;
         }
 
-        public override bool HatsudouCheck(Player player)
+        public override bool HatsudouCheck(CardAbilityData abilityData, Player player)
         {
             // 山札が1以上のときに発動可能
             // 墓地にジョーカーがいたら発動OK
@@ -283,7 +283,7 @@ namespace Cost
         static Treasure instance;
         public static Treasure GetInstance() { if (instance == null) { instance = new Treasure(); } return instance; }
 
-        //int step;
+        int step;
         int selectNumber;   // プレイヤーの選択した番号
         Card drawCard;
 
@@ -295,7 +295,7 @@ namespace Cost
             drawCard = null;
 
             // 数字選択UI表示
-            CardAbilityData.uiManager.AppearSelectNumberUI(abilityData.myPlayer.deckManager);
+            if(CardAbilityData.playerManager.GetMyPlayer().isMyPlayer)CardAbilityData.uiManager.AppearSelectNumberUI(abilityData.myPlayer.deckManager);
 
             // Ability列車 宝箱発動した瞬間
         }
@@ -391,7 +391,7 @@ namespace Cost
             return false;
         }
 
-        public override bool HatsudouCheck(Player player)
+        public override bool HatsudouCheck(CardAbilityData abilityData, Player player)
         {
             // 山札が1以上のときに発動可能
             return (player.deckManager.GetNumYamahuda() > 0);
@@ -404,7 +404,7 @@ namespace Cost
         static Kisikaisei instance;
         public static Kisikaisei GetInstance() { if (instance == null) { instance = new Kisikaisei(); } return instance; }
 
-        //int step;
+        int step;
         int selectNumber;   // プレイヤーの選択した番号
 
         public override void Enter(CardAbilityData abilityData)
@@ -438,11 +438,11 @@ namespace Cost
                         // 成功時の効果に移行
                         abilityData.skillNumber = abilityData.c_value0;
                     }
-                    else// 残念
+                    // 残念
+                    else
                     {
                         // 失敗時の効果に移行
-                        //abilityData.skillNumber = abilityData.c_value1;
-                        //[1209] 到達されないコードが検出されましたとか意味不明のエラーが出たため一時コメントアウト
+                        abilityData.skillNumber = abilityData.c_value1;
                     }
 
                     // コスト処理終了
@@ -473,7 +473,7 @@ namespace Cost
             return false;
         }
 
-        public override bool HatsudouCheck(Player player) { return true; }
+        public override bool HatsudouCheck(CardAbilityData abilityData, Player player) { return true; }
     }
 
     // 仲間と共に
@@ -483,7 +483,7 @@ namespace Cost
         public static Nakama GetInstance() { if (instance == null) { instance = new Nakama(); } return instance; }
 
         float timer;
-        //int step;
+        int step;
         Card drawCard;
 
         public override void Enter(CardAbilityData abilityData)
@@ -562,7 +562,7 @@ namespace Cost
                     abilityData.myPlayer.deckManager.AddBochi(drawCard);
 
                     // 引いたカードを墓地に送る動き
-                    drawCard.MoveToCemetery();
+                    //drawCard.MoveToCemetery();
 
                     step++;
                     break;
@@ -600,7 +600,7 @@ namespace Cost
             return false;
         }
 
-        public override bool HatsudouCheck(Player player)
+        public override bool HatsudouCheck(CardAbilityData abilityData, Player player)
         {
             // 墓地にストライカー系がいないと発動できない
             if (player.deckManager.isExistBochiCardType(CardType.Fighter)) { return (player.jissainoPower == 1); }
@@ -614,6 +614,96 @@ namespace Cost
         }
     }
 
+    public enum PowerRange
+    {
+        Pinpoint,
+        Ijou,
+        Ika,
+    }
+
+    // 相手のストライカーのパワーがx
+    public class YouStrikerPower : Base
+    {
+        static YouStrikerPower instance;
+        public static YouStrikerPower GetInstance() { if (instance == null) { instance = new YouStrikerPower(); } return instance; }
+
+        public override void Enter(CardAbilityData abilityData)
+        {
+            base.Enter(abilityData);
+
+            var striker = abilityData.youPlayer.GetFieldStrikerCard();
+            if(!striker)
+            {
+                JoukenNG(abilityData);
+                return;
+            }
+
+            var power = abilityData.c_value0;
+            var hantei = false;
+            switch ((PowerRange)abilityData.c_value1)
+            {
+                case PowerRange.Pinpoint:
+                    hantei = (striker.cardData.power == power);
+                    break;
+
+                case PowerRange.Ijou:
+                    hantei = (striker.cardData.power >= power);
+                    break;
+
+                case PowerRange.Ika:
+                    hantei = (striker.cardData.power <= power);
+                    break;
+
+                default:
+                    Debug.LogWarning("パワーレンジの値おかしいクマ");
+                    break;
+            }
+
+            if (hantei)
+                JoukenOK(abilityData);
+            else
+                JoukenNG(abilityData);
+        }
+
+        void JoukenOK(CardAbilityData abilityData)
+        {
+            // 成功時の効果に移行
+            abilityData.skillNumber = abilityData.c_value2;
+
+            // Ability列車 パワー条件成功時
+
+        }
+        void JoukenNG(CardAbilityData abilityData)
+        {
+            // 失敗時の効果に移行
+            abilityData.skillNumber = abilityData.c_value3;
+
+            // Ability列車 パワー条件失敗時
+
+        }
+
+        public override void Execute(CardAbilityData abilityData)
+        {
+            // Ability列車 パワー判定の演出終わったら
+            if(true)
+            {
+                // 終了
+                endFlag = true;
+                abilityData.isJoukenOK = true;
+            }
+        }
+
+        public override bool OnMessage(CardAbilityData abilityData, MessageInfo message)
+        {
+            return false;
+        }
+
+        public override bool HatsudouCheck(CardAbilityData abilityData, Player player)
+        {
+            return true;
+        }
+    }
+
     // パワーxのストライカーが
     public class PowerStriker : Base
     {
@@ -621,6 +711,7 @@ namespace Cost
         public static PowerStriker GetInstance() { if (instance == null) { instance = new PowerStriker(); } return instance; }
 
         Card suteCard;
+        int selectHandIndex;
 
         public override void Enter(CardAbilityData abilityData)
         {
@@ -628,50 +719,13 @@ namespace Cost
 
             suteCard = null;
 
-            Func<int, int, bool> check;
-            switch (abilityData.c_value1)
-            {
-                case 0:
-                    check = (a, b) => { return (a == b); };
-                    break;
-
-                case 1:
-                    check = (a, b) => { return (a >= b); };
-                    break;
-
-                case 2:
-                    check = (a, b) => { return (a <= b); };
-                    break;
-
-                default:
-                    Debug.LogWarning("おかしいおかしい");
-                    endFlag = true;
-                    return;
-            }
-
             // (TODO)手札からドローする番号を決定(無造作)
             if (abilityData.isMyPlayer || !SelectData.isNetworkBattle)
             {
-                var deckManager = abilityData.myPlayer.deckManager;
-                for (int i = 0; i < deckManager.GetNumHand(); i++)
-                {
-                    var card = deckManager.GetHandCard(i);
-                    if (card.isEventCard()) continue;
-                    // 条件満たしたら
-                    if (check(card.power, abilityData.c_value0))
-                    {
-                        SelectCardIndexInfo info = new SelectCardIndexInfo();
-                        info.index = i;
-                        // メッセージ送信
-                        MessageManager.Dispatch(abilityData.myPlayer.playerID, MessageType.SelectHand, info);
-                        return;
-                    }
-                }
-
-                Debug.LogWarning("パワーコストのモンスター持ってないのに発動しようとした。事前にその効果を発動しないようにしましょう。");
-
-                // 終了
-                endFlag = true;
+                SelectCardIndexInfo info = new SelectCardIndexInfo();
+                info.index = selectHandIndex;
+                // メッセージ送信
+                MessageManager.Dispatch(abilityData.myPlayer.playerID, MessageType.SelectHand, info);
                 return;
             }
         }
@@ -685,8 +739,10 @@ namespace Cost
                 case 1: // 捨てカード移動中
                     if(!suteCard.isInMovingState())
                     {
-                        // 墓地に行く
-                        suteCard.MoveToCemetery();
+                        // 墓地に送る
+                        abilityData.myPlayer.deckManager.AddBochi(suteCard);
+                        // 墓地に行く動き
+                        //suteCard.MoveToCemetery();
                         step++;
                     }
                     break;
@@ -718,8 +774,42 @@ namespace Cost
             return false;
         }
 
-        public override bool HatsudouCheck(Player player)
+        public override bool HatsudouCheck(CardAbilityData abilityData, Player player)
         {
+            Func<int, int, bool> check;
+            switch ((PowerRange)abilityData.c_value1)
+            {
+                case PowerRange.Pinpoint:
+                    check = (a, b) => { return (a == b); };
+                    break;
+
+                case PowerRange.Ijou:
+                    check = (a, b) => { return (a >= b); };
+                    break;
+
+                case PowerRange.Ika:
+                    check = (a, b) => { return (a <= b); };
+                    break;
+
+                default:
+                    Debug.LogWarning("おかしいおかしい");
+                    return false;
+            }
+
+            var deckManager = player.deckManager;
+            var numHand = deckManager.GetNumHand();
+            for (int i = 0; i < numHand; i++)
+            {
+                var card = deckManager.GetHandCard(i);
+                if (card.isEventCard()) continue;
+                // 条件満たしたら
+                if (check(card.power, abilityData.c_value0))
+                {
+                    selectHandIndex = i;
+                    return true;
+                }
+            }
+
             return false;
         }
     }
@@ -848,6 +938,10 @@ namespace Skill
         bool Enzan(Player player, UIManager uiManager, Arithmetic arithmetic, int value)
         {
             Card strikerCard = player.cardObjectManager.fieldStrikerCard;
+            // 現在のスコア
+            var score = uiManager.GetScore(player.isMyPlayer);
+            var isEnd = false;
+
             if (strikerCard != null)
             {
                 // Ability列車 ライフ変化
@@ -856,30 +950,37 @@ namespace Skill
                 {
                     case Arithmetic.Addition:
                         // 足し算なので回復
+                        uiManager.Heal(player.isMyPlayer, value);
                         break;
 
                     case Arithmetic.Subtraction:
                         // 引き算なのでダメージ
+                        isEnd = uiManager.Damage(player.isMyPlayer, value);
                         break;
 
                     case Arithmetic.Multiplication:
                         // 掛け算(あまり使わない)
+                        var mult = score * value;
+                        if (mult > score) uiManager.Heal(player.isMyPlayer, mult - score);
+                        else if (mult < score) isEnd = uiManager.Damage(player.isMyPlayer, score - mult);
                         break;
 
                     case Arithmetic.Division:
                         // 割り算(あまり使わない)
+                        var div = score / value;
+                        if (div > score) uiManager.Heal(player.isMyPlayer, div - score);
+                        else if (div < score) isEnd = uiManager.Damage(player.isMyPlayer, score - div);
                         break;
                 }
             }
 
-            // 現在のスコアを取ってきて
-            var score = uiManager.GetScore(player.isMyPlayer);
-            // 演算して
-            var newScore = ValueChange.Enzan(arithmetic, score, value);
-            // セット
-            uiManager.SetHP(player.isMyPlayer, newScore);
 
-            var isEnd = (newScore <= 0 && score > 0);
+            //// 演算して
+            //var newScore = ValueChange.Enzan(arithmetic, score, value);
+            //// セット
+            //uiManager.SetHP(player.isMyPlayer, newScore);
+
+            //var isEnd = (newScore <= 0 && score > 0);
             return isEnd;
         }
 
@@ -1042,313 +1143,666 @@ namespace Skill
     }
 
     // カード移動系系
-    //public class CardMove : Base
-    //{
-    //    static CardMove instance;
-    //    public static CardMove GetInstance() { if (instance == null) { instance = new CardMove(); } return instance; }
+    public class CardMove : Base
+    {
+        static CardMove instance;
+        public static CardMove GetInstance() { if (instance == null) { instance = new CardMove(); } return instance; }
 
-    //    public class Search
-    //    {
-    //        public Search()
-    //        {
+        //public class Search
+        //{
+        //public Search()
+        //{
 
-    //        }
+        //}
 
-    //        //bool Check(MaskData data, CardData card)
-    //        //{
-    //        //    switch (data.maskType)
-    //        //    {
-    //        //        case MaskType.Power:
-    //        //            break;
-    //        //        case MaskType.Syuzoku:
-    //        //            break;
-    //        //        case MaskType.Name:
-    //        //            break;
-    //        //        default:
-    //        //            break;
-    //        //    }
+        //bool Check(MaskData data, CardData card)
+        //{
+        //    switch (data.maskType)
+        //    {
+        //        case MaskType.Power:
+        //            break;
+        //        case MaskType.Syuzoku:
+        //            break;
+        //        case MaskType.Name:
+        //            break;
+        //        default:
+        //            break;
+        //    }
 
-    //        //    return false;
-    //        //}
+        //    return false;
+        //}
 
-    //        //public enum MaskType
-    //        //{
-    //        //    Power,      // パワー
-    //        //    Syuzoku,    // 種族
-    //        //    Name,       // ボーイと名のつくなど
-    //        //}
-    //        //public struct MaskData
-    //        //{
-    //        //    public MaskType maskType;  // タイプ
-    //        //    public string value;       // マスクに使う値
-    //        //}
-    //        //public MaskData[] maskDatas;
+        //public enum MaskType
+        //{
+        //    Power,      // パワー
+        //    Syuzoku,    // 種族
+        //    Name,       // ボーイと名のつくなど
+        //}
+        //public struct MaskData
+        //{
+        //    public MaskType maskType;  // タイプ
+        //    public string value;       // マスクに使う値
+        //}
+        //public MaskData[] maskDatas;
 
-    //        //public void SearchCards(CardData[] cards)
-    //        //{
-    //        //    //Queue<CardData> queue;
+        //public void SearchCards(CardData[] cards)
+        //{
+        //    //Queue<CardData> queue;
 
-    //        //    //foreach(CardData card in cards)
-    //        //    //{
-    //        //    //    if()
-    //        //    //}
-    //        //}
-    //    }
+        //    //foreach(CardData card in cards)
+        //    //{
+        //    //    if()
+        //    //}
+        //}
+        //}
 
-    //    //public AbilityTarget fromTarget;    // 対象
-    //    //public AbilityTarget toTarget;      // 対象
+        //public AbilityTarget fromTarget;    // 対象
+        //public AbilityTarget toTarget;      // 対象
 
-    //    public enum From
-    //    {
-    //        Hand,           // 手札から
-    //        Cemetery,       // 墓地から
-    //        Deck,           // 山札から
-    //        CemeteryOrDeck, // 墓地または山札から
-    //        NewCreate,      // 新たに生成
-    //    }
-    //    //From fromType;
+        public enum From
+        {
+            Hand,           // 手札から
+            Cemetery,       // 墓地から
+            Deck,           // 山札から
+            CemeteryOrDeck, // 墓地または山札から
+            NewCreate,      // 新たに生成
+        }
+        //From fromType;
+        Player fromPlayer;
 
-    //    public enum To
-    //    {
-    //        Hand,       // 手札に
-    //        Cemetery,   // 墓地に
-    //        Deck,       // 山札に
-    //        Tsuihou,    // 追放
-    //    }
-    //    //To toType;
+        public enum To
+        {
+            Hand,       // 手札に
+            Cemetery,   // 墓地に
+            Deck,       // 山札に
+            Tsuihou,    // 追放
+        }
+        To toType;
+        Player toPlayer;
 
-    //    public enum SearchType
-    //    {
-    //        None,   // 無造作
-    //        Saati,  // サーチ
-    //    }
-    //    //SearchType searchType;
+        public enum SearchType
+        {
+            None,   // 無造作
+            Saati,  // サーチ
+        }
+        //SearchType searchType;
 
-    //    public enum SearchSitei
-    //    {
-    //        PlayerSelect,   // プレイヤー指定
-    //        Random,         // 無造作
-    //        Highest,        // 最も高い
-    //        Lowest          // 最も低い
-    //    }
+        public enum SelectType
+        {
+            PlayerSelect,   // プレイヤー指定
+            AutoRandom,     // 無造作(デッキならトップ)
+            Highest,        // 最も高い
+            Lowest          // 最も低い
+        }
 
-    //    public enum SearchMask
-    //    {
-    //        NoneLimit,          // 指定なし
-    //        AllStriker,         // ストライカー全般
-    //        NoAbilityStriker,   // 効果なしストライカー
-    //        AbilityStriker,     // 効果ありストライカー
-    //        Joker,              // ジョーカー
-    //        Support,            // サポート
-    //        Connect,            // コネクト
-    //        Intercept,          // インターセプト
-    //    }
+        public enum SearchMask
+        {
+            NoneLimit,          // 指定なし
+            AllStriker,         // ストライカー全般
+            NoAbilityStriker,   // 効果なしストライカー
+            AbilityStriker,     // 効果ありストライカー
+            Joker,              // ジョーカー
+            Support,            // サポート
+            Connect,            // コネクト
+            Intercept,          // インターセプト
+        }
 
-    //    public enum Siborikomi
-    //    {
-    //        Power,      // パワー
-    //        Syuzoku,    // 種族
-    //        Name,       // ボーイと名のつくなど
-    //    }
+        //public enum Siborikomi
+        //{
+        //    Power,      // パワー
+        //    Syuzoku,    // 種族
+        //    Name,       // ボーイと名のつくなど
+        //}
 
-
-    //    Card drawCard;
-
-    //    public override void Enter(CardAbilityData abilityData)
-    //    {
-    //        base.Enter(abilityData);
-
-    //        var skillData = abilityData.GetCurrentSkillData();
-
-    //        drawCard = null;
-            
-    //        // ※value0=どこから, value1=誰の, value2=どこに, value3=誰の
-    //        var fromPlace = (From)skillData.s_iValue0;
-    //        var fromTarget = (AbilityTarget)skillData.s_iValue1;
-    //        var searchType = (SearchType)skillData.s_iValue2;
-    //        var toPlace = (To)skillData.s_iValue3;
-    //        var toTarget =  (AbilityTarget)skillData.s_iValue4;
-    //        var searchSitei = (SearchSitei)skillData.s_iValue5;
-    //        var searchMask = (SearchMask)skillData.s_iValue6;
-    //        var siborikomi = (Siborikomi)skillData.s_iValue7;
-    //        var siborikomiValue = skillData.s_sValue0;
-
-    //        if (fromPlace != From.NewCreate)
-    //        {
-    //            // Fromの処理
-    //            var fromPlayer = abilityData.GetPlayerByAbilitiTarget(fromTarget);
-
-    //            switch (fromPlace)
-    //            {
-    //                case From.Hand:
-    //                    // 手札から無造作に
-    //                    if (searchType == SearchType.None)
-    //                    {
-    //                        int numHand = abilityData.myPlayer.deckManager.GetNumHand();
-    //                        if (numHand <= 0)
-    //                        {
-    //                            endFlag = true;
-    //                            return;
-    //                        }
-
-    //                        if (abilityData.isMyPlayer || !SelectData.isNetworkBattle)
-    //                        {
-    //                            int r = UnityEngine.Random.Range(0, numHand - 1);
-    //                            SelectCardIndexInfo info = new SelectCardIndexInfo();
-    //                            info.index = r;
-
-    //                            // メッセージ送信
-    //                            MessageManager.Dispatch(abilityData.myPlayer.playerID, MessageType.SelectHand, info);
-    //                        }
-
-    //                    }
-    //                    else if(searchType == SearchType.Saati)
-    //                    {
-    //                        var cards = fromPlayer.deckManager.GetHand();
-    //                        // (TODO)
-    //                        Debug.LogWarning("未実装の効果が発動しようとしています");
-    //                    }
-    //                    break;
-    //                case From.Cemetery:
-    //                    // 墓地から無造作に
-    //                    if (searchType == SearchType.None)
-    //                    {
-    //                        int numCemetery = abilityData.myPlayer.deckManager.GetNumCemetery();
-    //                        if (numCemetery <= 0)
-    //                        {
-    //                            endFlag = true;
-    //                            return;
-    //                        }
-
-    //                        if (abilityData.isMyPlayer || !SelectData.isNetworkBattle)
-    //                        {
-    //                            int r = UnityEngine.Random.Range(0, numCemetery - 1);
-    //                            SelectCardIndexInfo info = new SelectCardIndexInfo();
-    //                            info.index = r;
-
-    //                            // メッセージ送信
-    //                            MessageManager.Dispatch(abilityData.myPlayer.playerID, MessageType.SelectHand, info);
-    //                        }
-    //                    }
-    //                    else if (searchType == SearchType.Saati)
-    //                    {
-    //                        var cards = fromPlayer.deckManager.GetCemeteryCards();
-    //                        // (TODO)
-    //                        Debug.LogWarning("未実装の効果が発動しようとしています");
-    //                    }
-    //                    break;
-    //                case From.Deck:
-    //                    // 山札から無造作に
-    //                    if (searchType == SearchType.None)
-    //                    {
-    //                        drawCard = fromPlayer.deckManager.DequeueYamahuda();
-    //                    }
-    //                    else if (searchType == SearchType.Saati)
-    //                    {
-    //                        var cards = fromPlayer.deckManager.GetHand();
-    //                        // (TODO)
-    //                        Debug.LogWarning("未実装の効果が発動しようとしています");
-    //                    }
-    //                    break;
-    //                case From.CemeteryOrDeck:
-    //                    if(searchType != SearchType.Saati)
-    //                    {
-    //                        Debug.LogWarning("墓地または山札なのに無造作になっている");
-
-    //                        return;
-    //                    }
+        public struct SearchInfo
+        {
+            public SelectType selectType;
+            public SearchMask searchMask;
+            //public Siborikomi siborikomi;
+            public string sPower;
+            public string sSyuzoku;
+            public string sName;
+        }
 
 
-    //                    break;
-    //                default:
-    //                    Debug.LogError("FromTypeで想定されない値");
-    //                    return;
-    //            }
 
-    //        }
-    //        else
-    //        {
-    //            // もふりとか、生成系の処理
-    //            //drawCard = 
-    //        }
+        Card drawCard;
 
-    //        if (drawCard == null) return;
+        public override void Enter(CardAbilityData abilityData)
+        {
+            base.Enter(abilityData);
 
-    //        // Toの処理
-    //        var toPlayer = abilityData.GetPlayerByAbilitiTarget(toTarget);
+            Debug.Log("カードサーチ発動するクマ");
 
-    //        switch (toPlace)
-    //        {
-    //            case To.Hand:
-    //                toPlayer.deckManager.AddHand(drawCard);
-    //                break;
-    //            case To.Cemetery:
-    //                // データ上でカードを墓地に送る
-    //                abilityData.myPlayer.deckManager.AddBochi(drawCard);
-    //                // カードを墓地に送る動き
-    //                drawCard.MoveToCemetery();
-    //                break;
-    //            case To.Deck:
-    //                // (TODO)実装まだ
-    //                break;
-    //            case To.Tsuihou:
-    //                // (TODO)実装まだ
-    //                break;
-    //            default:
-    //                Debug.LogError("ToTypeで想定されない値");
-    //                return;
-    //        }
-    //    }
+            var skillData = abilityData.GetCurrentSkillData();
 
-    //    public override Result Execute(CardAbilityData abilityData)
-    //    {
-    //        switch(step)
-    //        {
-    //            case 0:// メッセージ待ち
-    //                //break;
-    //            case 1:
-    //                // カードの動きが終わるまで待つ
-    //                if (drawCard.isInMovingState())
-    //                {
-    //                    return Result.None;
-    //                }
-    //                break;
-    //        }
-    //        return Result.None;
-    //    }
+            drawCard = null;
 
-    //    public override void Exit(CardAbilityData abilityData)
-    //    {
+            // ※value0=どこから, value1=誰の, value2=どこに, value3=誰の
+            var fromPlace = (From)skillData.s_iValue0;
+            var fromTarget = (AbilityTarget)skillData.s_iValue1;
+            var searchType = (SearchType)skillData.s_iValue2;
+            toType = (To)skillData.s_iValue3;
+            var toTarget = (AbilityTarget)skillData.s_iValue4;
+            toPlayer = abilityData.GetPlayerByAbilitiTarget(toTarget);
+            var searchInfo = new SearchInfo();
+            searchInfo.selectType = (SelectType)skillData.s_iValue5;
+            searchInfo.searchMask = (SearchMask)skillData.s_iValue6;
+            //searchInfo.siborikomi = (Siborikomi)skillData.s_iValue7;
+            //searchInfo.siborikomiValue = skillData.s_sValue0;
+            searchInfo.sPower = skillData.s_sValue0;
+            searchInfo.sSyuzoku = skillData.s_sValue1;
+            searchInfo.sName = skillData.s_sValue2;
 
-    //    }
+            if (fromPlace == From.NewCreate)
+            {
+                // もふりとか、生成系の処理
+                //drawCard = 
+            }
+            else
+            {
+                // ネットプレーかつ自分じゃなかったら送らなくていい
+                if (!abilityData.isMyPlayer && SelectData.isNetworkBattle)
+                {
+                    return;
+                }
 
-    //    public override bool OnMessage(CardAbilityData abilityData, MessageInfo message)
-    //    {
-    //        switch(message.messageType)
-    //        {
-    //            case MessageType.SelectHand:
-    //                {
-    //                    SelectCardIndexInfo info = new SelectCardIndexInfo();
-    //                    message.GetExtraInfo<SelectCardIndexInfo>(ref info);
-    //                    drawCard = abilityData.myPlayer.deckManager.DequeueHand(info.index);
-    //                    drawCard.ShowDraw(0.75f, false);
-    //                    step++;
-    //                }
-    //                break;
+                Debug.Log("from処理するクマ");
 
-    //            case MessageType.SelectCemetery:
-    //                {
-    //                    SelectCardIndexInfo info = new SelectCardIndexInfo();
-    //                    message.GetExtraInfo<SelectCardIndexInfo>(ref info);
-    //                    drawCard = abilityData.myPlayer.deckManager.DequeCemetery(info.index);
-    //                    drawCard.ShowDraw(0.75f, false);
-    //                    step++;
-    //                }
-    //                break;
-    //        }
-    //        return false;
-    //    }
-    //}
+                // Fromの処理
+                /*var */fromPlayer = abilityData.GetPlayerByAbilitiTarget(fromTarget);
+
+                int searchIndex = (int)IDType.NONE;
+
+                switch (fromPlace)
+                {
+                    case From.Hand:
+                        // 手札から無造作に
+                        if (searchType == SearchType.None)
+                        {
+                            Debug.Log("手札から無造作クマ");
+
+                            int numHand = fromPlayer.deckManager.GetNumHand();
+                            if (numHand <= 0)
+                            {
+                                Debug.Log("手札ないクマ");
+                                endFlag = true;
+                                return;
+                            }
+
+                            int r = UnityEngine.Random.Range(0, numHand - 1);
+                            SelectCardIndexInfo info = new SelectCardIndexInfo();
+                            info.index = r;
+
+                            // メッセージ送信
+                            MessageManager.Dispatch(fromPlayer.playerID, MessageType.SelectHand, info);
+
+                        }
+                        else if (searchType == SearchType.Saati)
+                        {
+                            Debug.Log("手札からサーチクマ");
+
+                            searchIndex = SearchHand(searchInfo);
+
+                            // 見つかった
+                            if (searchIndex != (int)IDType.NONE)
+                            {
+                                SelectCardIndexInfo info = new SelectCardIndexInfo();
+                                info.index = searchIndex;
+                                MessageManager.Dispatch(fromPlayer.playerID, MessageType.SelectHand, info);
+                                return;
+                            }
+
+                            // 見つからなかったので終了
+                            endFlag = true;
+                        }
+                        break;
+                    case From.Cemetery:
+                        // 墓地から無造作に
+                        if (searchType == SearchType.None)
+                        {
+                            Debug.Log("墓地から無造作クマ");
+
+                            int numCemetery = fromPlayer.deckManager.GetNumCemetery();
+                            if (numCemetery <= 0)
+                            {
+                                Debug.Log("墓地ないクマ");
+                                endFlag = true;
+                                return;
+                            }
+
+                            int r = UnityEngine.Random.Range(0, numCemetery - 1);
+                            SelectCardIndexInfo info = new SelectCardIndexInfo();
+                            info.index = r;
+
+                            // メッセージ送信
+                            MessageManager.Dispatch(fromPlayer.playerID, MessageType.SelectCemetery, info);
+                        }
+                        else if (searchType == SearchType.Saati)
+                        {
+                            Debug.Log("墓地からサーチクマ");
+
+                            searchIndex = SearchCemetery(searchInfo);
+
+                            // 見つかった
+                            if (searchIndex != (int)IDType.NONE)
+                            {
+                                SelectCardIndexInfo info = new SelectCardIndexInfo();
+                                info.index = searchIndex;
+                                MessageManager.Dispatch(fromPlayer.playerID, MessageType.SelectCemetery, info);
+                                return;
+                            }
+
+                            // 見つからなかったので終了
+                            endFlag = true;
+                        }
+                        break;
+                    case From.Deck:
+                        // 山札のトップ
+                        if (searchType == SearchType.None)
+                        {
+                            Debug.Log("デッキのトップから引くクマ");
+
+                            SelectCardIndexInfo info = new SelectCardIndexInfo();
+                            info.index = fromPlayer.deckManager.GetNumYamahuda() - 1;
+
+                            if (toType == To.Hand && fromPlayer.playerID == toPlayer.playerID)
+                            {
+                                //drawCard = fromPlayer.deckManager.DequeueYamahuda();
+                                //step = 2;
+                                info.iMoveFlag = (int)CardMoveFlag.Draw;
+                            }
+                            else
+                            {
+                                info.iMoveFlag = (int)CardMoveFlag.ShowDraw;
+                            }
+                            // メッセージ送信
+                            MessageManager.Dispatch(fromPlayer.playerID, MessageType.SelectYamahuda, info);
+                        }
+                        else if (searchType == SearchType.Saati)
+                        {
+                            Debug.Log("デッキからサーチするクマ");
+
+                            searchIndex = SearchYamahuda(searchInfo);
+
+                            // 見つかった
+                            if (searchIndex != (int)IDType.NONE)
+                            {
+                                SelectCardIndexInfo info = new SelectCardIndexInfo();
+                                info.index = searchIndex;
+                                info.iMoveFlag = (int)CardMoveFlag.ShowDraw;
+                                MessageManager.Dispatch(fromPlayer.playerID, MessageType.SelectYamahuda, info);
+                                return;
+                            }
+
+                            // 見つからなかったので終了
+                            endFlag = true;
+                        }
+                        break;
+                    case From.CemeteryOrDeck:
+                        if (searchType != SearchType.Saati)
+                        {
+                            Debug.LogWarning("墓地または山札なのに無造作になっている");
+                            return;
+                        }
+
+                        Debug.Log("デッキか墓地からサーチするクマ");
+
+                        // 山札カードから検索をかける
+                        searchIndex = SearchYamahuda(searchInfo);
+                        // 見つかった
+                        if (searchIndex != (int)IDType.NONE)
+                        {
+                            SelectCardIndexInfo info = new SelectCardIndexInfo();
+                            info.index = searchIndex;
+                            info.iMoveFlag = (int)CardMoveFlag.ShowDraw;
+                            MessageManager.Dispatch(fromPlayer.playerID, MessageType.SelectYamahuda, info);
+                            return;
+                        }
+
+                        // 墓地カードから検索を掛ける
+                        var cemeteryCards = fromPlayer.deckManager.GetCemeteryCards();
+                        searchIndex = SearchCemetery(searchInfo);
+
+                        // 見つかった
+                        if (searchIndex != (int)IDType.NONE)
+                        {
+                            SelectCardIndexInfo info = new SelectCardIndexInfo();
+                            info.index = searchIndex;
+                            MessageManager.Dispatch(fromPlayer.playerID, MessageType.SelectCemetery, info);
+                            return;
+                        }
+
+                        // 見つからなかった
+                        endFlag = true;
+
+                        break;
+                    default:
+                        Debug.LogError("FromTypeで想定されない値");
+                        return;
+                }
+
+            }
+
+        }
+
+        public override Result Execute(CardAbilityData abilityData)
+        {
+            switch(step)
+            {
+                case 0:// メッセージ待ち
+                    break;
+                case 1:
+                    // カードの動きが終わるまで待つ
+                    if (!drawCard.isInMovingState())
+                    {
+                        step++;
+                    }
+                    break;
+
+                case 2:
+                    // どこに向かうか
+                    {
+                        var skillData = abilityData.GetCurrentSkillData();
+
+                        switch (toType)
+                        {
+                            case To.Hand:
+                                toPlayer.deckManager.AddHand(drawCard);
+                                break;
+                            case To.Cemetery:
+                                // データ上でカードを墓地に送る
+                                toPlayer.deckManager.AddBochi(drawCard);
+                                // カードを墓地に送る動き
+                                //drawCard.MoveToCemetery();
+                                break;
+                            case To.Deck:
+                                // (TODO)実装まだ
+                                break;
+                            case To.Tsuihou:
+                                toPlayer.deckManager.AddExpulsion(drawCard);
+                                break;
+                            default:
+                                Debug.LogError("ToTypeで想定されない値");
+                                break;
+                        }
+                    }
+                    step++;
+                    break;
+
+                case 3:
+                    // カードの動きが終わるまで待つ
+                    if (!drawCard.isInMovingState())
+                    {
+                        endFlag = true;
+                    }
+                    break;
+            }
+            return Result.None;
+        }
+
+        public override void Exit(CardAbilityData abilityData)
+        {
+
+        }
+
+        public override bool OnMessage(CardAbilityData abilityData, MessageInfo message)
+        {
+            switch(message.messageType)
+            {
+                case MessageType.SelectYamahuda:
+                    {
+                        SelectCardIndexInfo info = new SelectCardIndexInfo();
+                        message.GetExtraInfo<SelectCardIndexInfo>(ref info);
+                        drawCard = fromPlayer.deckManager.DequeueYamahuda(info.index);
+                        if (info.iMoveFlag == (int)CardMoveFlag.ShowDraw)
+                            drawCard.ShowDraw(0.75f, false);
+                        step++;
+                    }
+                    break;
+                case MessageType.SelectHand:
+                    {
+                        SelectCardIndexInfo info = new SelectCardIndexInfo();
+                        message.GetExtraInfo<SelectCardIndexInfo>(ref info);
+                        drawCard = fromPlayer.deckManager.DequeueHand(info.index);
+                        drawCard.ShowDraw(0.75f, false);
+                        step++;
+                    }
+                    break;
+
+                case MessageType.SelectCemetery:
+                    {
+                        SelectCardIndexInfo info = new SelectCardIndexInfo();
+                        message.GetExtraInfo<SelectCardIndexInfo>(ref info);
+                        drawCard = fromPlayer.deckManager.DequeCemetery(info.index);
+                        drawCard.ShowDraw(0.75f, false);
+                        step++;
+                    }
+                    break;
+            }
+            return false;
+        }
+
+        int SearchHand(SearchInfo info)
+        {
+            var handCards = fromPlayer.deckManager.GetHand();
+            return Search(handCards, fromPlayer, info);
+        }
+
+        int SearchYamahuda(SearchInfo info)
+        {
+            var yamahudaCards = fromPlayer.deckManager.GetYamahuda();
+            return Search(yamahudaCards, fromPlayer, info);
+        }
+
+        int SearchCemetery(SearchInfo info)
+        {
+            var cemeteryCards = fromPlayer.deckManager.GetCemeteryCards();
+            return Search(cemeteryCards, fromPlayer, info);
+        }
+
+        int Search(List<CardData> cards, Player player, SearchInfo searchInfo)
+        {
+            // カードタイプに一致するカードを格納
+            Debug.Log("カードタイプ検索するクマ");
+            var buf = new List<int>();
+            for (int i = 0; i < cards.Count; i++)
+            {
+                var card = cards[i];
+                switch (searchInfo.searchMask)
+                {
+                    case SearchMask.NoneLimit:
+                        buf.Add(i);
+                        break;
+                    case SearchMask.AllStriker:
+                        if (card.isStrikerCard())
+                            buf.Add(i);
+                        break;
+                    case SearchMask.NoAbilityStriker:
+                        if (card.cardType == CardType.Fighter)
+                            buf.Add(i);
+                        break;
+                    case SearchMask.AbilityStriker:
+                        if (card.cardType == CardType.AbilityFighter)
+                            buf.Add(i);
+                        break;
+                    case SearchMask.Joker:
+                        if (card.cardType == CardType.Joker)
+                            buf.Add(i);
+                        break;
+                    case SearchMask.Support:
+                        if (card.cardType == CardType.Support)
+                            buf.Add(i);
+                        break;
+                    case SearchMask.Connect:
+                        if (card.cardType == CardType.Connect)
+                            buf.Add(i);
+                        break;
+                    case SearchMask.Intercept:
+                        if (card.cardType == CardType.Intercept)
+                            buf.Add(i);
+                        break;
+                    default:
+                        break;
+                }
+            }
+            // 何もヒットしなかったら終了
+            if (buf.Count <= 0)
+            {
+                Debug.Log("ひっとしなかったクマ…");
+                return (int)IDType.NONE;
+            }
+
+            Debug.Log(buf.Count + "件ヒットしたクマ");
+
+            var searchIndex = (int)IDType.NONE;
+
+            // 選択指定
+            switch (searchInfo.selectType)
+            {
+                case SelectType.PlayerSelect:
+                    searchIndex = PlayerSelectSearch(buf, cards, searchInfo);
+                    break;
+
+                case SelectType.AutoRandom:
+                    var indices = AutoRandomSearch(buf, cards, searchInfo);
+                    if (indices.Length > 0) searchIndex = indices[0];
+                    break;
+
+                case SelectType.Highest:
+                    searchIndex = HighestSearch(buf, cards, searchInfo);
+                    break;
+
+                case SelectType.Lowest:
+                    searchIndex = LowestSearch(buf, cards, searchInfo);
+                    break;
+
+                default:
+                    Debug.LogWarning("SelectTypeおかしいクマ");
+                    break;
+            }
+
+            buf.Clear();
+            return searchIndex;
+        }
+
+        public int PlayerSelectSearch(List<int> buf, List<CardData> cards, SearchInfo searchInfo)
+        {
+            Debug.LogWarning("PlayerSelectSearchは未実装");
+            return 0;
+        }
+        public int[] AutoRandomSearch(List<int> buf, List<CardData> cards, SearchInfo searchInfo)
+        {
+            List<int> searchIndices = new List<int>();
+            foreach (int i in buf)
+            {
+                var searchOK = true;
+                var card = cards[i];
+
+                if(searchInfo.sPower != "")
+                {
+                    // パワー一致
+                        var power = int.Parse(searchInfo.sPower);
+                        Debug.Log("パワー一致するかみてみるクマ ");
+                        if (card.power != power)
+                        {
+                            searchOK = false;
+                            Debug.Log("してないグマ");
+                        }
+                        else Debug.Log("しテルクマ");
+                }
+                if (searchInfo.sSyuzoku != "")
+                {
+                    // 種族一致
+                    var strikerCard = card.GetFighterCard();
+                    if(strikerCard != null)
+                    {
+                        var syuzoku = (Syuzoku)int.Parse(searchInfo.sSyuzoku);
+                        Debug.Log("種族一致するかみてみるクマ ");
+
+                        var find = false;
+                        foreach (Syuzoku s in strikerCard.syuzokus)
+                        {
+                            if (s == syuzoku)
+                            {
+                                find = true;
+                                Debug.Log("しテルクマ");
+                                break;
+                            }
+                        }
+
+                        if (!find)
+                        {
+                            searchOK = false;
+                            Debug.Log("してないグマ");
+                        }
+                    }
+                }
+                if(searchInfo.sName != "")
+                {
+                    Debug.Log("名前が含んでるかみてみるクマ ");
+
+                    // 文字列含んでいるかどうか
+                    if (!card.cardName.Contains(searchInfo.sName))
+                    {
+                        searchOK = false;
+                        Debug.Log("含んでないクマ ");
+                    }
+                    else Debug.Log("含んでるクマ ");
+                }
+                if (searchOK)
+                {
+                    searchIndices.Add(i);
+                    //break;
+                }
+            }
+            return searchIndices.ToArray();
+        }
+
+        public int HighestSearch(List<int> buf, List<CardData> cards, SearchInfo searchInfo)
+        {
+            Debug.Log("パワーもっとも高いやつをサーチするクマ");
+
+            var indices = AutoRandomSearch(buf, cards, searchInfo);
+
+            var max = int.MinValue;
+            var searchIndex = (int)IDType.NONE;
+
+            foreach (int i in indices)
+            {
+                var card = cards[i];
+                if (card.power > max)
+                {
+                    max = card.power;
+                    searchIndex = i;
+                }
+            }
+
+            return searchIndex;
+        }
+
+        public int LowestSearch(List<int> buf, List<CardData> cards, SearchInfo searchInfo)
+        {
+            Debug.Log("パワーもっとも低いやつをサーチするクマ");
+
+            var indices = AutoRandomSearch(buf, cards, searchInfo);
+
+            var min = int.MaxValue;
+            var searchIndex = (int)IDType.NONE;
+
+            foreach (int i in indices)
+            {
+                var card = cards[i];
+                if (card.power < min)
+                {
+                    min = card.power;
+                    searchIndex = i;
+                }
+            }
+
+            return searchIndex;
+        }
+    }
 }
 
 public class CardAbilityData
@@ -1362,7 +1816,7 @@ public class CardAbilityData
 
     public Cost.Base                                    cost;        // コスト(効果の条件)委譲クラス
 
-    public int skillNumber;         // 発動する効果の番号(分岐用に作成)
+    public int skillNumber;          // 発動する効果の番号(分岐用に作成)
     public int numSkill;             // 効果の個数
 
     public bool isJoukenOK; // Costを抜けた後にこれがtrueだったら効果を発動する(主にストライカーの爪痕とかに使う)
@@ -1378,8 +1832,11 @@ public class CardAbilityData
     public CostType costType;                      // 条件(コスト)
     public int c_value0;
     public int c_value1;
+    public int c_value2;
+    public int c_value3;
 
-    public const int RefValueFlag = 0x100;  // 256
+    public const int RefValueFlag = 256;
+    public const int HalfHPCostFlag = 256;
 
     // structにするとvarに格納して処理したときに無駄になってしまう
     public class SkillData
@@ -1454,15 +1911,12 @@ public class CardAbilityData
             youPlayer = playerManager.GetMyPlayer();
         }
 
-        // ライフコストを支払う
-        if (lifeCost > 0) uiManager.Damage(isMyPlayer, lifeCost);
+        skillNumber = 0;
+        endFlag = false;
+        state = State.Cost;
 
         // コスト実行
         cost.Enter(this);
-
-        endFlag = false;
-        state = State.Cost;
-        skillNumber = 0;
     }
 
     public void Update(CardAbilityManager abilityManager)
@@ -1476,11 +1930,22 @@ public class CardAbilityData
                 if (cost.EndCheck())
                 {
                     // 条件を満たしていない場合処理しない
-                    if(!isJoukenOK)
+                    if(!isJoukenOK || skillNumber == (int)IDType.NONE)
                     {
                         endFlag = true;
                         return;
                     }
+
+                    // ライフコストを支払う
+                    if (lifeCost > 0)
+                    {
+                        if (lifeCost == HalfHPCostFlag)
+                        {
+                            lifeCost = uiManager.GetScore(isMyPlayer) / 2;
+                        }
+                        uiManager.Damage(isMyPlayer, lifeCost);
+                    }
+
                     state = State.Ability;
                     GetCurrentSkillData().skill.Enter(this);
                     return;
@@ -1569,10 +2034,11 @@ public class CardAbilityData
 
         // [1210] 宝箱にも設定している？
         // ライフがコスト以下だと発動できない
-        var life = (player.isMyPlayer) ? uiManager.myLP.iLP : uiManager.cpuLP.iLP;
-        if (life <= lifeCost) return false;
+        var life = uiManager.GetScore(isMyPlayer);
+        if (lifeCost != HalfHPCostFlag)
+            if (life <= lifeCost) return false;
 
-        return cost.HatsudouCheck(player);
+        return cost.HatsudouCheck(this, player);
     }
 }
 

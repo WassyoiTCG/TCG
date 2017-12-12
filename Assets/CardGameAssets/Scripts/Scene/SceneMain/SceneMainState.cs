@@ -611,7 +611,7 @@ namespace SceneMainState
             {
                 // ステートチェンジ
                 //pMain.stateMachine.ChangeState(CardAttack.GetInstance());
-                pMain.stateMachine.ChangeState(SetIntercept.GetInstance());
+                pMain.stateMachine.ChangeState(StrikerBeforeBattleAbility.GetInstance());
 
             }
 
@@ -629,6 +629,41 @@ namespace SceneMainState
 
 
     }
+
+    // ストライカーのアビリティ(バトル後)が発動するステート
+    public class StrikerBeforeBattleAbility : BaseEntityState<SceneMain>
+    {
+        // Singleton.
+        static StrikerBeforeBattleAbility instance;
+        public static StrikerBeforeBattleAbility GetInstance() { if (instance == null) { instance = new StrikerBeforeBattleAbility(); } return instance; }
+
+        //float timer;
+
+        public override void Enter(SceneMain pMain)
+        {
+            // プレイヤーステート変更(効果持ちモンスターのバトル後発動効果の処理)
+            pMain.playerManager.SetState(PlayerState.StrikerBeforeBattleAbility.GetInstance());
+        }
+
+        public override void Execute(SceneMain pMain)
+        {
+            // 効果処理が終わったら
+            if (pMain.abilityManager.isAbilityEnd())
+            {
+                // ステートチェンジ
+                pMain.stateMachine.ChangeState(SetIntercept.GetInstance());
+            }
+        }
+
+        public override void Exit(SceneMain pMain)
+        { }
+
+        public override bool OnMessage(SceneMain pMain, MessageInfo message)
+        {
+            return false;
+        }
+    }
+
     // インターセプトカードをセットするステート
     public class SetIntercept : BaseEntityState<SceneMain>
     {

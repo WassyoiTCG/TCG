@@ -112,6 +112,9 @@
     <Compile Include="Assets\CardGameAssets\Scripts\Scene\SceneMain\SceneMainState.cs" />
     <Compile Include="Assets\CardGameAssets\Scripts\UI\BattleCardInfomation.cs" />
     <Compile Include="Assets\CardGameAssets\Scripts\UI\CemeteryInfomationUI.cs" />
+    <Compile Include="Assets\CardGameAssets\Scripts\UI\LifePoint.cs" />
+    <Compile Include="Assets\CardGameAssets\Scripts\UI\RemainingPoints.cs" />
+    <Compile Include="Assets\CardGameAssets\Scripts\UI\TurnEndButton.cs" />
     <Compile Include="Assets\CardGameAssets\Scripts\UI\UIManager.cs" />
     <Compile Include="Assets\DeckAssets\Sqript\SceneDeck.cs" />
     <Compile Include="Assets\DeckAssets\Sqript\SceneDeckState.cs" />
@@ -244,6 +247,7 @@
     <None Include="Assets\PostProcessing\Resources\Shaders\Uber.shader" />
     <None Include="Assets\PostProcessing\Resources\Shaders\UberSecondPass.cginc" />
     <None Include="Assets\PostProcessing\Utilities\CustomMotionTexture\Shaders\CustomMotionVectorTexture.shader" />
+    <None Include="Assets\UtilAssets\Shaders\Add_Noz.shader" />
     <None Include="Assets\UtilAssets\Shaders\AlphaMaskRGB.shader" />
     <None Include="Assets\UtilAssets\Shaders\AlphaMaskRGBA.shader" />
     <None Include="Assets\UtilAssets\Shaders\Grid.shader" />

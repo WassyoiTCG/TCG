@@ -37,23 +37,17 @@ public class Player : MonoBehaviour
     public void JunbiKanryoON()
     {
         isPushedJunbiKanryo = true;
-        var striker = GetFieldStrikerCard();
-        if (striker != null)
-        {
-            jissainoPower = striker.cardData.power;
-        }
-        else jissainoPower = noSetStrikerPower;
     }
 
     public void PushedNextButtonON()
     {
         isPushedNextButton = true;
-        var striker = GetFieldStrikerCard();
-        if (striker != null)
-        {
-            jissainoPower = striker.cardData.power;
-        }
-        else jissainoPower = noSetStrikerPower;
+        //var striker = GetFieldStrikerCard();
+        //if (striker != null)
+        //{
+        //    jissainoPower = striker.cardData.power;
+        //}
+        //else jissainoPower = noSetStrikerPower;
     }
 
     //public void JubikanryoOFF()
@@ -63,7 +57,12 @@ public class Player : MonoBehaviour
 
     public float waitTimer;
 
-    public int jissainoPower;   // イベントとかでいろいろ演算した後の実際のパワー
+    public int jissainoPower
+    {
+        get;
+        set;
+    }
+    // イベントとかでいろいろ演算した後の実際のパワー
 
     // Use this for initialization
     void Awake()

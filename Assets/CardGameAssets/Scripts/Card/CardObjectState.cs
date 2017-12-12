@@ -155,7 +155,7 @@ namespace CardObjectState
             card.cacheTransform.localEulerAngles = card.startAngle;
 
             // 大丈夫だと思うが一応裏状態にしとく
-            card.SetUraomote(false);
+            //card.SetUraomote(false);
         }
 
         public override void Execute(Card card)

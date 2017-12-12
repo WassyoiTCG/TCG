@@ -341,7 +341,7 @@ public class UIManager : MonoBehaviour
         return flag;
     }
 
-    public bool SetHP(bool isMyPlayer, int score)
+    public bool Heal(bool isMyPlayer, int score)
     {
         bool flag = false;
 
@@ -350,20 +350,42 @@ public class UIManager : MonoBehaviour
             //myHP = Mathf.Max(myHP - score, 0);
             //myHPNumber.SetNumber(myHP);
             //if (myHP == 0) return true;
-            flag = myLP.AddLP(-score);
+            flag = myLP.AddLP(score);
         }
         else
         {
             //cpuHP = Mathf.Max(cpuHP - score, 0);
             //cpuHPNumber.SetNumber(cpuHP);
             //if (cpuHP == 0) return true;
-            flag = cpuLP.AddLP(-score);
+            flag = cpuLP.AddLP(score);
         }
 
         return flag;
     }
 
-    public int GetScore(bool isMyPlayer) { return isMyPlayer ? myHP : cpuHP; }
+    //public bool SetHP(bool isMyPlayer, int score)
+    //{
+    //    bool flag = false;
+
+    //    if (isMyPlayer)
+    //    {
+    //        //myHP = Mathf.Max(myHP - score, 0);
+    //        //myHPNumber.SetNumber(myHP);
+    //        //if (myHP == 0) return true;
+    //        flag = myLP.AddLP(-score);
+    //    }
+    //    else
+    //    {
+    //        //cpuHP = Mathf.Max(cpuHP - score, 0);
+    //        //cpuHPNumber.SetNumber(cpuHP);
+    //        //if (cpuHP == 0) return true;
+    //        flag = cpuLP.AddLP(-score);
+    //    }
+
+    //    return flag;
+    //}
+
+    public int GetScore(bool isMyPlayer) { return isMyPlayer ? myLP.iLP : cpuLP.iLP; }
 
 
     public void AppearEndGameUI()

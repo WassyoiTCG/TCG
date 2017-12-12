@@ -15,7 +15,7 @@ public class DeckManager
     List<CardData> hand = new List<CardData>();         // 手札
     List<CardData> yamahuda = new List<CardData>();   // 山札
     List<CardData> cemetery = new List<CardData>();      // 墓地
-    Queue<CardData> tsuihou = new Queue<CardData>();     // 追放
+    Queue<CardData> expulsion = new Queue<CardData>();     // 追放
 
     Player player;
     CardObjectManager cardObjectManager;
@@ -30,7 +30,7 @@ public class DeckManager
         hand.Clear();
         yamahuda.Clear();
         cemetery.Clear();
-        tsuihou.Clear();
+        expulsion.Clear();
     }
 
     public void Marigan(SyncDeckInfo syncData)
@@ -246,6 +246,12 @@ public class DeckManager
         cardObjectManager.AddCemetery(card);
     }
 
+    public void AddExpulsion(Card card)
+    {
+        expulsion.Enqueue(card.cardData);
+        cardObjectManager.AddExpulsion(card);
+    }
+
     public void TurnEnd()
     {
         if(fieldStrikerCard != null)
@@ -287,14 +293,14 @@ public class DeckManager
         return cemetery.ToArray()[bothiNo];
     }
 
-    public CardData[] GetCemeteryCards() { return cemetery.ToArray(); }
+    public List<CardData> GetCemeteryCards() { return cemetery; }
 
     public CardData GetExpulsionCard(int tuihouNo)
     {
-        return tsuihou.ToArray()[tuihouNo];
+        return expulsion.ToArray()[tuihouNo];
     }
 
-    public CardData[] GetExpulsionCards() { return tsuihou.ToArray(); }
+    public CardData[] GetExpulsionCards() { return expulsion.ToArray(); }
 
     public void FieldSet(int handNo)
     {
@@ -480,6 +486,19 @@ public class DeckManager
         return cardObjectManager.DequeueYamahuda(draw);
     }
 
+    public Card DequeueYamahuda(int yamahudaNumber)
+    {
+        // (TODO)0の時は発動させないようにする？
+        if (yamahuda.Count > 0)
+        {
+            var card = yamahuda[yamahudaNumber];
+            yamahuda.Remove(card);
+            return cardObjectManager.DequeueYamahuda(card);
+        }
+
+        return null;
+    }
+
     public Card DequeCemetery(int cemeteryNumber)
     {
         // (TODO)0の時は発動させないようにする？
@@ -501,7 +520,7 @@ public class DeckManager
     public int GetNumHand() { return hand.Count; }
     public int GetNumYamahuda() { return yamahuda.Count; }
     public int GetNumCemetery() { return cemetery.Count; }
-    public int GetNumTsuihou() { return tsuihou.Count; }
+    public int GetNumTsuihou() { return expulsion.Count; }
 
     // そのカードの属性が墓地にいるか
     public bool isExistBochiCardType(CardType type)

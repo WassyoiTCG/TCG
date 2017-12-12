@@ -19,7 +19,8 @@ public class CemeteryInfomationUI : MonoBehaviour
     public Sprite spriteExpulsionOFF;           // 追放OFF
 
     uGUICard[] uguiCards = new uGUICard[15];
-    CardData[] cemeteryCards, expulsionCards;
+    List<CardData> cemeteryCards;
+    CardData[] expulsionCards;
 
     readonly float offsetX = -140;
     readonly float offsetY = 270;
@@ -49,7 +50,7 @@ public class CemeteryInfomationUI : MonoBehaviour
         }
     }
 
-    public void Appear(CardData[] cemetery, CardData[] expulsion)
+    public void Appear(List<CardData> cemetery, CardData[] expulsion)
     {
         gameObject.SetActive(true);
         cemeteryCards = cemetery;
@@ -117,6 +118,25 @@ public class CemeteryInfomationUI : MonoBehaviour
             else
             {
                 uguiCards[i].SetCardData(list[i]);
+                uguiCards[i].gameObject.SetActive(true);
+            }
+        }
+    }
+
+    public void SetDatas(List<CardData> datas)
+    {
+        // パワー順にソートする
+        datas.Sort(((a, b) => a.power - b.power));
+
+        for (int i = 0; i < 15; i++)
+        {
+            if (i >= datas.Count)
+            {
+                uguiCards[i].gameObject.SetActive(false);
+            }
+            else
+            {
+                uguiCards[i].SetCardData(datas[i]);
                 uguiCards[i].gameObject.SetActive(true);
             }
         }

@@ -26,12 +26,12 @@ SpriteAtlas:
       enableTightPacking: 0
     packedHash:
       serializedVersion: 2
-      Hash: b1380de869edb498f220abce45c0c8ce
+      Hash: a99c3dec6646908ff24e2d7d6760cdf7
     variantMultiplier: 1
     bindAsDefault: 1
     finalFormat: 4
-    hashString: b1380de869edb498f220abce45c0c8ce
-    totalSpriteSurfaceArea: 3466312
+    hashString: a99c3dec6646908ff24e2d7d6760cdf7
+    totalSpriteSurfaceArea: 3494312
     packables:
     - {fileID: 102900000, guid: 39d912bb47ce4474ea62f4cd14c67bd4, type: 3}
     packedSpriteRenderDataKeys:
@@ -53,6 +53,7 @@ SpriteAtlas:
     - e7840768c29da8c4e8efe19909793ae4: 21300000
     - 2da8a47543ff3b94e8f3d1eca9adfbbe: 21300000
     - 5330ab6e9ae4667449079a96569dbc06: 21300000
+    - 73e12dd075bb6b74b83dfc42980f3100: 21300000
     - e2d5e75237adba4438006b4db550bee8: 21300000
     - 9bc300fd8235fd5419774afa309efe5a: 21300000
     - d7dd425f44c27a649867673b034d669b: 21300000
@@ -153,6 +154,7 @@ SpriteAtlas:
   - {fileID: 21300000, guid: e7840768c29da8c4e8efe19909793ae4, type: 3}
   - {fileID: 21300000, guid: 2da8a47543ff3b94e8f3d1eca9adfbbe, type: 3}
   - {fileID: 21300000, guid: 5330ab6e9ae4667449079a96569dbc06, type: 3}
+  - {fileID: 21300000, guid: 73e12dd075bb6b74b83dfc42980f3100, type: 3}
   - {fileID: 21300000, guid: e2d5e75237adba4438006b4db550bee8, type: 3}
   - {fileID: 21300000, guid: 9bc300fd8235fd5419774afa309efe5a, type: 3}
   - {fileID: 21300000, guid: d7dd425f44c27a649867673b034d669b, type: 3}
@@ -253,6 +255,7 @@ SpriteAtlas:
   - P_NextButton
   - P_PushButton
   - LPFrame
+  - point
   - KindPlate
   - Point_10
   - Point_60
