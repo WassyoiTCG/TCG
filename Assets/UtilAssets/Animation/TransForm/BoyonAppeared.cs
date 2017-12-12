@@ -67,9 +67,9 @@ public class BoyonAppeared : BaseAnim2D
         {
             case STEP.START:
                 {
-                    m_pImage.transform.localScale += new Vector3(fAddScale, fAddScale);
+                    gameObject.transform.localScale += new Vector3(fAddScale, fAddScale);
 
-                    float fCurrentScale = m_pImage.transform.localScale.x;
+                    float fCurrentScale = gameObject.transform.localScale.x;
                     if (fCurrentScale >= fEndScale)
                     {
                         eStep = STEP.BACK;
@@ -86,9 +86,9 @@ public class BoyonAppeared : BaseAnim2D
                     float fPow = 0.35f;
                     if (fAddScale <= -(fVelocity * fPow)) { fAddScale = -(fVelocity * fPow); }
 
-                    m_pImage.transform.localScale += new Vector3(fAddScale, fAddScale);
+                    gameObject.transform.localScale += new Vector3(fAddScale, fAddScale);
 
-                    float fCurrentScale = m_pImage.transform.localScale.x;
+                    float fCurrentScale = gameObject.transform.localScale.x;
                     if (fCurrentScale <= fEndScale)
                     {
                         eStep = STEP.BACK2;
@@ -107,9 +107,9 @@ public class BoyonAppeared : BaseAnim2D
                     float fPow = 0.2f;
                     if (fAddScale >= (fVelocity * fPow)) { fAddScale = (fVelocity * fPow); }
 
-                    m_pImage.transform.localScale += new Vector3(fAddScale, fAddScale);
+                    gameObject.transform.localScale += new Vector3(fAddScale, fAddScale);
 
-                    float fCurrentScale = m_pImage.transform.localScale.x;
+                    float fCurrentScale = gameObject.transform.localScale.x;
                     if (fCurrentScale >= fEndScale)
                     {
                         eStep = STEP.BACK3;
@@ -126,14 +126,14 @@ public class BoyonAppeared : BaseAnim2D
                     float fPow = 0.1f;
                     if (fAddScale <= -(fVelocity * fPow)) { fAddScale = -(fVelocity * fPow); }
 
-                    m_pImage.transform.localScale += new Vector3(fAddScale, fAddScale);
+                    gameObject.transform.localScale += new Vector3(fAddScale, fAddScale);
 
-                    float fCurrentScale = m_pImage.transform.localScale.x;
+                    float fCurrentScale = gameObject.transform.localScale.x;
                     if (fCurrentScale <= fEndScale)
                     {
                          eStep = STEP.END;
                         // 最後スケール合わす
-                        m_pImage.transform.localScale = new Vector3(fEndScale, fEndScale, fEndScale);
+                        gameObject.transform.localScale = new Vector3(fEndScale, fEndScale, fEndScale);
 
                     }
                 }
@@ -158,7 +158,7 @@ public class BoyonAppeared : BaseAnim2D
         base.Action();
 
         // 初期スケール
-        m_pImage.transform.localScale = new Vector3(fStartScale, fStartScale, fStartScale);
+        gameObject.transform.localScale = new Vector3(fStartScale, fStartScale, fStartScale);
 
         eStep = STEP.START;
         fAddScale = fVelocity;

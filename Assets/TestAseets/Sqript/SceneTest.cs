@@ -17,6 +17,11 @@ public class SceneTest : MonoBehaviour
 
     public GameObject ClickEf;
 
+    public GameObject LifePoints;
+
+    public TurnEndButton m_TurnEndButton;
+
+    public GameObject remainingpoints;
     //+------------------------------
     // Use this for initialization
     void Start()
@@ -28,11 +33,89 @@ public class SceneTest : MonoBehaviour
         Card.GetComponent<ScreenOutAppeared>().Action();
         Card.GetComponent<Rotation>().Action();
 
+        LifePoints.SetActive(true);
     }
 
     // Update is called once per frame
     void Update()
-    {   
+    {
+        if (Input.GetKey(KeyCode.Keypad0))
+        {
+            remainingpoints.GetComponent<RemainingPoints>().Reset();
+        }
+
+        if (Input.GetKey(KeyCode.Keypad1))
+        {
+            remainingpoints.GetComponent<RemainingPoints>().NotRemaining(1);
+        }
+        if (Input.GetKey(KeyCode.Keypad2))
+        {
+            remainingpoints.GetComponent<RemainingPoints>().NotRemaining(5);
+        }
+        if (Input.GetKey(KeyCode.Keypad3))
+        {
+            remainingpoints.GetComponent<RemainingPoints>().NotRemaining(7);
+        }
+
+        if (Input.GetKey(KeyCode.Keypad4))
+        {
+            remainingpoints.GetComponent<RemainingPoints>().Remaining(1);
+        }
+        if (Input.GetKey(KeyCode.Keypad5))
+        {
+            remainingpoints.GetComponent<RemainingPoints>().Remaining(5);
+        }
+        if (Input.GetKey(KeyCode.Keypad6))
+        {
+            remainingpoints.GetComponent<RemainingPoints>().Remaining(7);
+        }
+        if (Input.GetKey(KeyCode.Keypad7))
+        {
+            remainingpoints.GetComponent<RemainingPoints>().TouchBegan();
+        }
+        if (Input.GetKey(KeyCode.Keypad8))
+        {
+            remainingpoints.GetComponent<RemainingPoints>().TouchEnded();
+        }
+
+
+        if (Input.GetKey(KeyCode.Q))
+        {
+            m_TurnEndButton.GetComponent<TurnEndButton>().Action(TurnEndButton.TURN_END_TYPE.NEXT);
+        }
+        if (Input.GetKey(KeyCode.W))
+        {
+            m_TurnEndButton.GetComponent<TurnEndButton>().Action(TurnEndButton.TURN_END_TYPE.SET_OK);
+        }
+        if (Input.GetKey(KeyCode.E))
+        {
+            m_TurnEndButton.GetComponent<TurnEndButton>().BackButton();
+        }
+
+        if (Input.GetKey(KeyCode.R))
+        {
+            LifePoints.GetComponent<LifePoint>().AddLP(-1);
+        }
+        if (Input.GetKey(KeyCode.T))
+        {
+            LifePoints.GetComponent<LifePoint>().AddLP(1);
+        }
+        if (Input.GetKey(KeyCode.Y))
+        {
+            LifePoints.GetComponent<LifePoint>().SetLP(250);
+        }
+        if (Input.GetKey(KeyCode.U))
+        {
+            LifePoints.GetComponent<LifePoint>().SetLP(40);
+        }
+        if (Input.GetKey(KeyCode.G))
+        {
+            LifePoints.GetComponent<LifePoint>().ActionDangerFlag();
+        }
+        if (Input.GetKey(KeyCode.H))
+        {
+            LifePoints.GetComponent<LifePoint>().StopDangerFlag();
+        }
         // throw処理
         if (Input.GetKey(KeyCode.Z))
         {
@@ -57,7 +140,7 @@ public class SceneTest : MonoBehaviour
         {
             //UVEffect.GetComponent<UVScroll>().Action();
             UVMgr.GetComponent<UVEffectManager>().
-            Action(UV_EFFECT_TYPE.UP_STATUS, new Vector3(0, 0, 0), new Vector3(0, 0, 90));
+            Action(UV_EFFECT_TYPE.UP_STATUS, new Vector3(1, 0, 0), new Vector3(0, 0, 90));
 
         }
 
@@ -72,7 +155,7 @@ public class SceneTest : MonoBehaviour
         {
             //UVEffect.GetComponent<UVScroll>().Action();
             UVMgr.GetComponent<UVEffectManager>().
-            Action(UV_EFFECT_TYPE.SUMMON, new Vector3(0, 0, 0), new Vector3(0, 0, 0));
+            Action(UV_EFFECT_TYPE.SUMMON, new Vector3(0, 3, 0), new Vector3(0, 0, 0));
         }
 
         if (Input.GetKey(KeyCode.P))
@@ -130,20 +213,20 @@ public class SceneTest : MonoBehaviour
 
         if (Input.GetKey(KeyCode.F))
         {
-            TurnEndEffects.GetComponent<TurnEndEffects>().Action(TURN_END_TYPE.MAIN);
+            TurnEndEffects.GetComponent<TurnEndEffects>().Action(PHASE_TYPE.MAIN);
         }
 
         if (Input.GetKey(KeyCode.G))
         {
-            TurnEndEffects.GetComponent<TurnEndEffects>().Action(TURN_END_TYPE.BATTLE);
+            TurnEndEffects.GetComponent<TurnEndEffects>().Action(PHASE_TYPE.BATTLE);
         }
         if (Input.GetKey(KeyCode.H))
         {
-            TurnEndEffects.GetComponent<TurnEndEffects>().Action(TURN_END_TYPE.WINNER);
+            TurnEndEffects.GetComponent<TurnEndEffects>().Action(PHASE_TYPE.WINNER);
         }
         if (Input.GetKey(KeyCode.J))
         {
-            TurnEndEffects.GetComponent<TurnEndEffects>().Action(TURN_END_TYPE.LOSER);
+            TurnEndEffects.GetComponent<TurnEndEffects>().Action(PHASE_TYPE.LOSER);
         }
 
         Card.GetComponent<ScreenOutAppeared>().SelfUpdate();

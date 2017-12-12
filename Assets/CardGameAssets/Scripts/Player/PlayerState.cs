@@ -158,6 +158,7 @@ namespace PlayerState
         {
             player.isStateEnd = false;
             player.isPushedJunbiKanryo = false;
+            player.isPushedNextButton= false;
 
             if (player.isMyPlayer)
             {
@@ -226,6 +227,7 @@ namespace PlayerState
         public override void Enter(Player player)
         {
             player.isPushedJunbiKanryo = false;
+            player.isPushedNextButton　= false;
             player.deckManager.TurnEnd();
             // UI更新
             player.playerManager.uiManager.UpdateDeckUI(player.deckManager, player.isMyPlayer);

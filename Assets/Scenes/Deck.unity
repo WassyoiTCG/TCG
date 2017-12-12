@@ -663,7 +663,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 03098dda86863b745bfc5606f4195a89, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_iDelayFrame: 0
+  m_iDelayFrameMax: 0
   fSpeed: 0.35
   vNextVector: {x: 0, y: 0, z: 0}
 --- !u!222 &508757350
@@ -795,21 +795,6 @@ Prefab:
         type: 2}
       propertyPath: m_Pivot.y
       value: 0.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 114972909830547956, guid: ec2077b4d30b3d34fbffa5a50b7283a9,
-        type: 2}
-      propertyPath: fEndScale
-      value: 0.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 114972909830547956, guid: ec2077b4d30b3d34fbffa5a50b7283a9,
-        type: 2}
-      propertyPath: fVelocity
-      value: 0.06
-      objectReference: {fileID: 0}
-    - target: {fileID: 114972909830547956, guid: ec2077b4d30b3d34fbffa5a50b7283a9,
-        type: 2}
-      propertyPath: fBackPower
-      value: 0.45
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: ec2077b4d30b3d34fbffa5a50b7283a9, type: 2}
@@ -983,7 +968,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a2a16291f4ef7934092c91d794d9cc7d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_iDelayFrame: 0
+  m_iDelayFrameMax: 0
   iEndFrame: 9999
   vShakeRange: {x: 5, y: 0, z: 0}
   iCycle: 18
@@ -1144,7 +1129,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 57da53e4623e2d74f81c68fb55f34999, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_iDelayFrame: 0
+  m_iDelayFrameMax: 0
   iEndFrame: 18
   fStartScale: 2.5
   fAddScale: 0.015
@@ -2412,7 +2397,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 57da53e4623e2d74f81c68fb55f34999, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_iDelayFrame: 0
+  m_iDelayFrameMax: 0
   iEndFrame: 18
   fStartScale: 2
   fAddScale: 0.02
@@ -2655,7 +2640,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1c2c2cf21a0d15949b517293b3e9cecf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_iDelayFrame: 0
+  m_iDelayFrameMax: 0
   fStartScale: 0.3
   fEndScale: 0.5
   fVelocity: 0.35
@@ -2672,7 +2657,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 03098dda86863b745bfc5606f4195a89, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_iDelayFrame: 0
+  m_iDelayFrameMax: 0
   fSpeed: 0.3
   vNextVector: {x: 0, y: 0, z: 0}
 --- !u!114 &1661492130
@@ -2695,6 +2680,7 @@ MonoBehaviour:
   panel: {fileID: 1502052950}
   DeckSetInfo: {fileID: 1446494565}
   EventFullInfo: {fileID: 663297224}
+  AbilityFullInfo: {fileID: 0}
 --- !u!114 &1661492131
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2741,7 +2727,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 57da53e4623e2d74f81c68fb55f34999, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_iDelayFrame: 0
+  m_iDelayFrameMax: 0
   iEndFrame: 12
   fStartScale: 0.3
   fAddScale: -0.002
@@ -3111,7 +3097,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8af085ba5bbc70a43bef03b3a68b96ab, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_iDelayFrame: 0
+  m_iDelayFrameMax: 0
   iEndFrame: 9999
   iCycle: 60
 --- !u!1 &1749762484
@@ -3601,7 +3587,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 57da53e4623e2d74f81c68fb55f34999, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_iDelayFrame: 0
+  m_iDelayFrameMax: 0
   iEndFrame: 18
   fStartScale: 2.5
   fAddScale: -0.015

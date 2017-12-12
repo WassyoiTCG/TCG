@@ -7,7 +7,7 @@ using UnityEngine.UI;
 //+--------------------------------
 // ターンエンドに必要な奴つくる
 //+--------------------------------
-public enum TURN_END_TYPE
+public enum PHASE_TYPE
 {
     MAIN,
     BATTLE,
@@ -49,7 +49,7 @@ public class TurnEndEffects : MonoBehaviour
 
     public GameObject Font_WinnerRip;
 
-    private TURN_END_TYPE m_eType = TURN_END_TYPE.MAIN;
+    private PHASE_TYPE m_eType = PHASE_TYPE.MAIN;
 
     private int m_iSelfFrame = 0;
 
@@ -60,7 +60,7 @@ public class TurnEndEffects : MonoBehaviour
     {
         m_iSelfFrame = 0;
 
-        m_eType = TURN_END_TYPE.LEST;
+        m_eType = PHASE_TYPE.LEST;
 
         BlackPanel.SetActive(false);
         Font_MainPhase.SetActive(false);
@@ -72,7 +72,7 @@ public class TurnEndEffects : MonoBehaviour
     void Update()
     {
         // 休憩中よ
-        if (m_eType == TURN_END_TYPE.LEST) { m_iSelfFrame = 0; return; }
+        if (m_eType == PHASE_TYPE.LEST) { m_iSelfFrame = 0; return; }
 
         // フレーム更新
         m_iSelfFrame++;
@@ -106,7 +106,7 @@ public class TurnEndEffects : MonoBehaviour
         const int iScaleAnim = 52;
         switch (m_eType)
         {
-            case TURN_END_TYPE.MAIN:
+            case PHASE_TYPE.MAIN:
 
                 if (m_iSelfFrame >= iScaleAnim)
                 {
@@ -115,11 +115,11 @@ public class TurnEndEffects : MonoBehaviour
 
                 if (m_iSelfFrame >= iAnimationEndFrame)
                 {
-                    m_eType = TURN_END_TYPE.LEST;
+                    m_eType = PHASE_TYPE.LEST;
                     Debug.Log("演出終了- TurnEndEffects");
                 }
                 break;
-            case TURN_END_TYPE.BATTLE:
+            case PHASE_TYPE.BATTLE:
 
                 if (m_iSelfFrame >= iScaleAnim)
                 {
@@ -128,11 +128,11 @@ public class TurnEndEffects : MonoBehaviour
 
                 if (m_iSelfFrame >= iAnimationEndFrame)
                 {
-                    m_eType = TURN_END_TYPE.LEST;
+                    m_eType = PHASE_TYPE.LEST;
                     Debug.Log("演出終了- TurnEndEffects");
                 }
                 break;
-            case TURN_END_TYPE.WINNER:
+            case PHASE_TYPE.WINNER:
                 const int iBackEffectAnim = 16;
                 if (m_iSelfFrame == iBackEffectAnim)
                 {
@@ -143,22 +143,22 @@ public class TurnEndEffects : MonoBehaviour
                 // (TODO)仮で直打ち
                 if (m_iSelfFrame >= 120)
                 {
-                    m_eType = TURN_END_TYPE.LEST;
+                    m_eType = PHASE_TYPE.LEST;
                     Debug.Log("演出終了- TurnEndEffects");
                 }
                 break;
-            case TURN_END_TYPE.LOSER:
+            case PHASE_TYPE.LOSER:
                 // (TODO)仮で直打ち
                 if (m_iSelfFrame >= 120)
                 {
-                    m_eType = TURN_END_TYPE.LEST;
+                    m_eType = PHASE_TYPE.LEST;
                     Debug.Log("演出終了- TurnEndEffects");
                 }
                 break;
-            case TURN_END_TYPE.LEST:
+            case PHASE_TYPE.LEST:
 
                 break;
-            case TURN_END_TYPE.END:
+            case PHASE_TYPE.END:
 
                 break;
             default:
@@ -175,7 +175,7 @@ public class TurnEndEffects : MonoBehaviour
 
     }
 
-    public void Action(TURN_END_TYPE eType)
+    public void Action(PHASE_TYPE eType)
     {
 
         // まず残ってる演出止める
@@ -190,7 +190,10 @@ public class TurnEndEffects : MonoBehaviour
         switch (m_eType)
         {
 
-            case TURN_END_TYPE.MAIN:
+            case PHASE_TYPE.MAIN:
+                // SE
+                oulAudio.PlaySE("phase");
+
                 BlackPanel.GetComponent<AlphaMove>().Action();
 
                 BlueFrash.GetComponent<Ripple>().Action();
@@ -204,7 +207,10 @@ public class TurnEndEffects : MonoBehaviour
                 Vector3 AwakeScale = Font_MainPhase.GetComponent<ScaleAppeared>().GetAwakScale();
                 Font_MainPhase.GetComponent<ScaleAppeared>().SetScale(AwakeScale);
                 break;
-            case TURN_END_TYPE.BATTLE:
+            case PHASE_TYPE.BATTLE:
+                // SE
+                oulAudio.PlaySE("phase");
+
                 BlackPanel.GetComponent<AlphaMove>().Action();
 
                 OrangeFrash.GetComponent<Ripple>().Action();
@@ -219,7 +225,7 @@ public class TurnEndEffects : MonoBehaviour
                 Font_BattlePhase.GetComponent<ScaleAppeared>().SetScale(AwakeScale);
 
                 break;
-            case TURN_END_TYPE.WINNER:
+            case PHASE_TYPE.WINNER:
                 //m_pHeaveho->OrderShrink(8, 1, 6);
                 //m_pHeaveho->Action();
                 //
@@ -241,7 +247,7 @@ public class TurnEndEffects : MonoBehaviour
                 Font_WinnerRip.GetComponent<Ripple>().Action();
 
                 break;
-            case TURN_END_TYPE.LOSER:
+            case PHASE_TYPE.LOSER:
 
                 BlackPanel.GetComponent<AlphaMove>().ActionRoop();
 
@@ -252,7 +258,7 @@ public class TurnEndEffects : MonoBehaviour
                 Font_Loser.GetComponent<ScreenOutAppeared>().SetPos(vAwakePos);
 
                 break;
-            case TURN_END_TYPE.END:
+            case PHASE_TYPE.END:
             default:
                 Debug.LogWarning("シルビア： あらへろしちゃん、そのTYPEは存在しないわよ。- TurnEnd ");
                 break;
@@ -261,7 +267,7 @@ public class TurnEndEffects : MonoBehaviour
     }
 
 
-    void Stop()
+    public　void Stop()
     {
         BlackPanel.GetComponent<AlphaMove>().StopRoop();
 
@@ -269,5 +275,5 @@ public class TurnEndEffects : MonoBehaviour
     }
 
 
-    public TURN_END_TYPE GetTrunEndType() { return m_eType; }// Lestだったら○○とか
+    public PHASE_TYPE GetTrunEndType() { return m_eType; }// Lestだったら○○とか
 }

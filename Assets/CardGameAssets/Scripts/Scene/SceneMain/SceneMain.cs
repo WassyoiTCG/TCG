@@ -39,13 +39,27 @@ public class SceneMain : MonoBehaviour
     public List<int> aikoPoint { get; private set; }            // あいこポイント
     public int turn;                                            // 現在のターン
 
+    public UVEffectManager UvEffectMgr_My;
+    public UVEffectManager UvEffectMgr_Cpu;
+    public PanelEffectManager PanelEffectMgr_My;
+    public PanelEffectManager PanelEffectMgr_Cpu;
+
+    public int iWaitFrame;                                      //  演出用止めるフレーム
+     
+
     //public bool isOnline = false;
 
-	// Use this for initialization
-	void Awake()
+    // Use this for initialization
+    void Awake()
     {
+        // 待機フレーム
+        iWaitFrame = 0;
+
         // システム初期化
         oulSystem.Initialize();
+
+        //  BGM
+        oulAudio.PlayBGM("RisingWinter", true);
 
         // メッセージ管理初期化
         MessageManager.Start(this, SelectData.isNetworkBattle);
@@ -72,9 +86,17 @@ public class SceneMain : MonoBehaviour
 
         Restart();
 	}
-	
-	// Update is called once per frame
-	void Update ()
+
+    // 終了時
+    void OnDisable()
+    {
+        //  BGM
+        oulAudio.StopBGM();
+
+    }
+
+    // Update is called once per frame
+    void Update ()
     {
         // ステートマシン更新
         stateMachine.Update();
@@ -88,8 +110,8 @@ public class SceneMain : MonoBehaviour
 
     public void Finish()
     {
-        var myScore = playerManager.uiManager.myHP;
-        var cpuScore = playerManager.uiManager.cpuHP;
+        var myScore = playerManager.uiManager.myLP.iLP;
+        var cpuScore = playerManager.uiManager.cpuLP.iLP;
         if (myScore > cpuScore)
         {
             stateMachine.ChangeState(SceneMainState.Winner.GetInstance());

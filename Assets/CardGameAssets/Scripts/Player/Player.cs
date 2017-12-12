@@ -28,6 +28,8 @@ public class Player : MonoBehaviour
     public bool isPushedJunbiKanryo;
     bool isStart = false;
 
+    public bool isPushedNextButton;
+    
     // ステートマシン用
     public int step;
     public bool isMarigan;
@@ -42,6 +44,18 @@ public class Player : MonoBehaviour
         }
         else jissainoPower = noSetStrikerPower;
     }
+
+    public void PushedNextButtonON()
+    {
+        isPushedNextButton = true;
+        var striker = GetFieldStrikerCard();
+        if (striker != null)
+        {
+            jissainoPower = striker.cardData.power;
+        }
+        else jissainoPower = noSetStrikerPower;
+    }
+
     //public void JubikanryoOFF()
     //{
     //    isPushedJunbiKanryo = false;

@@ -57,7 +57,11 @@ public class Ripple : BaseAnim2D
             if (m_bRoop == true)
             {
                 m_iCurrentFrame = 0;
-            }else 
+                // 初期スケール
+                m_pImage.transform.localScale =
+                 new Vector3(fStartScale, fStartScale, fStartScale);
+            }
+            else 
             {
                 m_bActionFlag = false;
                 m_bEndFlag = true; // 終りフラグON

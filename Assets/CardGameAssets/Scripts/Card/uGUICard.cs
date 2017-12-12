@@ -14,6 +14,7 @@ public class uGUICard : MonoBehaviour
     public GameObject panel;
     public GameObject DeckSetInfo;
     public GameObject EventFullInfo;
+    public GameObject AbilityFullInfo;
 
     public CardData cardData;// (TODO)カードデータの情報いれるよ
 
@@ -41,6 +42,9 @@ public class uGUICard : MonoBehaviour
         panel.GetComponent<Image>().color = new Color(0, 0, 0, 0);
         DeckSetInfo.SetActive(false);
         EventFullInfo.SetActive(false);
+        
+        
+        AbilityFullInfo.SetActive(false);
     }
 
     public void EventFullInfo_On()
@@ -63,12 +67,29 @@ public class uGUICard : MonoBehaviour
         EventFullInfo.SetActive(false);
     }
 
+    public void AbilityFullInfo_On()
+    {
+        //if (isNotGrasp == false)
+        {
+            isNotGrasp = true;
+            panel.GetComponent<Image>().color = new Color(0, 0, 0, 0.5f);
+            AbilityFullInfo.SetActive(true);
+        }
+    }
+
+    public void AbilityFullInfo_Off()
+    {
+        isNotGrasp = false;
+        panel.GetComponent<Image>().color = new Color(0, 0, 0, 0);
+        AbilityFullInfo.SetActive(false);
+    }
 
     // Use this for initialization
     protected virtual void Awake()
     {
         if(DeckSetInfo != null)DeckSetInfo.SetActive(false);
         if(EventFullInfo != null)EventFullInfo.SetActive(false);
+        if (AbilityFullInfo != null) AbilityFullInfo.SetActive(false);
 
     }
 

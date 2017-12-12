@@ -64,6 +64,38 @@ public static class oulAudio
     public static void Initialize()
     {
         LoadSE("Ketudoramu", "SE/Ketudoramu");
+
+        LoadSE("action_ability", "SE/shadowverse/action_ability");
+        LoadSE("card_create", "SE/shadowverse/card_create");
+        LoadSE("card_draw0", "SE/shadowverse/card_draw0");
+        LoadSE("card_draw1", "SE/shadowverse/card_draw1");
+        LoadSE("card_hold", "SE/shadowverse/card_hold");
+        LoadSE("cursor0", "SE/shadowverse/cursor0");
+        LoadSE("decide0", "SE/shadowverse/decide0");
+        LoadSE("decide1", "SE/shadowverse/decide1");
+        LoadSE("decide2", "SE/shadowverse/decide2");
+        LoadSE("decide3", "SE/shadowverse/decide3");
+        LoadSE("edit_end", "SE/shadowverse/edit_end");
+        LoadSE("edit_out", "SE/shadowverse/edit_out");
+        LoadSE("edit_set", "SE/shadowverse/edit_set");
+        LoadSE("ether", "SE/shadowverse/ether");
+        LoadSE("fire0", "SE/shadowverse/fire0");
+        LoadSE("gacha_comon", "SE/shadowverse/gacha_comon");
+        LoadSE("gacha_legend", "SE/shadowverse/gacha_legend");
+        LoadSE("edit_set", "SE/shadowverse/edit_set");
+        LoadSE("gacha_rare", "SE/shadowverse/gacha_rare");
+        LoadSE("gacha_s_rare", "SE/shadowverse/gacha_s_rare");
+        LoadSE("phase", "SE/shadowverse/phase");
+        LoadSE("select0", "SE/shadowverse/select0");
+        LoadSE("up", "SE/shadowverse/up");
+        LoadSE("Win", "SE/shadowverse/Win");
+
+        LoadSE("Attack_Extra", "SE/Main/Attack_Extra");
+        LoadSE("Attack_Middle", "SE/Main/Attack_Middle");
+        LoadSE("Attack_Mini", "SE/Main/Attack_Mini");
+        LoadSE("Attack_Strong", "SE/Main/Attack_Strong");
+
+
         //LoadSE("Trigger0", "Customizes/SE/Trigger0");
         //LoadSE("Wolf", "Sound/SE/wolf");
         //LoadSE("UnlimitedWolf", "Sound/SE/unlimited_wolf");
@@ -83,8 +115,8 @@ public static class oulAudio
         //    LoadSE(str, "Sound/SE/" + str);
         //}
         LoadBGM("CollectionBGM", "BGM/Collect");
-        LoadBGM("CollectionBGM", "BGM/tori");
-
+        LoadBGM("tori", "BGM/tori");
+        LoadBGM("RisingWinter", "BGM/Rising Winter");
         // 定数
         //constant = GameObject.Find("Util").GetComponent<Constant>();
     }

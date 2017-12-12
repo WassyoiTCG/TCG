@@ -252,14 +252,15 @@ namespace SceneMainState
 
         public override void Enter(SceneMain pMain)
         {
+            
             // メインフェーズエフェクト発動
-            pMain.turnEndEffect.Action(TURN_END_TYPE.MAIN);
+            pMain.turnEndEffect.Action(PHASE_TYPE.MAIN);
         }
 
         public override void Execute(SceneMain pMain)
         {
             // 演出終わったら
-            if(pMain.turnEndEffect.GetTrunEndType() == TURN_END_TYPE.LEST)
+            if(pMain.turnEndEffect.GetTrunEndType() == PHASE_TYPE.LEST)
             {
                 // ポイントドローステートへ
                 pMain.stateMachine.ChangeState(PointDraw.GetInstance());
@@ -326,6 +327,8 @@ namespace SceneMainState
 
         public override void Enter(SceneMain pMain)
         {
+
+ 
             //// 初回ドロー
             //if (pMain.turn++ == 0)
             //{
@@ -334,7 +337,10 @@ namespace SceneMainState
             //}
             // 2ターンごとドロー
             if (++pMain.turn % 2 == 1)
-            {
+            {           
+                //  SE
+                oulAudio.PlaySE("card_draw1");
+
                 pMain.playerManager.SetState(PlayerState.Draw.GetInstance());
                 return;
             }
@@ -371,10 +377,14 @@ namespace SceneMainState
         public override void Enter(SceneMain pMain)
         {
             pMain.playerManager.SetState(PlayerState.SetStriker.GetInstance());
-
+            
             // まずプレイヤーがストライカーをセットできる状況か判断。してボタンを表示
-            pMain.uiManager.AppearStrikerOK(pMain.playerManager.GetMyPlayer().isHaveStrikerCard());
-
+            // 出せるカードがなかった！
+            if (pMain.playerManager.GetMyPlayer().isHaveStrikerCard() == false)
+            {
+                Debug.Log(" 出せるカードがなかった！ - SetStriker");
+                pMain.uiManager.EnableSetStrikerButton();
+            }
             // タイマーセット
             pMain.uiManager.SetTimer(setLimitTime);
         }
@@ -385,7 +395,7 @@ namespace SceneMainState
             if (pMain.playerManager.isSetStrikerEnd())
             {
                 // ステートチェンジ
-                pMain.stateMachine.ChangeState(BattlePhase.GetInstance());
+                pMain.stateMachine.ChangeState(WaitToBattlePhase.GetInstance());
             }
 
             //// 時間切れなったら
@@ -420,8 +430,48 @@ namespace SceneMainState
         }
     }
 
-    // バトルフェーズエフェクトを発動するステート
 
+    // （仮）ウェイト用
+    public class WaitToBattlePhase : BaseEntityState<SceneMain>
+    {
+        // Singleton.
+        static WaitToBattlePhase instance;
+        public static WaitToBattlePhase GetInstance() { if (instance == null) { instance = new WaitToBattlePhase(); } return instance; }
+
+        public override void Enter(SceneMain pMain)
+        {
+
+            pMain.iWaitFrame = 0; // 初期化
+
+        }
+
+        public override void Execute(SceneMain pMain)
+        {
+            // (仮)
+            pMain.iWaitFrame++; // 
+            if (pMain.iWaitFrame >= 24)
+            {
+                // ステートチェンジ
+                pMain.stateMachine.ChangeState(BattlePhase.GetInstance());
+
+            }
+
+        }
+
+        public override void Exit(SceneMain pMain)
+        {
+
+        }
+
+        public override bool OnMessage(SceneMain pMain, MessageInfo message)
+        {
+            return false;
+        }
+
+
+    }
+
+    // バトルフェーズエフェクトを発動するステート
     public class BattlePhase : BaseEntityState<SceneMain>
     {
         // Singleton.
@@ -431,13 +481,13 @@ namespace SceneMainState
         public override void Enter(SceneMain pMain)
         {
             // バトルフェーズエフェクト発動
-            pMain.turnEndEffect.Action(TURN_END_TYPE.BATTLE);
+            pMain.turnEndEffect.Action(PHASE_TYPE.BATTLE);
         }
 
         public override void Execute(SceneMain pMain)
         {
             // 演出終わったら
-            if (pMain.turnEndEffect.GetTrunEndType() == TURN_END_TYPE.LEST)
+            if (pMain.turnEndEffect.GetTrunEndType() == PHASE_TYPE.LEST)
             {
                 // カードオープンステートへ
                 pMain.stateMachine.ChangeState(StrikerOpen.GetInstance());
@@ -470,14 +520,63 @@ namespace SceneMainState
 
             // 時間初期化
             timer = 0;
+
+            pMain.iWaitFrame = 0; // 初期化
         }
 
         public override void Execute(SceneMain pMain)
         {
-            if ((timer += Time.deltaTime) > 2)
+        // ひっくり返る動きが終わったら
+            if (!pMain.playerManager.GetMyPlayer().cardObjectManager.isInMovingState() && 
+                !pMain.playerManager.GetCPUPlayer().cardObjectManager.isInMovingState())
             {
-                // ステートチェンジ
-                pMain.stateMachine.ChangeState(CardAttack.GetInstance());
+
+                // SE
+                oulAudio.PlaySE("Ketudoramu");
+
+                //+-------------- 
+                // 演出
+                //+--------------
+                // nullじゃなかったら
+                Card MyFiledCard = pMain.playerManager.GetMyPlayer().cardObjectManager.fieldStrikerCard;
+                if (MyFiledCard  != null)
+                {
+                    Vector3 MyPos = MyFiledCard.cacheTransform.localPosition;
+                    Vector3 MyAngle = MyFiledCard.cacheTransform.localEulerAngles;
+                    pMain.UvEffectMgr_My.Action(UV_EFFECT_TYPE.SUMMON, MyPos, MyAngle);
+                    // 効果持ちファイターなら
+                    if (MyFiledCard.cardData.cardType == CardType.AbilityFighter)
+                    {
+                        pMain.PanelEffectMgr_My.Action(PANEL_EFFECT_TYPE.ABILITY, MyPos, MyAngle);
+                        pMain.PanelEffectMgr_My.Action(PANEL_EFFECT_TYPE.STAR, MyPos, MyAngle);
+                    }
+
+                    //pMain.UvEffectMgr.GetComponent<UVEffectManager>(). Action(UV_EFFECT_TYPE.DOWN_STATUS, new Vector3(0, 0, 0), new Vector3(0, 0, 0));
+
+                }
+                // 相手もやる
+                // nullじゃなかったら
+                Card CpuFiledCard = pMain.playerManager.GetCPUPlayer().cardObjectManager.fieldStrikerCard;
+                if (CpuFiledCard != null)
+                {
+                    Vector3 CpuPos = CpuFiledCard.cacheTransform.localPosition;
+                    Vector3 CpuAngle = CpuFiledCard.cacheTransform.localEulerAngles;
+                    pMain.UvEffectMgr_Cpu.Action(UV_EFFECT_TYPE.SUMMON, CpuPos, CpuAngle);
+                    // 効果持ちファイターなら
+                    if (CpuFiledCard.cardData.cardType == CardType.AbilityFighter)
+                    {
+                        pMain.PanelEffectMgr_Cpu.Action(PANEL_EFFECT_TYPE.ABILITY, CpuPos, CpuAngle);
+                        pMain.PanelEffectMgr_My.Action(PANEL_EFFECT_TYPE.STAR, CpuPos, CpuAngle);
+                    }
+
+                    //pMain.UvEffectMgr.GetComponent<UVEffectManager>().Action(UV_EFFECT_TYPE.DOWN_STATUS, new Vector3(0, 0, 0), new Vector3(0, 0, 0));
+
+                }
+
+                    // ステートチェンジ
+                    pMain.stateMachine.ChangeState(WaitToSetIntercept.GetInstance());
+                
+
             }
         }
 
@@ -489,6 +588,243 @@ namespace SceneMainState
             return false;
         }
     }
+
+    // ウェイト用
+    public class WaitToSetIntercept : BaseEntityState<SceneMain>
+    {      
+        // Singleton.
+        static WaitToSetIntercept instance;
+        public static WaitToSetIntercept GetInstance() { if (instance == null) { instance = new WaitToSetIntercept(); } return instance; }
+        
+        public override void Enter(SceneMain pMain)
+        {
+        
+            pMain.iWaitFrame = 0; // 初期化
+
+        }
+
+        public override void Execute(SceneMain pMain)
+        {
+             // (仮)
+              pMain.iWaitFrame++; // 
+            if (pMain.iWaitFrame >= 30)
+            {
+                // ステートチェンジ
+                //pMain.stateMachine.ChangeState(CardAttack.GetInstance());
+                pMain.stateMachine.ChangeState(SetIntercept.GetInstance());
+
+            }
+
+        }
+
+        public override void Exit(SceneMain pMain)
+        {
+
+        }
+
+        public override bool OnMessage(SceneMain pMain, MessageInfo message)
+        {
+            return false;
+        }
+
+
+    }
+    // インターセプトカードをセットするステート
+    public class SetIntercept : BaseEntityState<SceneMain>
+    {
+        // Singleton.
+        static SetIntercept instance;
+        public static SetIntercept GetInstance() { if (instance == null) { instance = new SetIntercept(); } return instance; }
+
+        //public enum SET_INTERCEPT_STEP
+        //{
+        //    FIRST,/*PLAY_CARD,*/END
+        //};
+
+        //SET_INTERCEPT_STEP eStep;
+
+        readonly float setLimitTime = 10 + 1;   // インターセプトセットする制限時間
+
+        public override void Enter(SceneMain pMain)
+        {
+            //eStep = SET_INTERCEPT_STEP.FIRST;
+
+            // プレイヤーステート変更(インターセプトセットステート)
+            pMain.playerManager.SetState(PlayerState.SetIntercept.GetInstance());
+
+            //pMain.uiManager.AppearStrikerOK(false);  // falseにするとパスが出る
+            pMain.uiManager.AppearInterceptOK();// [1211] NextButton
+
+            // UIに時間セット
+            pMain.uiManager.SetTimer(setLimitTime);
+        }
+
+        public override void Execute(SceneMain pMain)
+        {
+
+            // 時間切れなったら
+            if (pMain.uiManager.isTimerEnd())
+            {
+                //eStep = SET_INTERCEPT_STEP.END;
+                // インターセプト発動へ
+                pMain.stateMachine.ChangeState(WaitToActionIntercept.GetInstance());
+
+                return;
+            }
+            // 2人準備完了(NextButtonを押したら)
+            if (pMain.playerManager.isPushedNextButton())
+            {
+                // タイマーストップ
+                pMain.uiManager.StopTimer();
+
+                // インターセプト発動へ
+                pMain.stateMachine.ChangeState(WaitToActionIntercept.GetInstance());
+
+                //eStep = SET_INTERCEPT_STEP.END;
+            }
+
+            //switch (eStep)
+            //{
+            //    case SET_INTERCEPT_STEP.FIRST:
+            //        // 時間切れなったら
+            //        if (pMain.uiManager.isTimerEnd())
+            //        {
+            //            eStep = SET_INTERCEPT_STEP.END;
+            //            return;
+            //        }
+            //        // 2人準備完了(NextButtonを押したら)
+            //        if (pMain.playerManager.isPushedNextButton())
+            //        {
+            //            // タイマーストップ
+            //            pMain.uiManager.StopTimer();
+
+            //            // インターセプト発動へ
+            //             pMain.stateMachine.ChangeState(ActionIntercept.GetInstance());
+
+            //            //eStep = SET_INTERCEPT_STEP.END;
+            //        }
+            //        break;
+
+            //    case SET_INTERCEPT_STEP.END:
+
+            //        // 効果を発動させる
+            //        //pMain.playerManager.ActionIntercept();
+            //        // = SET_INTERCEPT_STEP.END;
+            //        break;
+
+            //    //case SET_INTERCEPT_STEP.END:
+            //    //    // 効果処理が終わったら
+            //    //    if (pMain.abilityManager.isAbilityEnd())
+            //    //    {
+            //    //        // ステートチェンジ
+            //    //        //pMain.stateMachine.ChangeState(StrikerBattleResult.GetInstance());
+
+            //    //        // モンスターアタックモーションへ
+            //    //        pMain.stateMachine.ChangeState(CardAttack.GetInstance());
+            //    //    }
+            //    //    break;
+            //}
+        }
+
+        public override void Exit(SceneMain pMain)
+        {
+            //  NEXT Buton消す
+            pMain.uiManager.DisableSetStrikerButton();// [1211] NextButton
+
+            // タイマーストップ
+            pMain.uiManager.StopTimer();
+        }
+
+        public override bool OnMessage(SceneMain pMain, MessageInfo message)
+        {
+
+
+
+            return false;
+        }
+    }// SetIntercept
+
+
+
+    // （仮）ウェイト用
+    public class WaitToActionIntercept : BaseEntityState<SceneMain>
+    {
+        // Singleton.
+        static WaitToActionIntercept instance;
+        public static WaitToActionIntercept GetInstance() { if (instance == null) { instance = new WaitToActionIntercept(); } return instance; }
+
+        public override void Enter(SceneMain pMain)
+        {
+
+            pMain.iWaitFrame = 0; // 初期化
+
+        }
+
+        public override void Execute(SceneMain pMain)
+        {
+            // (仮)
+            pMain.iWaitFrame++; // 
+            if (pMain.iWaitFrame >= 24)
+            {
+                // ステートチェンジ
+                pMain.stateMachine.ChangeState(ActionInterceptState.GetInstance());
+
+            }
+
+        }
+
+        public override void Exit(SceneMain pMain)
+        {
+
+        }
+
+        public override bool OnMessage(SceneMain pMain, MessageInfo message)
+        {
+            return false;
+        }
+
+
+    }
+
+    // インターセプトカードをセットするステート
+    public class ActionInterceptState : BaseEntityState<SceneMain>
+    {
+        // Singleton.
+        static ActionInterceptState instance;
+        public static ActionInterceptState GetInstance() { if (instance == null) { instance = new ActionInterceptState(); } return instance; }
+        
+        public override void Enter(SceneMain pMain)
+        {
+            // 効果を発動させる!
+            pMain.playerManager.ActionIntercept();
+        }
+
+        public override void Execute(SceneMain pMain)
+        {
+            // 効果処理が終わったら
+            if (pMain.abilityManager.isAbilityEnd())
+            {
+                // ステートチェンジ
+                //pMain.stateMachine.ChangeState(StrikerBattleResult.GetInstance());
+
+                // モンスターアタックモーションへ
+                pMain.stateMachine.ChangeState(CardAttack.GetInstance());
+            }
+        }
+
+        public override void Exit(SceneMain pMain)
+        {
+
+        }
+
+        public override bool OnMessage(SceneMain pMain, MessageInfo message)
+        {
+
+            return false;
+        }
+    }// ActionIntercept
+
+
 
     // カードの攻撃モーションが発動するステート
     public class CardAttack : BaseEntityState<SceneMain>
@@ -501,107 +837,23 @@ namespace SceneMainState
         {
             // ストライカー攻撃モーション発動
             pMain.playerManager.AttackStriker();
+            
+            //pMain.iWaitFrame = 0; // 初期化
+
         }
 
         public override void Execute(SceneMain pMain)
         {
-            // 今は速攻でインターセプトセットステートに行く
-            pMain.stateMachine.ChangeState(SetIntercept.GetInstance());
-        }
 
-        public override void Exit(SceneMain pMain)
-        {
-
-        }
-
-        public override bool OnMessage(SceneMain pMain, MessageInfo message)
-        {
-            return false;
-        }
-    }
-
-    // インターセプトカードをセットするステート
-    public class SetIntercept : BaseEntityState<SceneMain>
-    {
-        // Singleton.
-        static SetIntercept instance;
-        public static SetIntercept GetInstance() { if (instance == null) { instance = new SetIntercept(); } return instance; }
-
-        int step;
-
-        readonly float setLimitTime = 5 + 1;   // インターセプトセットする制限時間
-
-        public override void Enter(SceneMain pMain)
-        {
-            step = 0;
-
-            // 誰もインターセプトを持っていなかったら飛ばす
-            if (!pMain.playerManager.isHaveInterceptCard())
-            {
-                // ステートチェンジ
+                // 今は速攻でインターセプトセットステートに行く
+                //pMain.stateMachine.ChangeState(SetIntercept.GetInstance());
                 pMain.stateMachine.ChangeState(StrikerBattleResult.GetInstance());
 
-                return;
-            }
-
-            // プレイヤーステート変更(インターセプトセットステート)
-            pMain.playerManager.SetState(PlayerState.SetIntercept.GetInstance());
-
-            var myPlayer = pMain.playerManager.GetMyPlayer();
-            // 自分がインターセプト持ってなかったら最初からボタン押した扱いUIのボタンを表示
-            if (!myPlayer.isHaveInterceptCard())
-            {
-                myPlayer.isPushedJunbiKanryo = true;
-                return;
-            }
-
-            pMain.uiManager.AppearStrikerOK(false);  // falseにするとパスが出る
-
-            // UIに時間セット
-            pMain.uiManager.SetTimer(setLimitTime);
-        }
-
-        public override void Execute(SceneMain pMain)
-        {
-            switch(step)
-            {
-                case 0:
-                    // 時間切れなったら
-                    if(pMain.uiManager.isTimerEnd())
-                    {
-                        step++;
-                        return;
-                    }
-                    // 2人準備完了(パスだったり出してたり)
-                    if(pMain.playerManager.isPushedJunbiKanryo())
-                    {
-                        // タイマーストップ
-                        pMain.uiManager.StopTimer();
-                        step++;
-                    }
-                    break;
-
-                case 1:
-                    // 効果を発動させる
-                    pMain.playerManager.ActionIntercept();
-                    step++;
-                    break;
-
-                case 2:
-                    // 効果処理が終わったら
-                    if (pMain.abilityManager.isAbilityEnd())
-                    {
-                        // ステートチェンジ
-                        pMain.stateMachine.ChangeState(StrikerBattleResult.GetInstance());
-                    }
-                    break;
-            }
         }
 
         public override void Exit(SceneMain pMain)
         {
-            // タイマーストップ
-            pMain.uiManager.StopTimer();
+           
         }
 
         public override bool OnMessage(SceneMain pMain, MessageInfo message)
@@ -609,6 +861,100 @@ namespace SceneMainState
             return false;
         }
     }
+
+    //// インターセプトカードをセットするステート
+    //public class SetIntercept : BaseEntityState<SceneMain>
+    //{
+    //    // Singleton.
+    //    static SetIntercept instance;
+    //    public static SetIntercept GetInstance() { if (instance == null) { instance = new SetIntercept(); } return instance; }
+
+    //    int step;
+
+    //    readonly float setLimitTime = 5 + 1;   // インターセプトセットする制限時間
+
+    //    public override void Enter(SceneMain pMain)
+    //    {
+    //        step = 0;
+
+    //        // 誰もインターセプトを持っていなかったら飛ばす
+    //        if (!pMain.playerManager.isHaveInterceptCard())
+    //        {
+    //            // ステートチェンジ
+    //            pMain.stateMachine.ChangeState(StrikerBattleResult.GetInstance());
+
+    //            return;
+    //        }
+
+    //        // プレイヤーステート変更(インターセプトセットステート)
+    //        pMain.playerManager.SetState(PlayerState.SetIntercept.GetInstance());
+
+    //        var myPlayer = pMain.playerManager.GetMyPlayer();
+    //        // 自分がインターセプト持ってなかったら最初からボタン押した扱いUIのボタンを表示
+    //        if (!myPlayer.isHaveInterceptCard())
+    //        {
+    //            myPlayer.isPushedJunbiKanryo = true;
+    //            return;
+    //        }
+
+    //        //pMain.uiManager.AppearStrikerOK(false);  // falseにするとパスが出る
+    //        pMain.uiManager.AppearInterceptOK();// [1211] NextButton
+
+    //        // UIに時間セット
+    //        pMain.uiManager.SetTimer(setLimitTime);
+    //    }
+
+    //    public override void Execute(SceneMain pMain)
+    //    {
+    //        switch(step)
+    //        {
+    //            case 0:
+    //                // 時間切れなったら
+    //                if(pMain.uiManager.isTimerEnd())
+    //                {
+    //                    step++;
+    //                    return;
+    //                }
+    //                // 2人準備完了(パスだったり出してたり)
+    //                if(pMain.playerManager.isPushedJunbiKanryo())
+    //                {
+    //                    // タイマーストップ
+    //                    pMain.uiManager.StopTimer();
+    //                    step++;
+    //                }
+    //                break;
+
+    //            case 1:
+    //                // 効果を発動させる
+    //                pMain.playerManager.ActionIntercept();
+    //                step++;
+    //                break;
+
+    //            case 2:
+    //                // 効果処理が終わったら
+    //                if (pMain.abilityManager.isAbilityEnd())
+    //                {
+    //                    // ステートチェンジ
+    //                    pMain.stateMachine.ChangeState(StrikerBattleResult.GetInstance());
+    //                }
+    //                break;
+    //        }
+    //    }
+
+    //    public override void Exit(SceneMain pMain)
+    //    {
+    //        //  NEXT Buton消す
+    //        pMain.uiManager.DisableSetStrikerButton();// [1211] NextButton
+
+    //        // タイマーストップ
+    //        pMain.uiManager.StopTimer();
+    //    }
+
+    //    public override bool OnMessage(SceneMain pMain, MessageInfo message)
+    //    {
+    //        return false;
+    //    }
+    //}// SetIntercept
 
     // バトルの結果を清算するステート
     public class StrikerBattleResult : BaseEntityState<SceneMain>
@@ -617,29 +963,116 @@ namespace SceneMainState
         static StrikerBattleResult instance;
         public static StrikerBattleResult GetInstance() { if (instance == null) { instance = new StrikerBattleResult(); } return instance; }
 
+        int iLoserNo = 0;
+        bool endFlag = false;
+
         public override void Enter(SceneMain pMain)
         {
+            pMain.iWaitFrame = 0; // 初期化
+
             var winnerPlayerID = pMain.playerManager.StrikerBattle();
             if (winnerPlayerID != -1)
             {
+                // 負けてる方のIDを取得
+                iLoserNo = (winnerPlayerID == 0) ? 1 : 0;
+
                 pMain.aikoPoint.Clear();
-                if (pMain.uiManager.Damage(!pMain.playerManager.players[winnerPlayerID].isMyPlayer, pMain.currentPoint))
-                {
-                    pMain.Finish();
-                    return;
-                }
+                
+                endFlag = pMain.uiManager.Damage(!pMain.playerManager.players[winnerPlayerID].isMyPlayer, pMain.currentPoint);
+                //if (pMain.uiManager.Damage(!pMain.playerManager.players[winnerPlayerID].isMyPlayer, pMain.currentPoint))
+                //{
+                //    pMain.Finish();
+                //
+                return;
             }
-            else if (pMain.aikoPoint.Count >= 2)
+
+            iLoserNo = -1;   // 相殺
+
+            // ここからあいこの処理
+            if (pMain.aikoPoint.Count >= 2)
                 pMain.aikoPoint.Clear();
             else
                 pMain.aikoPoint.Add(pMain.pointManager.GetCurrentPoint());
 
-            // ステートチェンジ
-            pMain.stateMachine.ChangeState(StrikerAfterBattleAbility.GetInstance());
         }
 
         public override void Execute(SceneMain pMain)
-        { }
+        {
+            // ゴレイヌが書いたソースコード
+            const int ATTACK_FRAME = 22;
+            pMain.iWaitFrame++; // 更新
+            if (pMain.iWaitFrame == ATTACK_FRAME)
+            {
+                // どっち勝かってる
+                if (iLoserNo != -1)
+                {
+                    Card FieldCard = pMain.playerManager.GetPlayer(iLoserNo).GetFieldStrikerCard();
+                    if (FieldCard != null)
+                    {
+                        // やられモーションへ
+                        FieldCard.Lose();
+
+                        // +----------------------
+                        //  演出
+                        // +-----------------------
+
+                        // SE
+                        oulAudio.PlaySE("Attack_Middle");
+
+                        Vector3 pos = pMain.playerManager.players[iLoserNo].GetFieldStrikerCard().cacheTransform.localPosition;
+                        pos.y += 1;
+                        Vector3 vec = pMain.playerManager.players[iLoserNo].GetFieldStrikerCard().cacheTransform.localPosition;
+
+                        pMain.PanelEffectMgr_My.Action(PANEL_EFFECT_TYPE.ORANGE_LIGHT, pos, vec);
+                        pMain.PanelEffectMgr_My.Action(PANEL_EFFECT_TYPE.DAMAGE, pos, vec);
+                        //pMain.playerManager.GetPlayer(iLoserNo).GetFieldStrikerCard().Lose();
+                    }
+                }else 
+                {
+                    Card FieldCard1 = pMain.playerManager.GetPlayer(0).GetFieldStrikerCard();
+                    Card FieldCard2 = pMain.playerManager.GetPlayer(1).GetFieldStrikerCard();
+                    if (FieldCard1 != null && FieldCard2 != null)
+                    {
+                        // 相子はどっちもダメージモーション
+                        pMain.playerManager.GetPlayer(0).GetFieldStrikerCard().Lose();
+                        pMain.playerManager.GetPlayer(1).GetFieldStrikerCard().Lose();
+
+                        // SE
+                        oulAudio.PlaySE("Attack_Middle");
+
+                        // +----------------------
+                        //  演出
+                        // +-----------------------
+                        Vector3 pos = pMain.playerManager.players[0].GetFieldStrikerCard().cacheTransform.localPosition;
+                        pos.y += 1;
+                        Vector3 vec = pMain.playerManager.players[0].GetFieldStrikerCard().cacheTransform.localPosition;
+
+                        pMain.PanelEffectMgr_My.Action(PANEL_EFFECT_TYPE.ORANGE_LIGHT, pos, vec);
+                        pMain.PanelEffectMgr_My.Action(PANEL_EFFECT_TYPE.DAMAGE, pos, vec);
+
+                    }
+                }
+
+            }
+            
+
+
+            if (pMain.iWaitFrame >= 60)
+            {
+               // この時点で勝っていたら効果は発動しない。
+                if (endFlag)
+                {
+                    pMain.Finish();
+                }
+
+                else
+                {
+                    // ステートチェンジ
+                    pMain.stateMachine.ChangeState(StrikerAfterBattleAbility.GetInstance());
+                }
+            }
+
+         }
 
         public override void Exit(SceneMain pMain)
         { }
@@ -724,13 +1157,17 @@ namespace SceneMainState
         public override void Enter(SceneMain pMain)
         {
             // Winnerエフェクト発動
-            pMain.turnEndEffect.Action(TURN_END_TYPE.WINNER);
+            pMain.turnEndEffect.Action(PHASE_TYPE.WINNER);
+
+            //  SE
+            oulAudio.PlaySE("Win");
+
         }
 
         public override void Execute(SceneMain pMain)
         {
             // 演出終わったら
-            if (pMain.turnEndEffect.GetTrunEndType() == TURN_END_TYPE.LEST)
+            if (pMain.turnEndEffect.GetTrunEndType() == PHASE_TYPE.LEST)
             {
                 // 終了ステートへ
                 pMain.stateMachine.ChangeState(Finish.GetInstance());
@@ -756,13 +1193,13 @@ namespace SceneMainState
         public override void Enter(SceneMain pMain)
         {
             // Loserエフェクト発動
-            pMain.turnEndEffect.Action(TURN_END_TYPE.LOSER);
+            pMain.turnEndEffect.Action(PHASE_TYPE.LOSER);
         }
 
         public override void Execute(SceneMain pMain)
         {
             // 演出終わったら
-            if (pMain.turnEndEffect.GetTrunEndType() == TURN_END_TYPE.LEST)
+            if (pMain.turnEndEffect.GetTrunEndType() == PHASE_TYPE.LEST)
             {
                 // 終了ステートへ
                 pMain.stateMachine.ChangeState(Finish.GetInstance());
@@ -787,7 +1224,10 @@ namespace SceneMainState
 
         public override void Enter(SceneMain pMain)
         {
-            if(MessageManager.isServer || !SelectData.isNetworkBattle)
+            // 演出終り 
+            pMain.turnEndEffect.Stop();
+
+            if (MessageManager.isServer || !SelectData.isNetworkBattle)
             {
                 pMain.uiManager.AppearEndGameUI();
             }

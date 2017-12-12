@@ -11,6 +11,7 @@ public class ScreenOutAppeared : BaseAnim2D
     private Vector3 vNextPos = new Vector3(0.0f, 0.0f, 0.0f);// 元の値に足した先の場所
     public Vector3 vNextVector = new Vector3(0.0f, 0.0f, 0.0f);     // 元の値のベクトル
     private Vector3 vAwakePos = new Vector3(0.0f, 0.0f, 0.0f);
+    private Vector3 vAwakeNextPos= new Vector3(0.0f, 0.0f, 0.0f);    
     //+-------------------------------
 
     //+ メンバ変数---------------------
@@ -24,8 +25,9 @@ public class ScreenOutAppeared : BaseAnim2D
 
         // ベクトルだけ先に保存しておく
         //vNextVector = vAddNextPos;
-        vAwakePos = m_pImage.transform.localPosition;// 初期座標保存
-        vNextPos = m_pImage.transform.localPosition + vNextVector;
+        vAwakePos = gameObject.transform.localPosition;// 初期座標保存
+        vNextPos = gameObject.transform.localPosition + vNextVector;
+        vAwakeNextPos = vNextPos;
     }
 
     // Update is called once per frame
@@ -35,7 +37,7 @@ public class ScreenOutAppeared : BaseAnim2D
         if (!ActionCheck()) return;
 
 
-        Vector3 vCurrentPos = m_pImage.transform.localPosition;
+        Vector3 vCurrentPos = gameObject.transform.localPosition;
 
         // 場所補間の更新
         if (fSpeed > 1.0f)
@@ -57,7 +59,7 @@ public class ScreenOutAppeared : BaseAnim2D
         }
 
         // 画像の移動地更新！
-        m_pImage.transform.localPosition = vCurrentPos;
+        gameObject.transform.localPosition = vCurrentPos;
 
         // フレーム更新
         // エンドフレームまで来たら終わる
@@ -109,8 +111,8 @@ public class ScreenOutAppeared : BaseAnim2D
     public void SetPosReCalcNextPos(Vector3 vPos)
     {
 
-        m_pImage.transform.localPosition = vPos;
-        vNextPos = m_pImage.transform.localPosition + vNextVector;
+        gameObject.transform.localPosition = vPos;
+        vNextPos = gameObject.transform.localPosition + vNextVector;
 
     }
 
@@ -118,7 +120,7 @@ public class ScreenOutAppeared : BaseAnim2D
     public void SetNextVectorReCalcNextPos(Vector3 vVec)
     {
         vNextVector = vVec;
-        vNextPos = m_pImage.transform.localPosition + vNextVector;
+        vNextPos = gameObject.transform.localPosition + vNextVector;
 
     }
 
@@ -134,6 +136,8 @@ public class ScreenOutAppeared : BaseAnim2D
         vNextPos = vPos;
     }
 
+
+
     // 速度
     public float GetSpeed()
     {
@@ -148,5 +152,11 @@ public class ScreenOutAppeared : BaseAnim2D
     public Vector3 GetAwakPos()
     {
         return vAwakePos;
+    }
+
+    // 初期行先を渡す
+    public Vector3 GetAwakeNextPos()
+    {
+        return vAwakeNextPos;
     }
 }

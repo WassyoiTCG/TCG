@@ -5,7 +5,6 @@ using UnityEngine.UI;
 
 public class SceneDeck : MonoBehaviour
 {
-
     // メンバ変数
     public BaseEntityStateMachine<SceneDeck> m_pStateMachine;
 
@@ -69,6 +68,9 @@ public class SceneDeck : MonoBehaviour
 
         // (TODO)(A列車)システム初期化  を全て共通に  
         oulSystem.Initialize();
+
+        //  BGM
+        oulAudio.PlayBGM("CollectionBGM", true);
 
         // カードのデータベースを初期化
         //CardDataBase.Start();
@@ -158,68 +160,43 @@ public class SceneDeck : MonoBehaviour
 
         }// forコレクション
 
-        // イベント満タンやったら
-        if (EventCardFullTankCheak() == true)
-        {
-            // コレクションにあるイベント全部暗くする
-            for (int i3 = 0; i3 < SelectData.DECK_COLLECTCARD_MAX; i3++)
-            {
-                if (m_aCollectCard[i3].GetComponent<uGUICard>().cardData.cardType == CardType.Support ||
-                    m_aCollectCard[i3].GetComponent<uGUICard>().cardData.cardType == CardType.Connect ||
-                    m_aCollectCard[i3].GetComponent<uGUICard>().cardData.cardType == CardType.Intercept)
-                {
-                    int iEventIndex = PlayerDeckData.numStriker + PlayerDeckData.numJoker;
-                    bool bIDCheakOK = true;
-                    for (int i2 = 0; i2 < PlayerDeckData.numEvent; i2++)
-                    {
-                        if (m_aMyDeckCard[iEventIndex + i2].GetComponent<uGUICard>().cardData.id ==
-                        m_aCollectCard[i3].GetComponent<uGUICard>().cardData.id)
-                        {
-                            bIDCheakOK = false;// デッキに同じIDあり
-                        }
+        EventMANTAN();
+        AbilityMANTAN();
+              //// カードタイプ
+              //if (CardDataBase.GetCardData(11).cardType == CardType.Fighter)
+              //{
+              //    int a = 0;
+              //    a++;
+              //}
+              //if (CardDataBase.GetCardData(11).cardType == CardType.Intercept)
+              //{
+              //    int b = 0;
+              //    b++;
+              //}
 
-                    }
-
-                    // IDがデッキになかったら
-                    if (bIDCheakOK == true)
-                    {
-                        // 満杯マークや
-                        m_aCollectCard[i3].GetComponent<uGUICard>().EventFullInfo_On();
-                    }
-
-
-                }
-
-            }
-
-        }// イベント満タンやったら
-        //// カードタイプ
-        //if (CardDataBase.GetCardData(11).cardType == CardType.Fighter)
-        //{
-        //    int a = 0;
-        //    a++;
-        //}
-        //if (CardDataBase.GetCardData(11).cardType == CardType.Intercept)
-        //{
-        //    int b = 0;
-        //    b++;
-        //}
-
-        //m_aMyDeckCard[PlayerDeckData.numStriker].GetComponent<uGUICard>().SetCardData;//PlayerDeckData.jorkerCard;
-        //for (int i = 0; i < PlayerDeckData.numEvent; i++)
-        //{
-        //    cards[numStriker + numJoker + i] = eventCards[i];
-        //}
+              //m_aMyDeckCard[PlayerDeckData.numStriker].GetComponent<uGUICard>().SetCardData;//PlayerDeckData.jorkerCard;
+              //for (int i = 0; i < PlayerDeckData.numEvent; i++)
+              //{
+              //    cards[numStriker + numJoker + i] = eventCards[i];
+              //}
 
 
 
 
-        // ステートマシンの初期化や切り替えは最後に行う
-        m_pStateMachine = new BaseEntityStateMachine<SceneDeck>(this);
+              // ステートマシンの初期化や切り替えは最後に行う
+              m_pStateMachine = new BaseEntityStateMachine<SceneDeck>(this);
 
         m_pStateMachine.globalState = SceneDeckState.Global.GetInstance();
         m_pStateMachine.ChangeState(SceneDeckState.Intro.GetInstance());
         return;
+    }
+
+    // 終了時
+    void OnDisable()
+    {
+        //  BGM
+        oulAudio.StopBGM();
+
     }
 
     // Update is called once per frame
@@ -407,44 +384,8 @@ public class SceneDeck : MonoBehaviour
 
 
         }
-
-        // イベント満タンやったら
-        if (EventCardFullTankCheak() == true)
-        {
-            // コレクションにあるイベント全部暗くする
-            for (int i = 0; i < SelectData.DECK_COLLECTCARD_MAX; i++)
-            {
-                if (m_aCollectCard[i].GetComponent<uGUICard>().cardData.cardType == CardType.Support ||
-                    m_aCollectCard[i].GetComponent<uGUICard>().cardData.cardType == CardType.Connect ||
-                    m_aCollectCard[i].GetComponent<uGUICard>().cardData.cardType == CardType.Intercept)
-                {
-                    int iEventIndex = PlayerDeckData.numStriker + PlayerDeckData.numJoker;
-                    bool bIDCheakOK = true;
-                    for (int i2 = 0; i2 < PlayerDeckData.numEvent; i2++)
-                    {
-                        if (m_aMyDeckCard[iEventIndex + i2].GetComponent<uGUICard>().cardData.id ==
-                        m_aCollectCard[i].GetComponent<uGUICard>().cardData.id)
-                        {
-                            bIDCheakOK = false;// デッキに同じIDあり
-                        }
-
-                    }
-
-                    // IDがデッキになかったら
-                    if (bIDCheakOK == true)
-                    {
-                        // 満杯マークや
-                        m_aCollectCard[i].GetComponent<uGUICard>().EventFullInfo_On();
-                    }
-
-
-                }
-
-            }
-
-        }// イベント満タンやったら
-
-
+        EventMANTAN();
+        AbilityMANTAN();
     }
 
     //+--------------------------------------
@@ -520,6 +461,8 @@ public class SceneDeck : MonoBehaviour
         EffectRiipleCard.transform.localPosition = EffectPos;
         EffectRiipleCard.GetComponent<Ripple>().Action();
 
+        // SE
+        oulAudio.PlaySE("edit_set");
 
         //+-----------------------------------------------------------------------
         // (11/13)(TODO)この処理だと全部取ってきて重いので何とかする。
@@ -539,43 +482,8 @@ public class SceneDeck : MonoBehaviour
 
         }
 
-
-        // イベント満タンやったら
-        if (EventCardFullTankCheak() == true)
-        {
-            // コレクションにあるイベント全部暗くする
-            for (int i = 0; i < SelectData.DECK_COLLECTCARD_MAX; i++)
-            {
-                if (m_aCollectCard[i].GetComponent<uGUICard>().cardData.cardType == CardType.Support ||
-                    m_aCollectCard[i].GetComponent<uGUICard>().cardData.cardType == CardType.Connect ||
-                    m_aCollectCard[i].GetComponent<uGUICard>().cardData.cardType == CardType.Intercept)
-                {
-                    int iEventIndex = PlayerDeckData.numStriker + PlayerDeckData.numJoker;
-                    bool bIDCheakOK = true;
-                    for (int i2 = 0; i2 < PlayerDeckData.numEvent; i2++)
-                    {
-                        if (m_aMyDeckCard[iEventIndex + i2].GetComponent<uGUICard>().cardData.id ==
-                        m_aCollectCard[i].GetComponent<uGUICard>().cardData.id)
-                        {
-                            bIDCheakOK = false;// デッキに同じIDあり
-                        }
-
-                    }
-
-                    // IDがデッキになかったら
-                    if (bIDCheakOK == true)
-                    {
-                        // 満杯マークや
-                        m_aCollectCard[i].GetComponent<uGUICard>().EventFullInfo_On();
-                    }
-
-
-                }
-
-            }
-
-        }// イベント満タンやったら
-
+        EventMANTAN();
+        AbilityMANTAN();
 
     }
 
@@ -600,6 +508,9 @@ public class SceneDeck : MonoBehaviour
             {
                 Debug.Log(" 握っているID発見、消します。-DeckOut");
                 //m_aMyDeckCard[i].GetComponent<uGUICard>().NoneCard();
+
+                // SE
+                oulAudio.PlaySE("edit_out");
 
                 m_aMyDeckCard[i].GetComponent<uGUICard>().MissingCard();
 
@@ -677,7 +588,7 @@ public class SceneDeck : MonoBehaviour
         // イベント満タンを外す処理
         if (EventCardFullTankCheak() == false)// 逆に
         {
-            // コレクションにあるイベント全部暗くする
+            // コレクションにあるイベント全部
             for (int i = 0; i < SelectData.DECK_COLLECTCARD_MAX; i++)
             {
                 if (m_aCollectCard[i].GetComponent<uGUICard>().cardData.cardType == CardType.Support ||
@@ -709,12 +620,46 @@ public class SceneDeck : MonoBehaviour
             }
         }// イベント満タンを外す処理
 
+        // 効果満タンを外す処理
+        if (AbilityCardFullTankCheak() == false)// 逆に
+        {
+            // コレクションにある＿＿全部
+            for (int i = 0; i < SelectData.DECK_COLLECTCARD_MAX; i++)
+            {
+                if (m_aCollectCard[i].GetComponent<uGUICard>().cardData.cardType == CardType.AbilityFighter)
+                {
+                    bool bIDCheakOK = true;
+                    for (int i2 = 0; i2 < PlayerDeckData.numStriker; i2++)
+                    {
+                        if (m_aMyDeckCard[i2].GetComponent<uGUICard>().cardData.id ==
+                        m_aCollectCard[i].GetComponent<uGUICard>().cardData.id)
+                        {
+                            bIDCheakOK = false;// デッキに同じIDあり
+                        }
+
+                    }
+
+                    // IDがデッキになかったら
+                    if (bIDCheakOK == true)
+                    {
+                        // 満杯マーク外す
+                        m_aCollectCard[i].GetComponent<uGUICard>().AbilityFullInfo_Off();
+                    }
+
+
+                }
+
+            }
+        }// イベント満タンを外す処理
     }
 
     //+--------------------------------------
     // ★★★デッキのセーブ
     public void DeckSave()
     {
+        // SE
+        oulAudio.PlaySE("edit_end");
+
         // まず15毎のIDを保存
         int[] allDeckData = new int[15];
         for (int i = 0; i < PlayerDeckData.deckMax; i++)
@@ -730,8 +675,6 @@ public class SceneDeck : MonoBehaviour
     // デッキにイベント満タンか
     public bool EventCardFullTankCheak()
     {
-        //がんばれ
-        //きょくとかシーン遷移とか急いでSICみたいに形にしろ！くそソースコードいいから
 
         // イベントカード上限いっぱいならカードを暗くする
         int iEventIndex = PlayerDeckData.numStriker + PlayerDeckData.numJoker;
@@ -750,6 +693,113 @@ public class SceneDeck : MonoBehaviour
         return true;    // 満タンや
     }
 
+    // デッキにイベント満タンか
+    public void EventMANTAN()
+    {
+
+        // イベント満タンやったら
+        if (EventCardFullTankCheak() == true)
+        {
+            // コレクションにあるイベント全部暗くする
+            for (int i3 = 0; i3 < SelectData.DECK_COLLECTCARD_MAX; i3++)
+            {
+                if (m_aCollectCard[i3].GetComponent<uGUICard>().cardData.cardType == CardType.Support ||
+                    m_aCollectCard[i3].GetComponent<uGUICard>().cardData.cardType == CardType.Connect ||
+                    m_aCollectCard[i3].GetComponent<uGUICard>().cardData.cardType == CardType.Intercept)
+                {
+                    int iEventIndex = PlayerDeckData.numStriker + PlayerDeckData.numJoker;
+                    bool bIDCheakOK = true;
+                    for (int i2 = 0; i2 < PlayerDeckData.numEvent; i2++)
+                    {
+                        if (m_aMyDeckCard[iEventIndex + i2].GetComponent<uGUICard>().cardData.id ==
+                        m_aCollectCard[i3].GetComponent<uGUICard>().cardData.id)
+                        {
+                            bIDCheakOK = false;// デッキに同じIDあり
+                        }
+
+                    }
+
+                    // IDがデッキになかったら
+                    if (bIDCheakOK == true)
+                    {
+                        // 満杯マークや
+                        m_aCollectCard[i3].GetComponent<uGUICard>().EventFullInfo_On();
+                    }
+
+
+                }
+
+            }
+
+        }// イベント満タンやったら
+
+    }
+
+    // デッキに効果満タンか
+    public bool AbilityCardFullTankCheak()
+    {
+
+        // カード上限いっぱいならカードを暗くする
+        int iAbilityStrikerNom = 0;// PlayerDeckData.numStriker + PlayerDeckData.numJoker;
+        for (int i = 0; i < PlayerDeckData.numStriker; i++)
+        {
+            // 空き枠を探す
+            if (m_aMyDeckCard[i].GetComponent<uGUICard>().cardData.cardType == CardType.AbilityFighter)
+            {
+                iAbilityStrikerNom++;
+            }
+
+        }// 効果
+
+        if (iAbilityStrikerNom >= PlayerDeckData.MaxAbilityStrikerNom)
+        {
+            Debug.Log(" 効果持ちモンスター空き枠もうない。-AbilityCardFullTankCheak");
+            return true;    // 満タンや
+        }
+
+        Debug.Log(" 効果持ちモンスター空き枠まだあるやで。-AbilityCardFullTankCheak");
+        return false; // まだイベント空き枠あるお。
+
+    }
+
+    // デッキにイベント満タンか
+    public void AbilityMANTAN()
+    {
+
+        // イベント満タンやったら
+        if (AbilityCardFullTankCheak() == true)
+        {
+            // コレクションにある_全部暗くする
+            for (int i3 = 0; i3 < SelectData.DECK_COLLECTCARD_MAX; i3++)
+            {
+                if (m_aCollectCard[i3].GetComponent<uGUICard>().cardData.cardType == CardType.AbilityFighter)
+                {
+                    bool bIDCheakOK = true;
+                    for (int i2 = 0; i2 < PlayerDeckData.numStriker; i2++)
+                    {
+                        if (m_aMyDeckCard[i2].GetComponent<uGUICard>().cardData.id ==
+                        m_aCollectCard[i3].GetComponent<uGUICard>().cardData.id)
+                        {
+                            bIDCheakOK = false;// デッキに同じIDあり
+                        }
+
+                    }
+
+                    // IDがデッキになかったら
+                    if (bIDCheakOK == true)
+                    {
+                        // 満杯マークや
+                        m_aCollectCard[i3].GetComponent<uGUICard>().AbilityFullInfo_On();
+                    }
+
+
+                }
+
+            }
+
+        }// 満タンやったら
+
+    }
 
     // なんかのボタン達に触れた時
     public void ClickAnyButton(int no)

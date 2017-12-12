@@ -11,12 +11,14 @@ ModelImporter:
     100006: grid2
     100008: polymsh_detached
     100010: root1
+    100012: eff1
     400000: //RootNode
     400002: bone1
     400004: grid1
     400006: grid2
     400008: polymsh_detached
     400010: root1
+    400012: eff1
     4300000: grid2
     4300002: polymsh_detached
     4300004: grid1

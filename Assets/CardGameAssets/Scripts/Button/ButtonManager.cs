@@ -33,12 +33,18 @@ public class ButtonManager : MonoBehaviour
     //}
 
     public void OnClickCemeteryButton()
-    {
+    {                
+        // SE
+        oulAudio.PlaySE("decide2");
+        
         uiManager.cemeteryInfoUIManager.ShowCemeteryInfo();
     }
 
     public void OnClickExpulsionButton()
     {
+        // SE
+        oulAudio.PlaySE("decide2");
+
         uiManager.cemeteryInfoUIManager.ShowExplusionInfo();
     }
 
@@ -61,6 +67,9 @@ public class ButtonManager : MonoBehaviour
     // マリガンボタンを押したとき
     public void OnClickMarigan()
     {
+        // SE
+        oulAudio.PlaySE("decide2");
+
         var playerManager = GameObject.Find("PlayerManager").GetComponent<PlayerManager>();
 
         if(myPlayerID == -1)
@@ -82,6 +91,9 @@ public class ButtonManager : MonoBehaviour
     // マリガンしないボタンを押したとき
     public void OnClickNoMarigan()
     {
+        // SE
+        oulAudio.PlaySE("decide2");
+
         if (myPlayerID == -1)
             myPlayerID = GameObject.Find("PlayerManager").GetComponent<PlayerManager>().GetMyPlayerID();
 
@@ -94,6 +106,9 @@ public class ButtonManager : MonoBehaviour
     // 準備完了ボタン押したとき
     public void OnClickSetStrikerOK()
     {
+        // SE
+        oulAudio.PlaySE("decide3");
+
         MessageManager.Dispatch(myPlayerID, MessageType.SetStrikerOK, null);
         Debug.Log("ストライカーセットボタンキテルグマ");
 
@@ -102,8 +117,12 @@ public class ButtonManager : MonoBehaviour
     }
 
     // パスボタン押したとき
-    public void OnClickSetStrikerPass()
+    public void OnClickNext()
     {
+        // SE
+        Debug.Log("ネクストボタン");
+        oulAudio.PlaySE("decide3");
+
         MessageManager.Dispatch(myPlayerID, MessageType.SetStrikerPass, null);
 
         // 別のところでもこのメッセージを送るので、非表示処理はここでしない
@@ -113,6 +132,9 @@ public class ButtonManager : MonoBehaviour
     // 数字選択ボタン押したとき
     public void OnClickNumberButton(int number)
     {
+        // SE
+        oulAudio.PlaySE("decide2");
+
         SelectNumberInfo info = new SelectNumberInfo();
         info.selectNumber = number;
 
@@ -125,12 +147,18 @@ public class ButtonManager : MonoBehaviour
 
     public void OnClickRestart()
     {
+        // SE
+        oulAudio.PlaySE("decide2");
+
         MessageManager.Dispatch(myPlayerID, MessageType.Restart, null);
 
         uiManager.DisAppearEndGameUI();
     }
     public void OnClickEndButton()
     {
+        // SE
+        oulAudio.PlaySE("decide2");
+
         MessageManager.Dispatch(myPlayerID, MessageType.EndGame, null);
 
         uiManager.DisAppearEndGameUI();

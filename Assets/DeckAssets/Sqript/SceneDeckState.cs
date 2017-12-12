@@ -116,6 +116,9 @@ namespace SceneDeckState
                     {
 
                         Debug.Log("えうれしあ");
+                        
+                        // SE
+                        oulAudio.PlaySE("card_draw0");
 
                         // ★取得カード（当たり判定の↑の階層。つまりuGUICardや）
                         // ★保存
@@ -371,12 +374,16 @@ namespace SceneDeckState
                     //        break;
                     //}
 
+                    // SE
+                    oulAudio.PlaySE("decide2");
+
                     // コレクションカードのライン変更！
                     e.ChangeLine(info.iNextLine);
 
                     return true; // trueを返して終り
                 case MessageType.ClickBackButton:
-
+                    // SE
+                    oulAudio.PlaySE("edit_end");
 
                     SceneManager.LoadScene("Menu");
                     return true; // trueを返して終り
@@ -403,6 +410,9 @@ namespace SceneDeckState
         {
 
             Debug.Log("CollectToDeckに来た列車");
+       
+            // SE
+            oulAudio.PlaySE("card_hold");
 
             // 矢印の演出
             e.Arrow.transform.localPosition = e.Arrow.GetComponent<Shake>().GetOrgPos();
@@ -491,6 +501,8 @@ namespace SceneDeckState
 
             Debug.Log("DeckSettingに来た列車");
 
+            // SE
+            oulAudio.PlaySE("card_hold");
 
             Vector3 vNextPos = new Vector3(0, 0, 0);
             uGUICard GraspCard = e.m_uGraspCard.GetComponent<uGUICard>();

@@ -196,8 +196,11 @@ public class PlayerController : NetworkBehaviour
                 // マウスクリック放したら
                 if (oulInput.GetTouchState() == oulInput.TouchState.Ended)
                 {
+                    // SE
+                    oulAudio.PlaySE("card_draw0");
+
                     // ★サポートカード処理はメッセージ受信時に行う
-                    if(holdCard.cardData.cardType == CardType.Support)
+                    if (holdCard.cardData.cardType == CardType.Support)
                     {
                         SendSetCard(holdHandNo, MessageType.SetSupport);
                     }
@@ -239,8 +242,9 @@ public class PlayerController : NetworkBehaviour
                 // マウスクリック放したら
                 if (oulInput.GetTouchState() == oulInput.TouchState.Ended)
                 {
+
                     // ここでデッキデータを更新しよう(フィールド→手札考慮)
-                    if(isFieldCardHold)
+                    if (isFieldCardHold)
                     {
                         // ex構造体作成
                         BackToHandInfo exInfo = new BackToHandInfo();
@@ -323,8 +327,11 @@ public class PlayerController : NetworkBehaviour
 
                     if (fieldCard != null/*.gameObject.activeInHierarchy*/)
                     {
-                        if(card.cardData.id == fieldCard.cardData.id)
+                        if(card.cardData.id == fieldCard.cardData.id)//←[1210]なんかエラー出てた。 
                         {
+                            // SE
+                            oulAudio.PlaySE("card_hold");
+
                             holdCard = card;
                             holdCard.SetUraomote(true);
                             // ゴリ
@@ -353,6 +360,9 @@ public class PlayerController : NetworkBehaviour
                     {
                         if (card.cardData.id == hand[i].cardData.id)
                         {
+                            // SE
+                            oulAudio.PlaySE("card_hold");
+
                             holdCard = card;
                             isFieldCardHold = false;
                             holdHandNo = i;

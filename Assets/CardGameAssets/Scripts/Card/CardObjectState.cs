@@ -378,7 +378,8 @@ namespace CardObjectState
             card.timer = 0;
 
             // アタックモーションセット
-            card.animator.SetBool("AttackFlag", true);
+            //card.animator.SetBool("AttackFlag", true);
+            card.animator.Play("Attack");
         }
 
         public override void Execute(Card card)
@@ -414,7 +415,8 @@ namespace CardObjectState
             card.timer = 0;
 
             // 負けるモーションセット
-            card.animator.SetBool("DamageFlag", true);
+            //card.animator.SetBool("DamageFlag", true);
+            card.animator.Play("Damage");
         }
 
         public override void Execute(Card card)
@@ -443,7 +445,7 @@ namespace CardObjectState
         public override void Exit(Card card)
         {
             // 負けるモーション解除
-            card.animator.SetBool("DamageFlag", false);
+            //card.animator.SetBool("DamageFlag", false);
         }
 
         public override bool OnMessage(Card card, MessageInfo message)
@@ -461,6 +463,8 @@ namespace CardObjectState
 
         public override void Enter(Card card)
         {
+            card.animator.Play("Idle");
+
             card.timer = 0;
 
             card.cacheTransform.localPosition = card.startPosition;

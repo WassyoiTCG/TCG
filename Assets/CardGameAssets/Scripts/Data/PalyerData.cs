@@ -19,6 +19,7 @@ public class PlayerDeckData
     public const int numEvent = 4;
     public int[] eventCards;
     public const int deckMax = numStriker + numJoker + numEvent;
+    public const int MaxAbilityStrikerNom = 4;
     //public int[] cards = new int[numStriker + numJoker + numEvent];
 
     public PlayerDeckData()

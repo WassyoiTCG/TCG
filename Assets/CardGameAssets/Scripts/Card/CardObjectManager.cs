@@ -270,8 +270,10 @@ public class CardObjectManager : MonoBehaviour
         var angle = Vector3.zero;
         angle.y = 180;
 
-        const float width = 2;
+        const float width = 3;
         position.x = width * handNo - (numHand * width / 2) + (width / 2);
+        position.x += 0.7f;
+        //+ (width * handNo - (numHand * width / 2) + (width / 2)) / 4;
         position.z = -20.0f;
 
         // 逆サイド処理
@@ -644,6 +646,17 @@ public class CardObjectManager : MonoBehaviour
             // 何かしらの動いてるステートにいる
             if (card.isInMovingState()) return true;
         }
+        if(fieldStrikerCard)
+        {
+            // 何かしらの動いてるステートにいる
+            if (fieldStrikerCard.isInMovingState()) return true;
+        }
+        if(fieldEventCard)
+        {
+            // 何かしらの動いてるステートにいる
+            if (fieldEventCard.isInMovingState()) return true;
+        }
+
         // 誰も動いてるステートにいない
         return false;
     }

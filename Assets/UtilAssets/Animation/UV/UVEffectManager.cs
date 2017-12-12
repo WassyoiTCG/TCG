@@ -55,15 +55,19 @@ public class UVEffectManager : MonoBehaviour {
         switch (eType)
         {
             case UV_EFFECT_TYPE.SUMMON:
+                RisingImpact.SetActive(true);
                 RisingImpact.GetComponent<UVScroll>().Action(vPos, iDelay);
+                SummonRing.SetActive(true);
                 SummonRing.GetComponent<UVScroll>().Action(vPos, iDelay);
 
                 break;
             case UV_EFFECT_TYPE.UP_STATUS:
+                UpWave.SetActive(true);
                 UpWave.GetComponent<UVScroll>().Action(vPos, iDelay);
                 
                 break;
             case UV_EFFECT_TYPE.DOWN_STATUS:
+                DownWave.SetActive(true);
                 DownWave.GetComponent<UVScroll>().Action(vPos, iDelay);
 
                 break;

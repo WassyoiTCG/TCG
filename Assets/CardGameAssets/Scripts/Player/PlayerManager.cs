@@ -57,6 +57,9 @@ public class PlayerManager : MonoBehaviour
     //}
 
     // 自分が操作しているプレイヤーのIDを取得
+    public Player GetPlayer(int id) { return players[id]; }
+
+    // 自分が操作しているプレイヤーのIDを取得
     public int GetMyPlayerID()
     {
         foreach (Player player in players)
@@ -137,6 +140,14 @@ public class PlayerManager : MonoBehaviour
         bool allOK = true;
         foreach (Player player in players)
             if (!player.isPushedJunbiKanryo) allOK = false;
+        return allOK;
+    }
+
+    public bool isPushedNextButton()
+    {
+        bool allOK = true;
+        foreach (Player player in players)
+            if (!player.isPushedNextButton) allOK = false;
         return allOK;
     }
 
@@ -248,6 +259,7 @@ public class PlayerManager : MonoBehaviour
         if (message.messageType == MessageType.SetStrikerPass)
         {
             players[message.fromPlayerID].JunbiKanryoON();
+            players[message.fromPlayerID].PushedNextButtonON();
             // ボタン非表示
             if (players[message.fromPlayerID].isMyPlayer)
                 uiManager.DisableSetStrikerButton();
@@ -304,9 +316,10 @@ public class PlayerManager : MonoBehaviour
             //players[message.fromPlayerID].isStateEnd = true;
             players[message.fromPlayerID].isPushedJunbiKanryo = true;
 
+            // [1212] インターセプトカードを伏せた後も押さす用に
             // ボタン非表示
-            if (players[message.fromPlayerID].isMyPlayer)
-                uiManager.DisableSetStrikerButton();
+            //if (players[message.fromPlayerID].isMyPlayer)
+            //    uiManager.DisableSetStrikerButton();
             return true;
         }
         if(message.messageType == MessageType.BackToHand)
@@ -427,13 +440,13 @@ public class PlayerManager : MonoBehaviour
             {
                 winnerPlayerID = 0;
                 // カード負けるモーション
-                card1.Lose();
+                //card1.Lose();
             }
             else if (power1 > power0)
             {
                 winnerPlayerID = 1;
                 // カード負けるモーション
-                card0.Lose();
+               // card0.Lose();
             }
         }
 

@@ -39,6 +39,7 @@ public class AIController : MonoBehaviour
         {
             // 絶対イベントカード出さないマン
             myPlayer.isPushedJunbiKanryo = true;
+            myPlayer.isPushedNextButton = true; // NextButtonと分けまてみた、はは。
         }
     }
 

@@ -30,7 +30,6 @@ public class PanelEffectManager : MonoBehaviour
     public GameObject OrangeLight;
 
     // private static readonly int iNameHashTag = Animator.StringToHash("Positive");
-    private const int iNameHashTag = 0;// 決め打ちで0ハッシュタグ0番目のアニメーションを発動
 
     //+------------------------------------------
     //      
@@ -43,7 +42,7 @@ public class PanelEffectManager : MonoBehaviour
     }
 
     // 実行
-    public void Action(PANEL_EFFECT_TYPE eType, Vector3 vPos, Vector3 vVec, int iDelay = 0)
+    public void Action(PANEL_EFFECT_TYPE eType, Vector3 vPos, Vector3 vAngle/*, int iDelay = 0*/)
     {
 
         // 
@@ -52,24 +51,16 @@ public class PanelEffectManager : MonoBehaviour
         switch (eType)
         {
             case PANEL_EFFECT_TYPE.DAMAGE:
-                oulMath.Billboard(Damage.transform);
-                Damage.SetActive(true);
-                Damage.GetComponent<Animator>().Play(iNameHashTag, 0, 0.0f);
+                Damage.GetComponent<PanelAnim>().Action(vPos, vAngle);
                 break;
             case PANEL_EFFECT_TYPE.ABILITY:
-                oulMath.Billboard(Ability.transform);
-                Ability.SetActive(true);
-                Ability.GetComponent<Animator>().Play(iNameHashTag, 0, 0.0f);
+                Ability.GetComponent<PanelAnim>().Action(vPos, vAngle);
                 break;
             case PANEL_EFFECT_TYPE.STAR:
-                oulMath.Billboard(Star.transform);
-                Star.SetActive(true);
-                Star.GetComponent<Animator>().Play(iNameHashTag, 0, 0.0f);
+                Star.GetComponent<PanelAnim>().Action(vPos, vAngle);
                 break;
             case PANEL_EFFECT_TYPE.ORANGE_LIGHT:
-                oulMath.Billboard(OrangeLight.transform);
-                OrangeLight.SetActive(true);
-                OrangeLight.GetComponent<Animator>().Play(iNameHashTag, 0, 0.0f);
+                OrangeLight.GetComponent<PanelAnim>().Action(vPos, vAngle);
                 break;
             case PANEL_EFFECT_TYPE.END:
             default:

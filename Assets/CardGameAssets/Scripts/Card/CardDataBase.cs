@@ -409,7 +409,7 @@ public static class CardDataBase
                 //oulFile.OutPutLog(Application.dataPath + "/log.txt", "テキストロード開始\r\n");
 
                 // 読み飛ばし用
-                var skip = "";
+                string skip = " ";
 
                 // カードタイプ(ファイターor効果ファイターorイベント)
                 skip = loader.ReadString();
@@ -626,7 +626,8 @@ public static class CardDataBase
                     skillData.skill = new Skill.Power();
                     break;
                 case AbilityType.CardMove:
-                    skillData.skill = new Skill.CardMove();
+                    //skillData.skill = new Skill.CardMove();
+                    Debug.LogWarning("未実装: カード動かす");
                     break;
                 case AbilityType.Lose:
                     Debug.LogWarning("未実装: 無条件敗北");
