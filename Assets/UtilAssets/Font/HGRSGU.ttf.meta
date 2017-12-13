@@ -1,0 +1,21 @@
+fileFormatVersion: 2
+guid: f3b584275d02d4643a09a072a0708214
+timeCreated: 1513127638
+licenseType: Free
+TrueTypeFontImporter:
+  serializedVersion: 4
+  fontSize: 16
+  forceTextureCase: -2
+  characterSpacing: 0
+  characterPadding: 1
+  includeFontData: 1
+  fontName: HGSoeiKakugothicUB
+  fontNames:
+  - HGSoeiKakugothicUB
+  fallbackFontReferences: []
+  customCharacters: 
+  fontRenderingMode: 0
+  ascentCalculationMode: 1
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
