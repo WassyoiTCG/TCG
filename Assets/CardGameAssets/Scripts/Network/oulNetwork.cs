@@ -15,7 +15,7 @@ public class oulNetwork : NetworkManager
     //List<ClientMessageOKInfo> clientIDList = new List<ClientMessageOKInfo>();
     Queue<MyNetworkMessage> messageQueue = new Queue<MyNetworkMessage>();
 
-    float waitTimer;
+    //float waitTimer;
     int sendMessageNumber;
     //int receiveMessageNumber;
 
@@ -386,8 +386,8 @@ public static class MessageManager
     public static bool isNetwork;
     public static bool isServer = false;
 
-    static readonly float kankaku = 0.1f;   // おくる間隔
-    static float timer;
+    //static readonly float kankaku = 0.1f;   // おくる間隔
+    //static float timer;
     static bool messageSyoriSitemoii;
 
     static int receiveMessageNumber;
@@ -477,7 +477,7 @@ public static class MessageManager
         // 通信中UI非表示
         sceneMain.uiManager.DisAppearConnectingUI();
 
-        timer = 0;
+        //timer = 0;
 
         bool ok = false;
         // ずれがないように順番通りに処理するようにする

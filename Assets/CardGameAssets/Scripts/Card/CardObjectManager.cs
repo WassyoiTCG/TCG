@@ -152,6 +152,10 @@ public class CardObjectManager : MonoBehaviour
             draw.gameObject.SetActive(true);
         }
         else Debug.Log("墓地無いクマ");
+
+        // 墓地位置更新
+        UpdateCemeteryPosition();
+
         return draw;
     }
 
@@ -220,6 +224,15 @@ public class CardObjectManager : MonoBehaviour
                     else card.SetNotSelectFlag(true);
                     break;
             }
+        }
+    }
+
+    public void ChangeHandNoneSelect()
+    {
+        // 全部選択できないように
+        foreach (Card card in handCards)
+        {
+            card.SetNotSelectFlag(true);
         }
     }
 
@@ -375,6 +388,32 @@ public class CardObjectManager : MonoBehaviour
         }
     }
 
+    void UpdateCemeteryPosition()
+    {
+        for (int i = 0; i < cemeteryCards.Count; i++)
+        {
+            var card = cemeteryCards[i];
+
+            // 表
+            card.SetUraomote(true);
+            // 描画順
+            card.SetOrder(i);
+
+            // 位置設定
+            var position = cemeteryPosition;
+            var angle = Vector3.zero;
+            angle.y = 180;
+            angle.z = 0;
+            position.y = i * 0.25f;
+
+            //card.handPosition = position;
+            card.cacheTransform.localPosition = position;
+            card.cacheTransform.localEulerAngles = angle;
+        }
+    }
+
+    public int GetNumCemetery() { return cemeteryCards.Count; }
+
     public void FieldSet(int handNo, bool isMyPlayer)
     {
         var type = handCards[handNo].cardData.cardType;
@@ -501,15 +540,15 @@ public class CardObjectManager : MonoBehaviour
         if(fieldStrikerCard)
         {
             //fieldStrikerCard.gameObject.SetActive(false);
-            fieldStrikerCard.MoveToCemetery();
             cemeteryCards.Add(fieldStrikerCard);
+            fieldStrikerCard.MoveToCemetery(/*cemeteryCards.Count*/);
             fieldStrikerCard = null;
         }
         if(fieldEventCard)
         {
             //fieldEventCard.gameObject.SetActive(false);
-            fieldEventCard.MoveToCemetery();
             cemeteryCards.Add(fieldEventCard);
+            fieldEventCard.MoveToCemetery(/*cemeteryCards.Count*/);
             fieldEventCard = null;
         }
         //fieldStrikerCard.gameObject.SetActive(false);
@@ -529,13 +568,13 @@ public class CardObjectManager : MonoBehaviour
     public void AddCemetery(Card card)
     {
         cemeteryCards.Add(card);
-        card.MoveToCemetery();
+        card.MoveToCemetery(/*cemeteryCards.Count*/);
     }
 
     public void AddExpulsion(Card card)
     {
         expulsionCards.Enqueue(card);
-        card.MoveToCemetery();
+        card.Expulsion();
     }
 
     public bool isSetEndStriker()

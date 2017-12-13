@@ -111,7 +111,7 @@ public class uGUICard : MonoBehaviour
         mainTexture.sprite = data.image;/*Sprite.Create((Texture2D)data.image, new Rect(0, 0, data.image.width, data.image.height), new Vector2(0.5f, 0.5f));*/
 
         // パワーのフレームの有り無し
-        if (true)
+        if (!data.isEventCard())
         {
             powerFrame.SetActive(true);
             powerNumber.SetNumber(data.power);

@@ -200,8 +200,6 @@ namespace Cost
         static Burst instance;
         public static Burst GetInstance() { if (instance == null) { instance = new Burst(); } return instance; }
 
-
-        int step;
         Card drawCard;
 
         public override void Enter(CardAbilityData abilityData)
@@ -283,7 +281,6 @@ namespace Cost
         static Treasure instance;
         public static Treasure GetInstance() { if (instance == null) { instance = new Treasure(); } return instance; }
 
-        int step;
         int selectNumber;   // プレイヤーの選択した番号
         Card drawCard;
 
@@ -404,8 +401,7 @@ namespace Cost
         static Kisikaisei instance;
         public static Kisikaisei GetInstance() { if (instance == null) { instance = new Kisikaisei(); } return instance; }
 
-        int step;
-        int selectNumber;   // プレイヤーの選択した番号
+        //int selectNumber;   // プレイヤーの選択した番号
 
         public override void Enter(CardAbilityData abilityData)
         {
@@ -442,7 +438,7 @@ namespace Cost
                     else
                     {
                         // 失敗時の効果に移行
-                        abilityData.skillNumber = abilityData.c_value1;
+                        //abilityData.skillNumber = abilityData.c_value1;
                     }
 
                     // コスト処理終了
@@ -462,7 +458,7 @@ namespace Cost
                         message.GetExtraInfo<SelectNumberInfo>(ref selectNumberInfo);
 
                         // 選択した番号保存
-                        selectNumber = selectNumberInfo.selectNumber;
+                        //selectNumber = selectNumberInfo.selectNumber;
 
                         // 次のステップへ
                         step++;
@@ -483,7 +479,7 @@ namespace Cost
         public static Nakama GetInstance() { if (instance == null) { instance = new Nakama(); } return instance; }
 
         float timer;
-        int step;
+
         Card drawCard;
 
         public override void Enter(CardAbilityData abilityData)
@@ -1118,7 +1114,7 @@ namespace Skill
             // 現在のパワーを取ってきて
             var power = player.jissainoPower;
             // 演算する
-            player.jissainoPower = ValueChange.Enzan(arithmetic, power, value);
+            player.SetPower(ValueChange.Enzan(arithmetic, power, value));
         }
 
         public override Result Execute(CardAbilityData abilityData)
@@ -1461,7 +1457,6 @@ namespace Skill
                         }
 
                         // 墓地カードから検索を掛ける
-                        var cemeteryCards = fromPlayer.deckManager.GetCemeteryCards();
                         searchIndex = SearchCemetery(searchInfo);
 
                         // 見つかった
@@ -1503,7 +1498,7 @@ namespace Skill
                 case 2:
                     // どこに向かうか
                     {
-                        var skillData = abilityData.GetCurrentSkillData();
+                        //var skillData = abilityData.GetCurrentSkillData();
 
                         switch (toType)
                         {

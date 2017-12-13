@@ -416,10 +416,11 @@ public static class CardDataBase
                 //oulFile.OutPutLog(Application.dataPath + "/log.txt", "テキストロード開始\r\n");
 
                 // 読み飛ばし用
-                string skip = " ";
+                string skip;
 
                 // カードタイプ(ファイターor効果ファイターorイベント)
                 skip = loader.ReadString();
+                Debug.Assert(skip == "[TYPE]", "カードID" + i  +"のテキストずれてるクマ");
                 var cardType = (CardType)loader.ReadInt();
                 switch (cardType)
                 {
@@ -456,14 +457,17 @@ public static class CardDataBase
 
                 // カード名
                 skip = loader.ReadString();
+                Debug.Assert(skip == "[NAME]", "カードID" + i + "のテキストずれてるクマ");
                 cardDatas[i].cardName = loader.ReadString();
 
                 // レア度
                 skip = loader.ReadString();
+                Debug.Assert(skip == "[RARE]", "カードID" + i + "のテキストずれてるクマ");
                 cardDatas[i].rarelity = (Rarelity)loader.ReadInt();
 
                 // 効果テキスト
                 skip = loader.ReadString();
+                Debug.Assert(skip == "[A_TEXT]", "カードID" + i + "のテキストずれてるクマ");
                 while (true)
                 {
                     var str = loader.ReadLine();

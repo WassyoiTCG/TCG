@@ -13,6 +13,12 @@ namespace PlayerState
         public override void Enter(Player player)
         {
             player.isStateEnd = true;
+
+            if (player.isMyPlayer)
+            {
+                // 何も選択できないように
+                player.cardObjectManager.ChangeHandNoneSelect();
+            }
         }
 
         public override void Execute(Player player)
@@ -139,9 +145,9 @@ namespace PlayerState
             var striker = player.GetFieldStrikerCard();
             if (striker != null)
             {
-                player.jissainoPower = striker.cardData.power;
+                player.SetPower(striker.cardData.power);
             }
-            else player.jissainoPower = Player.noSetStrikerPower;
+            else player.SetPower(Player.noSetStrikerPower);
         }
 
         public override void Exit(Player player)

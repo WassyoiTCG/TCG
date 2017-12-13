@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.Networking;
 
 public class PlayerController : NetworkBehaviour
@@ -9,7 +10,7 @@ public class PlayerController : NetworkBehaviour
     readonly Vector3 playerCameraPosition = new Vector3(0, 52.5f, -29.2f);
 
     readonly int fieldStrikerHoldNo = 114;
-    readonly int fieldEventHoldNo = 514;
+    //readonly int fieldEventHoldNo = 514;
     int holdHandNo;                     // 手札の何番目のカードをつかんでいるか(ネット上では手札を同期させているのでメッセージで何番目の手札をつかったかの情報が欲しかった)
     readonly int noHoldCard = -1;       // 掴んでいないフラグ
     float setFieldBorderY;              // カード掴んでフィールドにセットできるライン
@@ -88,17 +89,16 @@ public class PlayerController : NetworkBehaviour
         }
         if(myPlayer.stateMachine.isInState(PlayerState.SetIntercept.GetInstance()))
         {
+            CardTapUpdate();
             SetInterceptUpdate();
         }
 	}
 
     void CardTapUpdate()
     {
-        // マウスがUIにポイントしていたら
-        if(UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject())
-        {
-            return;
-        }
+        //List<RaycastResult> raycastResults = new List<RaycastResult>();
+        //PointerEventData eventData = new PointerEventData(EventSystem.current);
+        //EventSystem.current.RaycastAll(eventData, raycastResults);
 
         // 押した瞬間
         if (oulInput.GetTouchState() == oulInput.TouchState.Began)
@@ -107,6 +107,27 @@ public class PlayerController : NetworkBehaviour
             var touchObject = oulInput.Collision3D();
             if (touchObject)
             {
+                // レイに触れたオブジェクトがカードかどうかチェック
+                if (touchObject.tag == "Card")
+                {
+                    var card = touchObject.GetComponent<Card>();
+                    if (!card.uraomoteFlag) return;
+
+                    // インフォメーション表示
+                    myPlayer.playerManager.uiManager.AppearBattleCardInfomation(card.cardData);
+                }
+                else
+                {
+                    // インフォメーション非表示
+                    myPlayer.playerManager.uiManager.DisAppearBattleCardInfomation();
+                }
+
+                // マウスがUIにポイントしていたら
+                if (EventSystem.current.IsPointerOverGameObject() /*raycastResults.Count > 0*/)
+                {
+                    return;
+                }
+
                 // 墓地オブジェクトかどうか
                 if (touchObject.tag == "Cemetery")
                 {
@@ -123,28 +144,13 @@ public class PlayerController : NetworkBehaviour
                 {
                     myPlayer.playerManager.uiManager.cemeteryInfoUIManager.DisAppear();
                 }
-                // レイに触れたオブジェクトがカードかどうかチェック
-                if (touchObject.tag == "Card")
-                {
-                    var card = touchObject.GetComponent<Card>();
-                    if (!card.uraomoteFlag) return;
-
-                    // インフォメーション表示
-                    myPlayer.playerManager.uiManager.AppearBattleCardInfomation(card.cardData);
-                }
-                else
-                {
-                    // インフォメーション非表示
-                    myPlayer.playerManager.uiManager.DisAppearBattleCardInfomation();
-                }
-
-
             }
             else
             {
                 myPlayer.playerManager.uiManager.cemeteryInfoUIManager.DisAppear();
             }
         }
+
     }
 
     void SetStrikerUpdate()
@@ -382,6 +388,13 @@ public class PlayerController : NetworkBehaviour
     {
         if (myPlayer.isPushedJunbiKanryo) return;
 
+        // マウスクリック放したら
+        if (oulInput.GetTouchState() == oulInput.TouchState.Ended)
+        {
+            // インフォメーション非表示
+            myPlayer.playerManager.uiManager.DisAppearBattleCardInfomation();
+        }
+
         if (holdHandNo != noHoldCard)
         {
             var currentPosition = oulInput.GetPosition(0, false);
@@ -415,9 +428,6 @@ public class PlayerController : NetworkBehaviour
 
                     // 掴んでるカードを離す
                     holdHandNo = noHoldCard;
-
-                    // インフォメーション非表示
-                    myPlayer.playerManager.uiManager.DisAppearBattleCardInfomation();
                 }
             }
             // 手札から動かないモード
@@ -465,6 +475,7 @@ public class PlayerController : NetworkBehaviour
                 if (tapObject.tag == "Card")
                 {
                     var card = tapObject.GetComponent<Card>();
+
                     // 相手サイドは見れない
                     if (!card.isMyPlayerSide) return;
 
@@ -488,9 +499,6 @@ public class PlayerController : NetworkBehaviour
                             holdHandNo = i;
                             // 掴んでる座標
                             orgHoldCardPosition = card.transform.localPosition;
-
-                            // インフォメーション表示
-                            myPlayer.playerManager.uiManager.AppearBattleCardInfomation(card.cardData);
                             return;
                         }
                     }

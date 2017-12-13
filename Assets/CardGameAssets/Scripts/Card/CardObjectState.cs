@@ -477,9 +477,17 @@ namespace CardObjectState
             position = oulMath.LerpVector(position, card.nextPosition, 0.3f);
             card.cacheTransform.localPosition = position;
 
+            // アングルも変える
+            var angle = card.cacheTransform.localEulerAngles;
+            angle.z = Mathf.LerpAngle(angle.z, card.nextAngle.z, 0.3f);
+            card.cacheTransform.localEulerAngles = angle;
+
             // ほぼ終点まで移動したら
             if (Vector3.SqrMagnitude(position - card.nextPosition) < 0.1f)
             {
+                card.cacheTransform.localPosition = card.nextPosition;
+                card.cacheTransform.localEulerAngles = card.nextAngle;
+
                 // ステートチェンジ
                 card.ChangeState(None.GetInstance());
 
@@ -487,7 +495,7 @@ namespace CardObjectState
                 //card.cardObjectManager.AddCemetery(card);
 
                 // 非表示
-                card.gameObject.SetActive(false);
+                //card.gameObject.SetActive(false);
             }
         }
 

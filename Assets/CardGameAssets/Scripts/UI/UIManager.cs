@@ -40,7 +40,7 @@ public class UIManager : MonoBehaviour
     public Number cpuHandCountNumber, cpuYamahudaCountNumber, cpuBochiCountNumber, cpuTsuihouCountNumber;
 
     //public GameObject netOrOffline;         // ネットかオフラインかの選択
-    public GameObject lobby;                // ロビー
+    //public GameObject lobby;                // ロビー
     public GameObject matchingWait;         // マッチング大気中
     public GameObject mainUI;               // メイン画面のUI
     public GameObject firstDrawButtons;     // 最初のドローのボタン
@@ -151,14 +151,14 @@ public class UIManager : MonoBehaviour
     //    netOrOffline.SetActive(false);
     //}
 
-    public void AppearLobby()
-    {
-        lobby.SetActive(true);
-    }
-    public void DisAppearLobby()
-    {
-        lobby.SetActive(false);
-    }
+    //public void AppearLobby()
+    //{
+    //    lobby.SetActive(true);
+    //}
+    //public void DisAppearLobby()
+    //{
+    //    lobby.SetActive(false);
+    //}
 
     public void AppearMatchingWait()
     {

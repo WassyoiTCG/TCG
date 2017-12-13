@@ -147,20 +147,26 @@ public class Card : MonoBehaviour
                 if (cardObjectManager)
                     if (cardFrameRenderer.materials[0].GetTexture("_MainTex") != cardObjectManager.eventFrame)
                         cardFrameRenderer.materials[0].SetTexture("_MainTex", cardObjectManager.eventFrame);
-                fighterPowerFrame.gameObject.SetActive(true);
+                fighterPowerFrame.gameObject.SetActive(false);
                 syuzokuText.text = "コネクトカード";
-                powerNumber.SetNumber(data.power);
+                //powerNumber.SetNumber(data.power);
                 break;
             case CardType.Intercept:
                 // フレーム差し替え
                 if (cardObjectManager)
                     if (cardFrameRenderer.materials[0].GetTexture("_MainTex") != cardObjectManager.eventFrame)
                         cardFrameRenderer.materials[0].SetTexture("_MainTex", cardObjectManager.eventFrame);
-                fighterPowerFrame.gameObject.SetActive(true);
+                fighterPowerFrame.gameObject.SetActive(false);
                 syuzokuText.text = "インターセプトカード";
-                powerNumber.SetNumber(data.power);
+                //powerNumber.SetNumber(data.power);
                 break;
         }
+    }
+
+    public void SetPower(int power)
+    {
+        // パワーフレームのパワー設定
+        powerNumber.SetNumber(power);
     }
 
     public void SetNotSelectFlag(bool value)
@@ -223,6 +229,9 @@ public class Card : MonoBehaviour
     // 宝箱とか見せる用の位置に移動するドロー
     public void ShowDraw(float endTime, bool urakarahajimaru)
     {
+        // 表にする
+        SetUraomote(true);
+
         // デッキにいる位置を保存
         startPosition = cacheTransform.localPosition;
         startAngle = cacheTransform.localEulerAngles;
@@ -299,11 +308,30 @@ public class Card : MonoBehaviour
     }
 
     // 墓地に移動して消える
-    public void MoveToCemetery()
+    public void MoveToCemetery(/*int numCemetery*/)
+    {
+        // 描画順
+        SetOrder(cardObjectManager.GetNumCemetery());
+
+        startPosition = cacheTransform.localPosition;
+        startAngle = cacheTransform.localEulerAngles;
+        nextPosition = cardObjectManager.cemeteryPosition;
+        nextPosition.y += cardObjectManager.GetNumCemetery() * 0.25f;
+        nextAngle = cacheTransform.localEulerAngles;
+        // 裏にする
+        SetUraomote(false);
+        nextAngle.x = 0;
+        nextAngle.z = 180;
+        // ステートてぇんじ
+        stateMachine.ChangeState(CardObjectState.MoveToCemetery.GetInstance());
+    }
+
+    public void Expulsion()
     {
         startPosition = cacheTransform.localPosition;
         startAngle = cacheTransform.localEulerAngles;
         nextPosition = cardObjectManager.cemeteryPosition;
+        nextPosition.x *= 100;
         nextAngle = cacheTransform.localEulerAngles;
         // ステートてぇんじ
         stateMachine.ChangeState(CardObjectState.MoveToCemetery.GetInstance());

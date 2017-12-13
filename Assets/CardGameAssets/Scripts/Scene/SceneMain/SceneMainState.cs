@@ -511,7 +511,7 @@ namespace SceneMainState
         static StrikerOpen instance;
         public static StrikerOpen GetInstance() { if (instance == null) { instance = new StrikerOpen(); } return instance; }
 
-        float timer;
+        //float timer;
 
         public override void Enter(SceneMain pMain)
         {
@@ -519,7 +519,7 @@ namespace SceneMainState
             pMain.playerManager.OpenStriker();
 
             // 時間初期化
-            timer = 0;
+            //timer = 0;
 
             pMain.iWaitFrame = 0; // 初期化
         }
@@ -630,7 +630,7 @@ namespace SceneMainState
 
     }
 
-    // ストライカーのアビリティ(バトル後)が発動するステート
+    // ストライカーのアビリティ(バトル前)が発動するステート
     public class StrikerBeforeBattleAbility : BaseEntityState<SceneMain>
     {
         // Singleton.
@@ -697,15 +697,15 @@ namespace SceneMainState
         public override void Execute(SceneMain pMain)
         {
 
-            // 時間切れなったら
-            if (pMain.uiManager.isTimerEnd())
-            {
-                //eStep = SET_INTERCEPT_STEP.END;
-                // インターセプト発動へ
-                pMain.stateMachine.ChangeState(WaitToActionIntercept.GetInstance());
+            //// 時間切れなったら
+            //if (pMain.uiManager.isTimerEnd())
+            //{
+            //    //eStep = SET_INTERCEPT_STEP.END;
+            //    // インターセプト発動へ
+            //    pMain.stateMachine.ChangeState(WaitToActionIntercept.GetInstance());
 
-                return;
-            }
+            //    return;
+            //}
             // 2人準備完了(NextButtonを押したら)
             if (pMain.playerManager.isPushedNextButton())
             {
@@ -768,6 +768,9 @@ namespace SceneMainState
 
             // タイマーストップ
             pMain.uiManager.StopTimer();
+
+            // プレイヤーステート変更(何もなし)
+            pMain.playerManager.SetState(PlayerState.None.GetInstance());
         }
 
         public override bool OnMessage(SceneMain pMain, MessageInfo message)

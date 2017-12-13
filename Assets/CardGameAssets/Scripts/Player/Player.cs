@@ -60,7 +60,16 @@ public class Player : MonoBehaviour
     public int jissainoPower
     {
         get;
-        set;
+        private set;
+    }
+    public void SetPower(int power)
+    {
+        jissainoPower = power;
+        var striker = GetFieldStrikerCard();
+        if(striker)
+        {
+            striker.SetPower(power);
+        }
     }
     // イベントとかでいろいろ演算した後の実際のパワー
 

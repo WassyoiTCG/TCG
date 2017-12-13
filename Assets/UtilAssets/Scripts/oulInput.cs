@@ -53,7 +53,7 @@ public static class oulInput
             case TouchState.Began:
             // エフェクトの処理
             {
-                    Vector3 position = GetPosition();
+                    //Vector3 position = GetPosition();
 
             }
                 holdTime = 0;
