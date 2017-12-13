@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Card
   - Cemetery
+  - DamagePoint
   layers:
   - Default
   - TransparentFX

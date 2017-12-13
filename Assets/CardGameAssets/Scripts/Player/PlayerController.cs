@@ -122,6 +122,11 @@ public class PlayerController : NetworkBehaviour
                     myPlayer.playerManager.uiManager.DisAppearBattleCardInfomation();
                 }
 
+                if(touchObject.tag == "DamagePoint")
+                {
+                    myPlayer.playerManager.uiManager.remainingPoints.TouchBegan();
+                }
+
                 // マウスがUIにポイントしていたら
                 if (EventSystem.current.IsPointerOverGameObject() /*raycastResults.Count > 0*/)
                 {
@@ -150,7 +155,13 @@ public class PlayerController : NetworkBehaviour
                 myPlayer.playerManager.uiManager.cemeteryInfoUIManager.DisAppear();
             }
         }
-
+        // 離した瞬間
+        if(oulInput.GetTouchState() == oulInput.TouchState.Ended)
+        {
+            // 閉じる
+            if (myPlayer.playerManager.uiManager.remainingPoints.gameObject.activeSelf)
+                myPlayer.playerManager.uiManager.remainingPoints.TouchEnded();
+        }
     }
 
     void SetStrikerUpdate()

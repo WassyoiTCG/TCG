@@ -57,6 +57,8 @@ public class UIManager : MonoBehaviour
     // クリックエフェクト
     public GameObject ClickEffect;
 
+    public RemainingPoints remainingPoints;
+
     public void Restart()
     {
         //myHP = MaxHP;

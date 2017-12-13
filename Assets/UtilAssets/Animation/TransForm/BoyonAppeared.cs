@@ -166,7 +166,7 @@ public class BoyonAppeared : BaseAnim2D
         // 透明に
         //SetAlpha(0.0f);
         // 
-        gameObject.SetActive(false);
+       // gameObject.SetActive(false);
     }
 
     // 止める

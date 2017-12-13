@@ -30,14 +30,23 @@ public class RemainingPoints : MonoBehaviour {
 
     public void TouchBegan()
     {
-        gameObject.SetActive(true);
+        Frame.SetActive(true);
+        for (int i = 0; i < POINTS_MAX; i++)
+        {
+            Points[i].gameObject.SetActive(true);
+        }
         gameObject.GetComponent<BoyonAppeared>().Action();
     }
 
     public void TouchEnded()
     {
         gameObject.GetComponent<BoyonAppeared>().Stop();
-        gameObject.SetActive(false);
+        Frame.SetActive(false);
+        for (int i = 0; i < POINTS_MAX; i++)
+        {
+            Points[i].gameObject.SetActive(false);
+        }
+
     }
 
     // リセット
