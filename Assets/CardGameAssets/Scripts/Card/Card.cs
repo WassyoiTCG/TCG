@@ -46,6 +46,9 @@ public class Card : MonoBehaviour
 
     public CardObjectState.OpenCardInfo openCardInfo = new CardObjectState.OpenCardInfo();
 
+    public UVScroll cardFrameEffect;
+    public UVScroll cardFrameEffect2;
+
     void Awake()
     {
         //canvas = GetComponent<Canvas>();
@@ -70,6 +73,8 @@ public class Card : MonoBehaviour
         cardSleeveRenderer.sortingOrder = no;
         cardImageRenderer.sortingOrder = no;
         canvas.sortingOrder = no;
+        cardFrameEffect.gameObject.GetComponent<MeshRenderer>().sortingOrder = no;
+        cardFrameEffect2.gameObject.GetComponent<MeshRenderer>().sortingOrder = no;
     }
 
     public void SetCardData(CardData data)
@@ -169,6 +174,7 @@ public class Card : MonoBehaviour
         powerNumber.SetNumber(power);
     }
 
+    // 演出込み　出せるか出せないか
     public void SetNotSelectFlag(bool value)
     {
         notSelectFlag = value;
@@ -178,9 +184,14 @@ public class Card : MonoBehaviour
         {
             cardImageRenderer.materials[0].color = new Color(0.5f, 0.5f, 0.5f);
             cardFrameRenderer.materials[0].color = new Color(0.5f, 0.5f, 0.5f);
+   
+            StopUseCard();
         }
         else
         {
+
+            ActiveUseCard();  
+
             cardImageRenderer.materials[0].color = new Color(1, 1, 1);
             cardFrameRenderer.materials[0].color = new Color(1, 1, 1);
         }
@@ -343,6 +354,24 @@ public class Card : MonoBehaviour
     }
 
     public bool isInMovingState() { return (!stateMachine.isInState(CardObjectState.None.GetInstance())); }
+
+    // カードエフェクト　カード使用可能
+    public void ActiveUseCard()
+    {
+        cardFrameEffect.gameObject.SetActive(true);
+        cardFrameEffect.Action();
+        cardFrameEffect2.gameObject.SetActive(true);
+        cardFrameEffect2.Action(0.75f);
+    }
+
+    // カードエフェクト　止める
+    public void StopUseCard()
+    {
+        cardFrameEffect.Stop();
+        cardFrameEffect.gameObject.SetActive(false);
+        cardFrameEffect2.Stop();
+        cardFrameEffect2.gameObject.SetActive(false);
+    }
 
     // カードを出す
     //public void SendCard()

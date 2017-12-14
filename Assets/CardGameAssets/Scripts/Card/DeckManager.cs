@@ -12,10 +12,12 @@ using UnityEngine;
 public class DeckManager
 {
     const int Maxhand = 9;  // 手札の最大数
-    List<CardData> hand = new List<CardData>();         // 手札
-    List<CardData> yamahuda = new List<CardData>();   // 山札
-    List<CardData> cemetery = new List<CardData>();      // 墓地
-    Queue<CardData> expulsion = new Queue<CardData>();     // 追放
+    List<CardData> hand = new List<CardData>();                         // 手札
+    List<CardData> yamahuda = new List<CardData>();                     // 山札
+    List<CardData> cemetery = new List<CardData>();                     // 墓地
+    Queue<CardData> expulsion = new Queue<CardData>();                  // 追放
+
+    private List<CardData> haveAbilityCards = new List<CardData>();     // 所持効果持ちモンスター
 
     Player player;
     CardObjectManager cardObjectManager;
@@ -31,6 +33,7 @@ public class DeckManager
         yamahuda.Clear();
         cemetery.Clear();
         expulsion.Clear();
+
     }
 
     public void Marigan(SyncDeckInfo syncData)
@@ -124,6 +127,13 @@ public class DeckManager
 
                 var cardData = CardDataBase.GetCardData(id);
                 yamahuda.Add(cardData);
+
+                //// 所持効果持ちファイターを保存
+                //if (cardData.cardType == CardType.AbilityFighter )
+                //{
+                //    haveAbilityCards.Add(cardData);
+                //}
+                
             }
         }
         //foreach (CardData card in deckData.eventCards)
@@ -138,7 +148,31 @@ public class DeckManager
         if (updateCardObject)
             cardObjectManager.SetDeckData(yamahuda.ToArray(), player.isMyPlayer);
     }
+
+    public void SarchAbilityCards(PlayerDeckData deckData)
+    {
+        haveAbilityCards.Clear();
      
+        int[] cardID = deckData.GetArray();
+        
+        // デッキデータを山札に入れていく
+        foreach (int id in cardID)
+        {
+            if (id != (int)IDType.NONE)
+            {
+                var cardData = CardDataBase.GetCardData(id);
+
+                // 所持効果持ちファイターを保存
+                if (cardData.cardType == CardType.AbilityFighter)
+                {
+                    haveAbilityCards.Add(cardData);
+                }
+
+            }
+        }
+
+    }
+
     public void Draw(int maisuu)
     {
         CardData[] ret = new CardData[maisuu];
@@ -301,6 +335,8 @@ public class DeckManager
     }
 
     public CardData[] GetExpulsionCards() { return expulsion.ToArray(); }
+
+    public List<CardData> GetHaveAbilityCards() { return haveAbilityCards; }
 
     public void FieldSet(int handNo)
     {

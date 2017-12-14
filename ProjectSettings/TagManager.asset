@@ -7,6 +7,7 @@ TagManager:
   - Card
   - Cemetery
   - DamagePoint
+  - CpuWatchCard
   layers:
   - Default
   - TransparentFX

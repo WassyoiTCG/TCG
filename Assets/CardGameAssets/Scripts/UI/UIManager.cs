@@ -22,6 +22,7 @@ public class UIManager : MonoBehaviour
     //public Sprite spriteSetStrikerPassOFF;      // パスOFF
 
     public CemeteryInfomationUI cemeteryInfoUIManager;
+    public CpuWatchCard cpuWatchCard;             // 相手の効果ガン見
 
     float timer;
     float limitTime;
@@ -69,6 +70,7 @@ public class UIManager : MonoBehaviour
         cpuLP.Restart();
 
         cemeteryInfoUIManager.Restart();
+        cpuWatchCard.Restart();
         DisAppearMainUI();
     }
 

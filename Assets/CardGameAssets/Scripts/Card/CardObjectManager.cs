@@ -284,8 +284,9 @@ public class CardObjectManager : MonoBehaviour
         var angle = Vector3.zero;
         angle.y = 180;
 
-        const float width = 2;
+        const float width = 3.25f;
         position.x = width * handNo - (numHand * width / 2) + (width / 2);
+        position.x += 1;
         position.z = -20.0f;
 
         // 逆サイド処理

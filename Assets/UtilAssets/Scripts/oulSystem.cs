@@ -65,6 +65,9 @@ public class oulSystemObject : MonoBehaviour
 
         // カードデータ読み込み
         CardDataBase.Start();
+
+        // カードの淵のデータ取得
+        CardFrames.Init();
     }
 
     // Use this for initialization

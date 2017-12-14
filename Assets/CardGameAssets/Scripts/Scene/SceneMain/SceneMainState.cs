@@ -138,6 +138,9 @@ namespace SceneMainState
 
         public override void Enter(SceneMain pMain)
         {
+            //[1214] ここで初期化してみた
+            pMain.uiManager.remainingPoints.Reset();
+
             // 自分がホストならポイントデータを相手に送信
             if (MessageManager.isServer)
             {
@@ -288,6 +291,14 @@ namespace SceneMainState
 
         public override void Execute(SceneMain pMain)
         {
+
+            //  最初は飛ばして　残りポイントを消していく処理
+            if (pMain.pointManager.step >= 0)
+            {
+
+                pMain.uiManager.remainingPoints.NotRemaining(pMain.pointManager.GetCurrentPoint());
+            }
+
             // ポイント
             if (pMain.pointManager.Next())
             {
@@ -387,6 +398,16 @@ namespace SceneMainState
             }
             // タイマーセット
             pMain.uiManager.SetTimer(setLimitTime);
+
+            ////+----------------------------------------------------------------------------------
+            //// 手札カードオブジェ取得
+            //Card[] card = pMain.playerManager.GetMyPlayer().cardObjectManager.GetHandCardObject();
+            //for (int i = 0; i < card.Length; i++)
+            //{
+            //    card[i].ActiveUseCard();
+            //}
+            ////+----------------------------------------------------------------------------------
+
         }
 
         public override void Execute(SceneMain pMain)

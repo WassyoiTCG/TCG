@@ -108,6 +108,48 @@ NavMeshSettings:
     tileSize: 256
     accuratePlacement: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1001 &99133836
+Prefab:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 4877433150709150, guid: 70de64275ccd32d44981b4fb790943ae, type: 2}
+      propertyPath: m_LocalPosition.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4877433150709150, guid: 70de64275ccd32d44981b4fb790943ae, type: 2}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4877433150709150, guid: 70de64275ccd32d44981b4fb790943ae, type: 2}
+      propertyPath: m_LocalPosition.z
+      value: -2.08
+      objectReference: {fileID: 0}
+    - target: {fileID: 4877433150709150, guid: 70de64275ccd32d44981b4fb790943ae, type: 2}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4877433150709150, guid: 70de64275ccd32d44981b4fb790943ae, type: 2}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4877433150709150, guid: 70de64275ccd32d44981b4fb790943ae, type: 2}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4877433150709150, guid: 70de64275ccd32d44981b4fb790943ae, type: 2}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4877433150709150, guid: 70de64275ccd32d44981b4fb790943ae, type: 2}
+      propertyPath: m_RootOrder
+      value: 10
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_ParentPrefab: {fileID: 100100000, guid: 70de64275ccd32d44981b4fb790943ae, type: 2}
+  m_IsPrefabParent: 0
 --- !u!1 &122199117 stripped
 GameObject:
   m_PrefabParentObject: {fileID: 1755090089981262, guid: 3b83b8a904b2c3648b4a5a0b3a484450,
@@ -1614,6 +1656,11 @@ Prefab:
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 8fa93ea1180dc2144af1cd8f694b185c, type: 2}
   m_IsPrefabParent: 0
+--- !u!1 &1775326488 stripped
+GameObject:
+  m_PrefabParentObject: {fileID: 1951026347265602, guid: 70de64275ccd32d44981b4fb790943ae,
+    type: 2}
+  m_PrefabInternal: {fileID: 99133836}
 --- !u!1 &1823858096 stripped
 GameObject:
   m_PrefabParentObject: {fileID: 1178743664710256, guid: 72b68c1cafc8a414a9927f7522975400,
@@ -1967,6 +2014,7 @@ MonoBehaviour:
   LifePoints: {fileID: 1823858096}
   m_TurnEndButton: {fileID: 1647881183}
   remainingpoints: {fileID: 1899608176}
+  cardFrameUV: {fileID: 1775326488}
 --- !u!4 &2130756760
 Transform:
   m_ObjectHideFlags: 0

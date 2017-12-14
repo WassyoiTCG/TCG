@@ -7,6 +7,8 @@
 		_ScrollV("ScrollV", Range(0,1)) = 0
 		_Color("Main Color", Color) = (1,1,1,1)
 		_MaskTex("MaskTexture", 2D) = "white" {}
+		//_ColorMask("Color Mask", Float) = 15
+
 	}
 	SubShader
 	{
@@ -17,6 +19,7 @@
 		Fog{ Mode Off }
 
 		Blend SrcAlpha OneMinusSrcAlpha
+		//ColorMask[_ColorMask]
 
 		Pass
 		{

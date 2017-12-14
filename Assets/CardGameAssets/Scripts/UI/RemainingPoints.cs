@@ -88,8 +88,13 @@ public class RemainingPoints : MonoBehaviour {
     }
 
     // もうない(128)
-    public void NotRemaining(int no)
+    public void NotRemaining(int point)
     {
+        // ゴレイヌ降臨
+        int no = point;
+        no /= 10;
+        no--;
+
         //  エラー処理
         if (no >= POINTS_MAX || no < 0)
         {

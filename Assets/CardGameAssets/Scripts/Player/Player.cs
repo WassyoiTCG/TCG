@@ -149,6 +149,7 @@ public class Player : MonoBehaviour
         deckManager.Start(this, cardObjectManager);
         deckManager.Reset();
         deckManager.SetDeckData(deckData);
+        deckManager.SarchAbilityCards(deckData); // [1213]効果持ち所持情報用に
 
         var controller = GetComponent<PlayerController>();
         if(controller)

@@ -22,6 +22,9 @@ public class SceneTest : MonoBehaviour
     public TurnEndButton m_TurnEndButton;
 
     public GameObject remainingpoints;
+
+    public GameObject cardFrameUV;
+
     //+------------------------------
     // Use this for initialization
     void Start()
@@ -39,6 +42,13 @@ public class SceneTest : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (Input.GetKey(KeyCode.Keypad9))
+        {
+            cardFrameUV.GetComponent<UVScroll>().Action();
+        }
+        int a = 0; a++;
+
+
         if (Input.GetKey(KeyCode.Keypad0))
         {
             remainingpoints.GetComponent<RemainingPoints>().Reset();

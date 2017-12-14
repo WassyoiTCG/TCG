@@ -105,6 +105,32 @@ public class uGUICard : MonoBehaviour
         //    cardName.text = data.cardName;
         //    return;
         //}
+        
+        // 種類により淵を変化させる
+        switch (data.cardType)
+        {
+            case CardType.Fighter:
+                gameObject.GetComponent<Image>().sprite = CardFrames.GetStrikerFrame();
+                break;
+            case CardType.AbilityFighter:
+                gameObject.GetComponent<Image>().sprite = CardFrames.GetAbilityStrikerFrame();
+                break;
+            case CardType.Joker:
+                gameObject.GetComponent<Image>().sprite = CardFrames.GetJOKERFrame();
+                break;
+            case CardType.Support:
+                gameObject.GetComponent<Image>().sprite = CardFrames.GetSupportFrame();
+                break;
+            case CardType.Connect:
+                gameObject.GetComponent<Image>().sprite = CardFrames.GetEventFrame();
+                break;
+            case CardType.Intercept:
+                gameObject.GetComponent<Image>().sprite = CardFrames.GetEventFrame();
+                break;
+            default:
+                Debug.LogWarning("ロウ: へろしよ、そのTYPEは存在せんぞ - uGUICard ");
+                break;
+        }
 
         cardName.text = data.cardName;
 

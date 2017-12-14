@@ -122,9 +122,27 @@ public class PlayerController : NetworkBehaviour
                     myPlayer.playerManager.uiManager.DisAppearBattleCardInfomation();
                 }
 
-                if(touchObject.tag == "DamagePoint")
+                //+-------------------------------------------------------------------
+                //      全てのダメージポイント確認
+                //+-------------------------------------------------------------------
+                if (touchObject.tag == "DamagePoint")
                 {
                     myPlayer.playerManager.uiManager.remainingPoints.TouchBegan();
+                }
+
+                //+-------------------------------------------------------------------
+                //      相手の効果モンスター見る
+                //+-------------------------------------------------------------------
+                if (touchObject.tag == "CpuWatchCard")
+                {
+                    var PlayerMgr = myPlayer.playerManager;
+                    var cpuPlayer = PlayerMgr.GetCPUPlayer();
+                    PlayerMgr.uiManager.cpuWatchCard.Appear(cpuPlayer.deckManager.GetHaveAbilityCards());
+
+                }
+                else
+                {
+                    myPlayer.playerManager.uiManager.cpuWatchCard.DisAppear();
                 }
 
                 // マウスがUIにポイントしていたら
@@ -153,6 +171,7 @@ public class PlayerController : NetworkBehaviour
             else
             {
                 myPlayer.playerManager.uiManager.cemeteryInfoUIManager.DisAppear();
+                myPlayer.playerManager.uiManager.cpuWatchCard.DisAppear();
             }
         }
         // 離した瞬間

@@ -17,5 +17,8 @@ public class PointCardManager
     }
     public int GetCurrentPoint(){ return (step < points.Length) ? points[randomIndexArray[step]] : 0; }
     // 次のポイント(山札が0だったらtrueを返す)
-    public bool Next() { return (++step >= points.Length); }
+    public bool Next()
+    {
+        return (++step >= points.Length);
+    }
 }
