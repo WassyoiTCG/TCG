@@ -22,6 +22,7 @@ public enum MessageType
     //OfflinePlay,    // オフライン対戦プレイ選択
     SyncDeck,       // 山札・手札・墓地・追放情報の同期
     SyncPoint,      // ポイント情報の同期
+    SyncState,      // シーンメインステートの同期
     SetStriker,     // ストライカーカードをセット
     SetSupport,     // サポートカード発動
     SetIntercept,   // インターセプト発動
@@ -64,6 +65,11 @@ public struct ReMessageInfo
     public int messageNumber;
 }
 
+public struct SyncStateInfo
+{
+    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 128)]
+    public char[] cStateName;
+}
 
 public struct PointInfo
 {

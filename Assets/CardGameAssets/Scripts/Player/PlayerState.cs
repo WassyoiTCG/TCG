@@ -142,17 +142,51 @@ namespace PlayerState
 
         public override void Execute(Player player)
         {
+
+        }
+
+        public override void Exit(Player player)
+        {
             var striker = player.GetFieldStrikerCard();
             if (striker != null)
             {
                 player.SetPower(striker.cardData.power);
             }
             else player.SetPower(Player.noSetStrikerPower);
+
+            player.playerManager.uiManager.DisAppearWaitYouUI();
+        }
+
+        public override bool OnMessage(Player player, MessageInfo message)
+        {
+            return false;
+        }
+    }
+
+    // サポートカードの効果待ちをしているステート
+    public  class SupportWait : BaseEntityState<Player>
+    {
+        // Singleton.
+        static SupportWait instance;
+        public static SupportWait GetInstance() { if (instance == null) { instance = new SupportWait(); } return instance; }
+
+        public override void Enter(Player player)
+        {
+            if (player.isMyPlayer)
+            {
+                // 何も選択できないように
+                player.cardObjectManager.ChangeHandNoneSelect();
+            }
+        }
+
+        public override void Execute(Player player)
+        {
+
         }
 
         public override void Exit(Player player)
         {
-            player.playerManager.uiManager.DisAppearWaitYouUI();
+
         }
 
         public override bool OnMessage(Player player, MessageInfo message)

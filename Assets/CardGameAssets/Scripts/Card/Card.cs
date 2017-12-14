@@ -204,7 +204,7 @@ public class Card : MonoBehaviour
         uraomoteFlag = value;
         if (value)
         {
-            if(cardData.cardType != CardType.Support) fighterPowerFrame.gameObject.SetActive(true);
+            if(/*cardData.cardType != CardType.Support*/!cardData.isEventCard()) fighterPowerFrame.gameObject.SetActive(true);
             canvas.gameObject.SetActive(true);
         }
         else
@@ -240,8 +240,13 @@ public class Card : MonoBehaviour
     // 宝箱とか見せる用の位置に移動するドロー
     public void ShowDraw(float endTime, bool urakarahajimaru)
     {
+        Debug.Log(cardData.cardName + "が見せる用ドロー");
+
         // 表にする
         SetUraomote(true);
+
+        // 選択不可能になっている手札を考慮して、戻す
+        SetNotSelectFlag(false);
 
         // デッキにいる位置を保存
         startPosition = cacheTransform.localPosition;

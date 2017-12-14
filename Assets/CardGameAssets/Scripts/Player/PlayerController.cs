@@ -82,15 +82,42 @@ public class PlayerController : NetworkBehaviour
 	// Update is called once per frame
 	void Update ()
     {
+        // ストライカーセットするステートにいたら
         if (myPlayer.stateMachine.isInState(PlayerState.SetStriker.GetInstance()))
         {
-            CardTapUpdate();
+            // もういや
             SetStrikerUpdate();
+            CardTapUpdate();
         }
+        // インターセプトセットするステートにいたら
         if(myPlayer.stateMachine.isInState(PlayerState.SetIntercept.GetInstance()))
         {
             CardTapUpdate();
             SetInterceptUpdate();
+        }
+        if (myPlayer.stateMachine.isInState(PlayerState.SupportWait.GetInstance()))
+        {
+            // なんかカード持ってたら
+            if (holdHandNo == noHoldCard) return;
+
+            // ★★★カードの座標を強制的に手札に戻す
+            // フィールドから掴んでたら
+            if (isFieldCardHold)
+            {
+                // フィールドにもう一度セット
+                myPlayer.cardObjectManager.ReFieldSetStriker(true);
+            }
+            // 手札から掴んでたら
+            else
+            {
+                // 手札の座標に戻る
+                holdCard.cacheTransform.localPosition = orgHoldCardPosition;
+                // 描画順
+                holdCard.SetOrder(holdHandNo);
+            }
+
+            // 掴んでるカードIDを離す
+            holdHandNo = noHoldCard;
         }
 	}
 
@@ -145,8 +172,10 @@ public class PlayerController : NetworkBehaviour
                     myPlayer.playerManager.uiManager.cpuWatchCard.DisAppear();
                 }
 
+                var ui = EventSystem.current.currentSelectedGameObject;
+
                 // マウスがUIにポイントしていたら
-                if (EventSystem.current.IsPointerOverGameObject() /*raycastResults.Count > 0*/)
+                if (ui != null /*raycastResults.Count > 0*/)
                 {
                     return;
                 }
@@ -207,6 +236,15 @@ public class PlayerController : NetworkBehaviour
                 {
                     cardSetOK = false;
 
+                    // UVエフェクト発動
+                    //holdCard.ActiveUseCard();
+                    //myPlayer.cardObjectManager.ChangeHandSetStrikerMode(myPlayer);
+                    // UVエフェクト発動
+                    foreach (Card card in myPlayer.cardObjectManager.GetHandCardObject())
+                    {
+                        if(!card.notSelectFlag) card.ActiveUseCard();
+                    }
+
                     // カードの座標を手札に戻す
                     // フィールドから掴んでたら
                     if (isFieldCardHold)
@@ -214,6 +252,8 @@ public class PlayerController : NetworkBehaviour
                         holdCard.cacheTransform.localPosition = orgHoldCardPosition;
                         // 描画順
                         holdCard.SetOrder(myPlayer.deckManager.GetNumHand());
+                        // UVエフェクト発動
+                        holdCard.ActiveUseCard();
                     }
                     // 手札から掴んでたら
                     else
@@ -270,6 +310,12 @@ public class PlayerController : NetworkBehaviour
 
                     // インフォメーション非表示
                     myPlayer.playerManager.uiManager.DisAppearBattleCardInfomation();
+
+                    // UVエフェクト発動
+                    foreach (Card card in myPlayer.cardObjectManager.GetHandCardObject())
+                    {
+                        if (!card.notSelectFlag) card.ActiveUseCard();
+                    }
                 }
             }
             // 手札から動かないモード
@@ -306,6 +352,14 @@ public class PlayerController : NetworkBehaviour
 
                     // インフォメーション非表示
                     myPlayer.playerManager.uiManager.DisAppearBattleCardInfomation();
+
+                    // UVエフェクト止める(全部)
+                    foreach (Card card in myPlayer.cardObjectManager.GetHandCardObject())
+                    {
+                        card.StopUseCard();
+                    }
+                    if (isFieldCardHold)
+                        holdCard.StopUseCard();
                 }
             }
 
@@ -313,11 +367,11 @@ public class PlayerController : NetworkBehaviour
         }
         else
         {
-            // マウスがUIにポイントしていたら
-            if (UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject())
-            {
-                return;
-            }
+            //// マウスがUIにポイントしていたら
+            //if (UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject())
+            //{
+            //    return;
+            //}
 
             // マウスクリックした瞬間
             if (oulInput.GetTouchState() == oulInput.TouchState.Began)
@@ -385,6 +439,12 @@ public class PlayerController : NetworkBehaviour
 
                             // めり込みバグ修正
                             holdCard.ChangeState(CardObjectState.None.GetInstance());
+
+                            // UVエフェクト止める(全部)
+                            foreach (Card card1 in myPlayer.cardObjectManager.GetHandCardObject())
+                            {
+                                card1.StopUseCard();
+                            }
                             return;
                         }
                     }
@@ -434,6 +494,15 @@ public class PlayerController : NetworkBehaviour
                 // 手札に戻る判定
                 if (currentPosition.y <= setFieldBorderY)
                 {
+                    // UVエフェクト発動
+                    //holdCard.ActiveUseCard();
+                    //myPlayer.cardObjectManager.ChangeHandSetStrikerMode(myPlayer);
+                    // UVエフェクト発動
+                    foreach (Card card in myPlayer.cardObjectManager.GetHandCardObject())
+                    {
+                        if (!card.notSelectFlag) card.ActiveUseCard();
+                    }
+
                     cardSetOK = false;
 
                     // カードの座標を手札に戻す
@@ -484,6 +553,14 @@ public class PlayerController : NetworkBehaviour
 
                     // インフォメーション非表示
                     myPlayer.playerManager.uiManager.DisAppearBattleCardInfomation();
+
+                    // UVエフェクト止める(全部)
+                    foreach (Card card in myPlayer.cardObjectManager.GetHandCardObject())
+                    {
+                        card.StopUseCard();
+                    }
+
+                    holdCard.StopUseCard();
                 }
             }
         }

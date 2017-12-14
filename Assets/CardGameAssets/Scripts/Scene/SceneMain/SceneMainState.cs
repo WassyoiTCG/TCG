@@ -114,7 +114,7 @@ namespace SceneMainState
                 pMain.playerManager.Restart();
 
                 // ステートチェンジ
-                pMain.stateMachine.ChangeState(BattleStart.GetInstance());
+                pMain.ChangeState(BattleStart.GetInstance());
             }
         }
 
@@ -156,7 +156,7 @@ namespace SceneMainState
             if (pMain.playerManager.isPlayesStandbyOK())
             {
                 // ステートチェンジ
-                pMain.stateMachine.ChangeState(SyncDeck.GetInstance());
+                pMain.ChangeState(SyncDeck.GetInstance());
             }
         }
 
@@ -193,7 +193,7 @@ namespace SceneMainState
             if (pMain.playerManager.isSyncDeckOK())
             {
                 // ステートチェンジ
-                pMain.stateMachine.ChangeState(FirstDraw.GetInstance());
+                pMain.ChangeState(FirstDraw.GetInstance());
             }
         }
 
@@ -228,7 +228,7 @@ namespace SceneMainState
             if (pMain.playerManager.isStateEnd()/* && pMain.playerManager.isSyncDeckOK()*/)
             {
                 // ステートチェンジ
-                pMain.stateMachine.ChangeState(MainPhase.GetInstance());
+                pMain.ChangeState(MainPhase.GetInstance());
             }
         }
 
@@ -266,7 +266,7 @@ namespace SceneMainState
             if(pMain.turnEndEffect.GetTrunEndType() == PHASE_TYPE.LEST)
             {
                 // ポイントドローステートへ
-                pMain.stateMachine.ChangeState(PointDraw.GetInstance());
+                pMain.ChangeState(PointDraw.GetInstance());
             }
         }
 
@@ -316,7 +316,7 @@ namespace SceneMainState
                     pMain.pointText.text += " + " + add;
                 }
                 // ステートチェンジ
-                pMain.stateMachine.ChangeState(OneDraw.GetInstance());
+                pMain.ChangeState(OneDraw.GetInstance());
             }
         }
 
@@ -364,7 +364,7 @@ namespace SceneMainState
             if (pMain.playerManager.isStateEnd())
             {
                 // ステートチェンジ
-                pMain.stateMachine.ChangeState(SetStriker.GetInstance());
+                pMain.ChangeState(SetStriker.GetInstance());
             }
         }
 
@@ -416,7 +416,7 @@ namespace SceneMainState
             if (pMain.playerManager.isSetStrikerEnd())
             {
                 // ステートチェンジ
-                pMain.stateMachine.ChangeState(WaitToBattlePhase.GetInstance());
+                pMain.ChangeState(WaitToBattlePhase.GetInstance());
             }
 
             //// 時間切れなったら
@@ -451,6 +451,52 @@ namespace SceneMainState
         }
     }
 
+    // サポートカード発動中ステート
+    public class SupportExcusionState : BaseEntityState<SceneMain>
+    {
+        static SupportExcusionState instance;
+        public static SupportExcusionState GetInstance() { if (instance == null) { instance = new SupportExcusionState(); } return instance; }
+
+        float waitTimer;
+
+        public override void Enter(SceneMain pMain)
+        {
+            Debug.Log("サポートカードステート開始");
+            waitTimer = 1.0f;
+        }
+
+        public override void Execute(SceneMain pMain)
+        {
+            if(waitTimer > 0)
+            {
+                waitTimer -= Time.deltaTime;
+                return;
+            }
+
+            // ごりくんをかくのはたのしい(カードが動いている状態(サポートを出す時の)だったらまだ処理扱い)
+            if (pMain.playerManager.GetMyPlayer().cardObjectManager.isInMovingState()) return;
+            if (pMain.playerManager.GetCPUPlayer().cardObjectManager.isInMovingState()) return;
+
+            // 効果の処理が終わったら
+            if (pMain.abilityManager.isAbilityEnd())
+            {
+                // 前のステートに戻る
+                pMain.ChangeState(SetStriker.GetInstance());
+            }
+        }
+
+        public override void Exit(SceneMain pMain)
+        {
+            Debug.Log("サポートカードステート終了");
+        }
+
+        public override bool OnMessage(SceneMain pMain, MessageInfo message)
+        {
+            return false;
+        }
+    }
+
+
 
     // （仮）ウェイト用
     public class WaitToBattlePhase : BaseEntityState<SceneMain>
@@ -473,7 +519,7 @@ namespace SceneMainState
             if (pMain.iWaitFrame >= 24)
             {
                 // ステートチェンジ
-                pMain.stateMachine.ChangeState(BattlePhase.GetInstance());
+                pMain.ChangeState(BattlePhase.GetInstance());
 
             }
 
@@ -511,7 +557,7 @@ namespace SceneMainState
             if (pMain.turnEndEffect.GetTrunEndType() == PHASE_TYPE.LEST)
             {
                 // カードオープンステートへ
-                pMain.stateMachine.ChangeState(StrikerOpen.GetInstance());
+                pMain.ChangeState(StrikerOpen.GetInstance());
             }
         }
 
@@ -595,7 +641,7 @@ namespace SceneMainState
                 }
 
                     // ステートチェンジ
-                    pMain.stateMachine.ChangeState(WaitToSetIntercept.GetInstance());
+                    pMain.ChangeState(WaitToSetIntercept.GetInstance());
                 
 
             }
@@ -631,8 +677,8 @@ namespace SceneMainState
             if (pMain.iWaitFrame >= 30)
             {
                 // ステートチェンジ
-                //pMain.stateMachine.ChangeState(CardAttack.GetInstance());
-                pMain.stateMachine.ChangeState(StrikerBeforeBattleAbility.GetInstance());
+                //pMain.ChangeState(CardAttack.GetInstance());
+                pMain.ChangeState(StrikerBeforeBattleAbility.GetInstance());
 
             }
 
@@ -658,22 +704,34 @@ namespace SceneMainState
         static StrikerBeforeBattleAbility instance;
         public static StrikerBeforeBattleAbility GetInstance() { if (instance == null) { instance = new StrikerBeforeBattleAbility(); } return instance; }
 
-        //float timer;
+        int step;
 
         public override void Enter(SceneMain pMain)
         {
-            // プレイヤーステート変更(効果持ちモンスターのバトル後発動効果の処理)
-            pMain.playerManager.SetState(PlayerState.StrikerBeforeBattleAbility.GetInstance());
+            step = 0;
         }
 
         public override void Execute(SceneMain pMain)
         {
-            // 効果処理が終わったら
-            if (pMain.abilityManager.isAbilityEnd())
+            // 同期待ち後に通る
+            switch (step)
             {
-                // ステートチェンジ
-                pMain.stateMachine.ChangeState(SetIntercept.GetInstance());
+                case 0:
+                    // プレイヤーステート変更(効果持ちモンスターのバトル後発動効果の処理)
+                    pMain.playerManager.SetState(PlayerState.StrikerBeforeBattleAbility.GetInstance());
+                    step++;
+                    break;
+
+                case 1:
+                    // 効果処理が終わったら
+                    if (pMain.abilityManager.isAbilityEnd())
+                    {
+                        // ステートチェンジ
+                        pMain.ChangeState(SetIntercept.GetInstance());
+                    }
+                    break;
             }
+
         }
 
         public override void Exit(SceneMain pMain)
@@ -723,7 +781,7 @@ namespace SceneMainState
             //{
             //    //eStep = SET_INTERCEPT_STEP.END;
             //    // インターセプト発動へ
-            //    pMain.stateMachine.ChangeState(WaitToActionIntercept.GetInstance());
+            //    pMain.ChangeState(WaitToActionIntercept.GetInstance());
 
             //    return;
             //}
@@ -734,7 +792,7 @@ namespace SceneMainState
                 pMain.uiManager.StopTimer();
 
                 // インターセプト発動へ
-                pMain.stateMachine.ChangeState(WaitToActionIntercept.GetInstance());
+                pMain.ChangeState(WaitToActionIntercept.GetInstance());
 
                 //eStep = SET_INTERCEPT_STEP.END;
             }
@@ -755,7 +813,7 @@ namespace SceneMainState
             //            pMain.uiManager.StopTimer();
 
             //            // インターセプト発動へ
-            //             pMain.stateMachine.ChangeState(ActionIntercept.GetInstance());
+            //             pMain.ChangeState(ActionIntercept.GetInstance());
 
             //            //eStep = SET_INTERCEPT_STEP.END;
             //        }
@@ -773,10 +831,10 @@ namespace SceneMainState
             //    //    if (pMain.abilityManager.isAbilityEnd())
             //    //    {
             //    //        // ステートチェンジ
-            //    //        //pMain.stateMachine.ChangeState(StrikerBattleResult.GetInstance());
+            //    //        //pMain.ChangeState(StrikerBattleResult.GetInstance());
 
             //    //        // モンスターアタックモーションへ
-            //    //        pMain.stateMachine.ChangeState(CardAttack.GetInstance());
+            //    //        pMain.ChangeState(CardAttack.GetInstance());
             //    //    }
             //    //    break;
             //}
@@ -826,7 +884,7 @@ namespace SceneMainState
             if (pMain.iWaitFrame >= 24)
             {
                 // ステートチェンジ
-                pMain.stateMachine.ChangeState(ActionInterceptState.GetInstance());
+                pMain.ChangeState(ActionInterceptState.GetInstance());
 
             }
 
@@ -851,23 +909,36 @@ namespace SceneMainState
         // Singleton.
         static ActionInterceptState instance;
         public static ActionInterceptState GetInstance() { if (instance == null) { instance = new ActionInterceptState(); } return instance; }
-        
+
+        int step;
+
         public override void Enter(SceneMain pMain)
         {
-            // 効果を発動させる!
-            pMain.playerManager.ActionIntercept();
+            step = 0;
         }
 
         public override void Execute(SceneMain pMain)
         {
-            // 効果処理が終わったら
-            if (pMain.abilityManager.isAbilityEnd())
+            // 同期待ち後に通る
+            switch (step)
             {
-                // ステートチェンジ
-                //pMain.stateMachine.ChangeState(StrikerBattleResult.GetInstance());
+                case 0:
+                    // 効果を発動させる!
+                    pMain.playerManager.ActionIntercept();
+                    step++;
+                    break;
 
-                // モンスターアタックモーションへ
-                pMain.stateMachine.ChangeState(CardAttack.GetInstance());
+                case 1:
+                    // 効果処理が終わったら
+                    if (pMain.abilityManager.isAbilityEnd())
+                    {
+                        // ステートチェンジ
+                        //pMain.ChangeState(StrikerBattleResult.GetInstance());
+
+                        // モンスターアタックモーションへ
+                        pMain.ChangeState(CardAttack.GetInstance());
+                    }
+                    break;
             }
         }
 
@@ -905,8 +976,8 @@ namespace SceneMainState
         {
 
                 // 今は速攻でインターセプトセットステートに行く
-                //pMain.stateMachine.ChangeState(SetIntercept.GetInstance());
-                pMain.stateMachine.ChangeState(StrikerBattleResult.GetInstance());
+                //pMain.ChangeState(SetIntercept.GetInstance());
+                pMain.ChangeState(StrikerBattleResult.GetInstance());
 
         }
 
@@ -940,7 +1011,7 @@ namespace SceneMainState
     //        if (!pMain.playerManager.isHaveInterceptCard())
     //        {
     //            // ステートチェンジ
-    //            pMain.stateMachine.ChangeState(StrikerBattleResult.GetInstance());
+    //            pMain.ChangeState(StrikerBattleResult.GetInstance());
 
     //            return;
     //        }
@@ -994,7 +1065,7 @@ namespace SceneMainState
     //                if (pMain.abilityManager.isAbilityEnd())
     //                {
     //                    // ステートチェンジ
-    //                    pMain.stateMachine.ChangeState(StrikerBattleResult.GetInstance());
+    //                    pMain.ChangeState(StrikerBattleResult.GetInstance());
     //                }
     //                break;
     //        }
@@ -1127,7 +1198,7 @@ namespace SceneMainState
                 else
                 {
                     // ステートチェンジ
-                    pMain.stateMachine.ChangeState(StrikerAfterBattleAbility.GetInstance());
+                    pMain.ChangeState(StrikerAfterBattleAbility.GetInstance());
                 }
             }
 
@@ -1149,22 +1220,35 @@ namespace SceneMainState
         static StrikerAfterBattleAbility instance;
         public static StrikerAfterBattleAbility GetInstance() { if (instance == null) { instance = new StrikerAfterBattleAbility(); } return instance; }
 
-        //float timer;
+        int step;
 
         public override void Enter(SceneMain pMain)
         {
-            // プレイヤーステート変更(効果持ちモンスターのバトル後発動効果の処理)
-            pMain.playerManager.SetState(PlayerState.StrikerAfterBattleAbility.GetInstance());
+            step = 0;
         }
 
         public override void Execute(SceneMain pMain)
         {
-            // 効果処理が終わったら
-            if (pMain.abilityManager.isAbilityEnd())
+            // 同期待ち後に通る
+            switch(step)
             {
-                // ステートチェンジ
-                pMain.stateMachine.ChangeState(TurnEnd.GetInstance());
+                case 0:
+                    // プレイヤーステート変更(効果持ちモンスターのバトル後発動効果の処理)
+                    pMain.playerManager.SetState(PlayerState.StrikerAfterBattleAbility.GetInstance());
+                    step++;
+                    break;
+
+                case 1:
+                    // 効果処理が終わったら
+                    if (pMain.abilityManager.isAbilityEnd())
+                    {
+                        // ステートチェンジ
+                        pMain.ChangeState(TurnEnd.GetInstance());
+                    }
+                    break;
             }
+
+
         }
 
         public override void Exit(SceneMain pMain)
@@ -1191,7 +1275,7 @@ namespace SceneMainState
             pMain.playerManager.SetState(PlayerState.TurnEnd.GetInstance());
 
             // メインフェーズ演出に戻る
-            pMain.stateMachine.ChangeState(MainPhase.GetInstance());
+            pMain.ChangeState(MainPhase.GetInstance());
         }
 
         public override void Execute(SceneMain pMain)
@@ -1229,7 +1313,7 @@ namespace SceneMainState
             if (pMain.turnEndEffect.GetTrunEndType() == PHASE_TYPE.LEST)
             {
                 // 終了ステートへ
-                pMain.stateMachine.ChangeState(Finish.GetInstance());
+                pMain.ChangeState(Finish.GetInstance());
             }
         }
 
@@ -1261,7 +1345,7 @@ namespace SceneMainState
             if (pMain.turnEndEffect.GetTrunEndType() == PHASE_TYPE.LEST)
             {
                 // 終了ステートへ
-                pMain.stateMachine.ChangeState(Finish.GetInstance());
+                pMain.ChangeState(Finish.GetInstance());
             }
         }
 

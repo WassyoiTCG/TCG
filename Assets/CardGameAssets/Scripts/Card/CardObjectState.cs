@@ -258,6 +258,8 @@ namespace CardObjectState
 
             card.cacheTransform.localPosition = card.startPosition;
             card.cacheTransform.localEulerAngles = card.startAngle;
+
+            Debug.Log("カードくんサポートカードステートEnter");
         }
 
         public override void Execute(Card card)
@@ -292,7 +294,9 @@ namespace CardObjectState
         }
 
         public override void Exit(Card card)
-        { }
+        {
+            Debug.Log("カードくんサポートカードステートExit");
+        }
 
         public override bool OnMessage(Card card, MessageInfo message)
         {

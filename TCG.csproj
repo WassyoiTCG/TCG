@@ -91,9 +91,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\CardGameAssets\Scripts\Button\ButtonManager.cs" />
+    <Compile Include="Assets\CardGameAssets\Scripts\Card\AbilityCost.cs" />
+    <Compile Include="Assets\CardGameAssets\Scripts\Card\AbilitySkill.cs" />
     <Compile Include="Assets\CardGameAssets\Scripts\Card\Card.cs" />
     <Compile Include="Assets\CardGameAssets\Scripts\Card\CardAbilityManager.cs" />
     <Compile Include="Assets\CardGameAssets\Scripts\Card\CardDataBase.cs" />
+    <Compile Include="Assets\CardGameAssets\Scripts\Card\CardFrames.cs" />
     <Compile Include="Assets\CardGameAssets\Scripts\Card\CardObjectManager.cs" />
     <Compile Include="Assets\CardGameAssets\Scripts\Card\CardObjectState.cs" />
     <Compile Include="Assets\CardGameAssets\Scripts\Card\DeckManager.cs" />
@@ -112,6 +115,7 @@
     <Compile Include="Assets\CardGameAssets\Scripts\Scene\SceneMain\SceneMainState.cs" />
     <Compile Include="Assets\CardGameAssets\Scripts\UI\BattleCardInfomation.cs" />
     <Compile Include="Assets\CardGameAssets\Scripts\UI\CemeteryInfomationUI.cs" />
+    <Compile Include="Assets\CardGameAssets\Scripts\UI\CpuWatchCard.cs" />
     <Compile Include="Assets\CardGameAssets\Scripts\UI\LifePoint.cs" />
     <Compile Include="Assets\CardGameAssets\Scripts\UI\RemainingPoints.cs" />
     <Compile Include="Assets\CardGameAssets\Scripts\UI\TurnEndButton.cs" />
@@ -170,6 +174,7 @@
     <Compile Include="Assets\UtilAssets\Animation\TransForm\AlphaWave.cs" />
     <Compile Include="Assets\UtilAssets\Animation\TransForm\BaseAnim2D.cs" />
     <Compile Include="Assets\UtilAssets\Animation\TransForm\BoyonAppeared.cs" />
+    <Compile Include="Assets\UtilAssets\Animation\TransForm\NAMEKOScreenOut.cs" />
     <Compile Include="Assets\UtilAssets\Animation\TransForm\Ripple.cs" />
     <Compile Include="Assets\UtilAssets\Animation\TransForm\Rotation.cs" />
     <Compile Include="Assets\UtilAssets\Animation\TransForm\ScaleAppeared.cs" />

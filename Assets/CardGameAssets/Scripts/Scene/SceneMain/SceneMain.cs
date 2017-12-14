@@ -24,8 +24,8 @@ public class SceneMain : MonoBehaviour
     //    End             // 勝ったプレイヤーに点数を与える、相内の場合は次へ持ち越し(もう点数山札ないときは終了)
     //}
     //State state;
-    public BaseEntityStateMachine<SceneMain> stateMachine { get; private set; }
-
+    BaseEntityStateMachine<SceneMain> stateMachine;
+    
     public GameObject offlinePlayers;                           // オフライン用
     public oulNetwork networkManager;                           // ネット管理さん
     public UIManager uiManager;                                 // UI管理さん
@@ -45,7 +45,9 @@ public class SceneMain : MonoBehaviour
     public PanelEffectManager PanelEffectMgr_Cpu;
 
     public int iWaitFrame;                                      //  演出用止めるフレーム
-     
+
+    // ステート同期用
+    public string[] currentStateNames = new string[2];
 
     //public bool isOnline = false;
 
@@ -98,13 +100,49 @@ public class SceneMain : MonoBehaviour
     // Update is called once per frame
     void Update ()
     {
+        if (MessageManager.isNetwork)
+        {
+            // ステート同期チェック
+            if (currentStateNames[0] != currentStateNames[1]) return;
+        }
+
         // ステートマシン更新
         stateMachine.Update();
     }
 
     public void HandleMessage(MessageInfo message)
     {
+        if (MessageManager.isNetwork)
+        {
+            // ステート同期メッセージ
+            if (message.messageType == MessageType.SyncState)
+            {
+                SyncStateInfo info = new SyncStateInfo();
+                message.GetExtraInfo<SyncStateInfo>(ref info);
+
+                currentStateNames[message.fromPlayerID] = info.cStateName.ToString();
+                return;
+            }
+        }
+
         stateMachine.HandleMessage(message);
+    }
+
+    public void ChangeState(BaseEntityState<SceneMain> newState)
+    {
+        // ステートチェンジ
+        stateMachine.ChangeState(newState);
+
+        // ステート同期用メッセージ
+        char[] newStateName = newState.GetType().FullName.ToCharArray();
+        SyncStateInfo info;
+        info.cStateName = new char[128];
+        for (int i = 0; i < newStateName.Length; i++)
+        {
+            info.cStateName[i] = newStateName[i];
+        }
+
+        MessageManager.Dispatch(playerManager.GetMyPlayerID(), MessageType.SyncState, info);
     }
 
 
@@ -128,6 +166,9 @@ public class SceneMain : MonoBehaviour
         pointText.text = "";
         pointManager.Start();
         aikoPoint.Clear();
+
+        // 残りのポイントUI初期化
+        uiManager.remainingPoints.Reset();
 
         // ターン初期化
         turn = 0;

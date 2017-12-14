@@ -4058,6 +4058,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   uiManager: {fileID: 576066911}
+  sceneMain: {fileID: 1308224565}
   players:
   - {fileID: 0}
   - {fileID: 0}
@@ -7451,6 +7452,9 @@ MonoBehaviour:
   PanelEffectMgr_My: {fileID: 1697489246}
   PanelEffectMgr_Cpu: {fileID: 1679967416}
   iWaitFrame: 0
+  currentStateNames:
+  - 
+  - 
 --- !u!4 &1308224566
 Transform:
   m_ObjectHideFlags: 0
@@ -11850,7 +11854,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &2034199889
 Transform:
   m_ObjectHideFlags: 0

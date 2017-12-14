@@ -10,6 +10,7 @@ public class PlayerManager : MonoBehaviour
     const int numPlayer = 2;
 
     public UIManager uiManager;
+    public SceneMain sceneMain;
 
     //public List<Player> players { get; private set; }
     public Player[] players = new Player[numPlayer];
@@ -189,11 +190,11 @@ public class PlayerManager : MonoBehaviour
         else
         {
             // 相殺処理
-            if(card0.power == card1.power)
-            {
+            //if(card0.power == card1.power)
+            //{
 
-                return;
-            }
+            //    return;
+            //}
 
             var ability0 = card0.interceptCard.abilityData;
             var ability1 = card1.interceptCard.abilityData;
@@ -298,6 +299,11 @@ public class PlayerManager : MonoBehaviour
             Debug.Log("受信: プレイヤー" + message.fromPlayerID + "が手札" + setCardInfo.index + "のサポートカードを発動");
 
             players[message.fromPlayerID].SetSupport(setCardInfo);
+
+            // ★シーンメインのステートをサポート待ちのステートに変更
+            Debug.Assert(sceneMain, "PlayerManagerがscemeMainアタッチされてない");
+            sceneMain.ChangeState(SceneMainState.SupportExcusionState.GetInstance());
+
             return true;
         }
         if (message.messageType == MessageType.SetIntercept)
@@ -399,33 +405,33 @@ public class PlayerManager : MonoBehaviour
         {
             if (card1 == null) return -1;
 
-            winnerPlayerID = 0;
+            winnerPlayerID = 1;
         }
         else if(card1 == null)
         {
-            winnerPlayerID = 1;
+            winnerPlayerID = 0;
         }
 
         // ジョーカー判定
-        else if (card0.cardData.cardType == CardType.Joker)
+        else if (card0.cardData.cardType == CardType.Joker && card1.cardData.power == 10)
         {
             // 相打ち処理
-            if (card1.cardData.cardType == CardType.Joker) return -1;
+            //if (card1.cardData.cardType == CardType.Joker) return -1;
 
-            if (card1.cardData.power == 10)
+            //if (card1.cardData.power == 10)
                 winnerPlayerID = 0;
             
-            else
-                winnerPlayerID = 1;
+            //else
+            //    winnerPlayerID = 1;
             
         }
-        else if (card1.cardData.cardType == CardType.Joker)
+        else if (card1.cardData.cardType == CardType.Joker && card0.cardData.power == 10)
         {
-            if (card0.cardData.power == 10)
+            //if (card0.cardData.power == 10)
                 winnerPlayerID = 1;
 
-            else
-                winnerPlayerID = 0;
+            //else
+            //    winnerPlayerID = 0;
             
         }
         else

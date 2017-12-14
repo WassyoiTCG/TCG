@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class oulText : MonoBehaviour
 {
@@ -74,7 +75,7 @@ public class oulText : MonoBehaviour
     {
         GUI.Label(
             new Rect(0.0f, 0.0f, Screen.width, Screen.height),
-            "FPS: " + fps + "  FixedUpdate: " + fixedFps + "\n" + oulInput.GetPosition(0, false) + debugString);
+            "FPS: " + fps + "  FixedUpdate: " + fixedFps + "\r\n" + oulInput.GetPosition(0, false) + "\r\n" + (EventSystem.current.currentSelectedGameObject ? EventSystem.current.currentSelectedGameObject.name : "") + debugString);
 
         GUI.Label(
         new Rect(240.0f, 0.0f, Screen.width, Screen.height),

@@ -14,6 +14,9 @@ public class oulNetwork : NetworkManager
 
     //List<ClientMessageOKInfo> clientIDList = new List<ClientMessageOKInfo>();
     Queue<MyNetworkMessage> messageQueue = new Queue<MyNetworkMessage>();
+    MyNetworkMessage currentMessage;
+    float waitTimer = 0;
+    readonly float delay = 0.5f;
 
     //float waitTimer;
     int sendMessageNumber;
@@ -54,6 +57,9 @@ public class oulNetwork : NetworkManager
 
     public void Restart()
     {
+        currentMessage = null;
+        waitTimer = 0;
+
         sendMessageNumber = 0;
         //receiveMessageNumber = 0;
         for (int i = 0; i < messageBuffer.Length; i++)
@@ -76,16 +82,36 @@ public class oulNetwork : NetworkManager
     {
         if (!MessageManager.isServer) return;
 
-        if(messageQueue.Count > 0)
+        if(currentMessage != null)
         {
-            var mes = messageQueue.Dequeue();
+            // ゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリゴリ
+            // でぃれいじかん、つくろう
+            switch (currentMessage.myMessageInfo.messageType)
+            {
+                case MessageType.SelectCemetery:
+                case MessageType.SelectHand:
+                case MessageType.SelectNumber:
+                case MessageType.SelectYamahuda:
+                    if ((waitTimer += Time.deltaTime) > delay)
+                    {
+                        waitTimer = 0;
+                    }
+                    else return;
+                    break;
+            }
 
             // クライアントに送信
-            var res = NetworkServer.SendToAll(Msg.MyMessage, mes);
+            var res = NetworkServer.SendToAll(Msg.MyMessage, currentMessage);
 
             // クライアント全員に送信する
-            Debug.Log("クライアント全員に" + mes.myMessageInfo.number + "番のメッセージ送信[" + mes.myMessageInfo.messageType.ToString() + 
+            Debug.Log("クライアント全員に" + currentMessage.myMessageInfo.number + "番のメッセージ送信[" + currentMessage.myMessageInfo.messageType.ToString() +
                 "]" + res.ToString());
+
+            currentMessage = null;
+        }
+        else if(messageQueue.Count > 0)
+        {
+            currentMessage = messageQueue.Dequeue();
 
             //// 全員に送れたら
             //if (isAllSendOK())
