@@ -124,39 +124,39 @@ namespace SceneMenuState
         public override void Enter(SceneMenu e)
         {
             //  ↓のプレートが出る
-            e.MenuPlate.GetComponent<ScreenOutAppeared>().SetDelayFrame(0);
-            e.MenuPlate.GetComponent<ScreenOutAppeared>().Action();
+            //e.MenuPlate.GetComponent<ScreenOutAppeared>().SetDelayFrame(0);
+            //e.MenuPlate.GetComponent<ScreenOutAppeared>().Action();
 
-            // 次にアイコン達が出る
-            int iDelayFrame = 6;
-            int iAdd= 12;
-            // メニューボタンたち
-            for (int i = 0; i < (int)MENU_TYPE.END; i++)
-            {
-      
-                e.MenuButton[i].GetComponent<ScreenOutAppeared>().SetDelayFrame((i * iDelayFrame) + iAdd);
-                e.MenuButton[i].GetComponent<ScreenOutAppeared>().Action();
-
-            }
+            //// 次にアイコン達が出る
+            //int iDelayFrame = 6;
+            //int iAdd= 12;
+            //// メニューボタンたち
+            //for (int i = 0; i < (int)MENU_TYPE.END; i++)
+            //{
+            //
+            //    e.MenuButton[i].GetComponent<ScreenOutAppeared>().SetDelayFrame((i * iDelayFrame) + iAdd);
+            //    e.MenuButton[i].GetComponent<ScreenOutAppeared>().Action();
+            //
+            //}
 
             
             //  選択されているポジションの場所へ配置
-            e.MenuSelectCursor.GetComponent<ScreenOutAppeared>().SetPosReCalcNextPos(e.MenuButton[(int)SelectData.iMenuType].transform.localPosition);
-            e.MenuSelectCursor.GetComponent<ScreenOutAppeared>().SetDelayFrame(((int)SelectData.iMenuType * iDelayFrame) + iAdd);
-            e.MenuSelectCursor.GetComponent<ScreenOutAppeared>().Action();
+            //e.MenuSelectCursor.GetComponent<ScreenOutAppeared>().SetPosReCalcNextPos(e.MenuButton[(int)SelectData.iMenuType].transform.localPosition);
+            //e.MenuSelectCursor.GetComponent<ScreenOutAppeared>().SetDelayFrame(((int)SelectData.iMenuType * iDelayFrame) + iAdd);
+            //e.MenuSelectCursor.GetComponent<ScreenOutAppeared>().Action();
 
 
             // その次にインフォメーション
-            e.InfoPlate.GetComponent<ScreenOutAppeared>().SetDelayFrame(((int)MENU_TYPE.END * iDelayFrame) + iAdd);
-            e.InfoPlate.GetComponent<ScreenOutAppeared>().Action();
+            //e.InfoPlate.GetComponent<ScreenOutAppeared>().SetDelayFrame(((int)MENU_TYPE.END * iDelayFrame) + iAdd);
+            //e.InfoPlate.GetComponent<ScreenOutAppeared>().Action();
 
             // 説明の文字もアクション
-            e.Info[(int)SelectData.iMenuType].GetComponent<ScreenOutAppeared>().SetDelayFrame(((int)MENU_TYPE.END * iDelayFrame) + iAdd);
-            e.Info[(int)SelectData.iMenuType].GetComponent<ScreenOutAppeared>().Action();
+            //e.Info[(int)SelectData.iMenuType].GetComponent<ScreenOutAppeared>().SetDelayFrame(((int)MENU_TYPE.END * iDelayFrame) + iAdd);
+            //e.Info[(int)SelectData.iMenuType].GetComponent<ScreenOutAppeared>().Action();
 
             // コイン
-            e.CoinPlate.GetComponent<ScreenOutAppeared>().SetDelayFrame(((int)MENU_TYPE.END * iDelayFrame) + iAdd);
-            e.CoinPlate.GetComponent<ScreenOutAppeared>().Action();
+            //e.CoinPlate.GetComponent<ScreenOutAppeared>().SetDelayFrame(((int)MENU_TYPE.END * iDelayFrame) + iAdd);
+            //e.CoinPlate.GetComponent<ScreenOutAppeared>().Action();
 
             // メニュースフィアたちの描画を最初切りたいので
             for (int i = 0; i < (int)MENU_SPHERE_TYPE.END; i++)
@@ -168,35 +168,39 @@ namespace SceneMenuState
             //  セレクトタイプによってステート変更
             // ステートマシンの初期化や切り替えは最後に行う
 
-            switch ((MENU_TYPE)SelectData.iMenuType)
-            {
-                case MENU_TYPE.TOTORIAL:
-                    e.m_pStateMachine.ChangeState(SceneMenuState.TutorialSelect.GetInstance());
+            // バトルセレクト
+            e.m_pStateMachine.ChangeState(SceneMenuState.BattleSelect.GetInstance());
 
-                    break;
-                case MENU_TYPE.BATTLE:
-                    e.m_pStateMachine.ChangeState(SceneMenuState.BattleSelect.GetInstance());
+            //switch ((MENU_TYPE)SelectData.iMenuType)
+            //{
+            //    case MENU_TYPE.TOTORIAL:
+            //        e.m_pStateMachine.ChangeState(SceneMenuState.TutorialSelect.GetInstance());
 
-                    break;
-                case MENU_TYPE.DECK:
-                    e.m_pStateMachine.ChangeState(SceneMenuState.DeckSelect.GetInstance());
+            //        break;
+            //    case MENU_TYPE.BATTLE:
+            //        e.m_pStateMachine.ChangeState(SceneMenuState.BattleSelect.GetInstance());
 
-                    break;
-                case MENU_TYPE.COLLECTION:
-                    e.m_pStateMachine.ChangeState(SceneMenuState.CollectSelect.GetInstance());
+            //        break;
+            //    case MENU_TYPE.DECK:
+            //        e.m_pStateMachine.ChangeState(SceneMenuState.DeckSelect.GetInstance());
 
-                    break;
-                case MENU_TYPE.OPTION:
-                    e.m_pStateMachine.ChangeState(SceneMenuState.OptionSelect.GetInstance());
+            //        break;
+            //    case MENU_TYPE.COLLECTION:
+            //        e.m_pStateMachine.ChangeState(SceneMenuState.CollectSelect.GetInstance());
 
-                    break;
-                case MENU_TYPE.END:
-                    Debug.LogWarning("SceneMenuState: それ以上のタイプはない。");
-                    break;
-                default:
-                    break;
-            }
-                return;
+            //        break;
+            //    case MENU_TYPE.OPTION:
+            //        e.m_pStateMachine.ChangeState(SceneMenuState.OptionSelect.GetInstance());
+
+            //        break;
+            //    case MENU_TYPE.END:
+            //        Debug.LogWarning("SceneMenuState: それ以上のタイプはない。");
+            //        break;
+            //    default:
+            //        break;
+            //}
+
+            return;
 
 
         }
@@ -332,19 +336,22 @@ namespace SceneMenuState
         public override void Enter(SceneMenu e)
         {
             // メニュー選択カーソル移動
-            Vector3 vNextPos = e.MenuButton[(int)SelectData.iMenuType].GetComponent<ScreenOutAppeared>().GetNextPos();
-            e.MenuSelectCursor.GetComponent<ScreenOutAppeared>().SetNextPos(vNextPos);
-            e.MenuSelectCursor.GetComponent<ScreenOutAppeared>().Action();
+            //Vector3 vNextPos = e.MenuButton[(int)SelectData.iMenuType].GetComponent<ScreenOutAppeared>().GetNextPos();
+            //e.MenuSelectCursor.GetComponent<ScreenOutAppeared>().SetNextPos(vNextPos);
+            //e.MenuSelectCursor.GetComponent<ScreenOutAppeared>().Action();
+            //
+            //// ステート毎のインフォメーションの文字のアニメ開始 (最初座標から再アクション)
+            //e.Info[(int)MENU_TYPE.BATTLE].transform.localPosition = e.Info[(int)MENU_TYPE.BATTLE].GetComponent<ScreenOutAppeared>().GetAwakPos();
+            //e.Info[(int)MENU_TYPE.BATTLE].GetComponent<ScreenOutAppeared>().Action();
 
-            // ステート毎のインフォメーションの文字のアニメ開始 (最初座標から再アクション)
-            e.Info[(int)MENU_TYPE.BATTLE].transform.localPosition = e.Info[(int)MENU_TYPE.BATTLE].GetComponent<ScreenOutAppeared>().GetAwakPos();
-            e.Info[(int)MENU_TYPE.BATTLE].GetComponent<ScreenOutAppeared>().Action();
 
+            e.BlackPanel.SetActive(false);
 
             // 球体
             e.MenuSphere[(int)MENU_SPHERE_TYPE.BATTLE].GetComponent<BoyonAppeared>().Action();
             e.MenuSphere[(int)MENU_SPHERE_TYPE.NET_BATTLE].GetComponent<BoyonAppeared>().Action();
 
+            e.MenuSphere[(int)MENU_SPHERE_TYPE.DECK_CREATE].GetComponent<BoyonAppeared>().Action();
         }
 
         public override void Execute(SceneMenu e)
@@ -356,12 +363,13 @@ namespace SceneMenuState
         {
 
             // 演出・描画を止める
-            e.Info[(int)MENU_TYPE.BATTLE].GetComponent<ScreenOutAppeared>().Stop();
+           // e.Info[(int)MENU_TYPE.BATTLE].GetComponent<ScreenOutAppeared>().Stop();
 
             // 球体
             e.MenuSphere[(int)MENU_SPHERE_TYPE.BATTLE].GetComponent<BoyonAppeared>().Stop();
             e.MenuSphere[(int)MENU_SPHERE_TYPE.NET_BATTLE].GetComponent<BoyonAppeared>().Stop();
 
+            e.MenuSphere[(int)MENU_SPHERE_TYPE.DECK_CREATE].GetComponent<BoyonAppeared>().Stop();
         }
 
         public override bool OnMessage(SceneMenu e, MessageInfo message)
@@ -818,6 +826,7 @@ namespace SceneMenuState
             e.Info[(int)MENU_TYPE.BATTLE].GetComponent<ScreenOutAppeared>().KeepUp();
             e.MenuSphere[(int)MENU_SPHERE_TYPE.BATTLE].GetComponent<BoyonAppeared>().KeepUp();
             e.MenuSphere[(int)MENU_SPHERE_TYPE.NET_BATTLE].GetComponent<BoyonAppeared>().KeepUp();
+            e.MenuSphere[(int)MENU_SPHERE_TYPE.DECK_CREATE].GetComponent<BoyonAppeared>().KeepUp();
 
             // メニュー選択カーソル移動
             e.NetBattleGroup.GetComponent<ScreenOutAppeared>().Action();

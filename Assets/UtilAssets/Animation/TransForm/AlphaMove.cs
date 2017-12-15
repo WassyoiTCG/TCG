@@ -129,6 +129,7 @@ public class AlphaMove : BaseAnim2D
     public override void StopRoop()
     {
         m_iCurrentFrame = iVanishFrame;
+        m_bRoop = false;
     }
 
     // 止める

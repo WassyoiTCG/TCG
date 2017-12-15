@@ -11,7 +11,9 @@ namespace CardObjectState
         public static None GetInstance() { if (instance == null) { instance = new None(); } return instance; }
 
         public override void Enter(Card card)
-        {}
+        {
+            card.animator.Play("Idle");
+        }
 
         public override void Execute(Card card)
         {
@@ -38,6 +40,8 @@ namespace CardObjectState
 
         public override void Enter(Card card)
         {
+            card.animator.Play("Idle");
+
             card.timer = 0;
 
             card.cacheTransform.localPosition = card.startPosition;
@@ -91,6 +95,8 @@ namespace CardObjectState
 
         public override void Enter(Card card)
         {
+            card.animator.Play("Idle");
+
             card.timer = 0;
 
             //card.nextPosition = card.cacheTransform.localPosition;
@@ -147,6 +153,8 @@ namespace CardObjectState
 
         public override void Enter(Card card)
         {
+            card.animator.Play("Idle");
+
             card.timer = 0;
 
             //card.nextPosition = card.cacheTransform.localPosition;
@@ -204,6 +212,8 @@ namespace CardObjectState
 
         public override void Enter(Card card)
         {
+            card.animator.Play("Idle");
+
             // 裏にする
             //var angle = card.cacheTransform.localEulerAngles.y * Mathf.Deg2Rad;
             card.cacheTransform.localPosition = card.startPosition;

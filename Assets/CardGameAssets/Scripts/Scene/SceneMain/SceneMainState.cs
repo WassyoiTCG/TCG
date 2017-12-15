@@ -408,6 +408,7 @@ namespace SceneMainState
             //}
             ////+----------------------------------------------------------------------------------
 
+            pMain.playerManager.GetMyPlayer().cardObjectManager.CheakActiveUseCard();
         }
 
         public override void Execute(SceneMain pMain)
@@ -419,6 +420,24 @@ namespace SceneMainState
                 pMain.ChangeState(WaitToBattlePhase.GetInstance());
             }
 
+            //int No = pMain.playerManager.GetMyPlayer().GetComponent<PlayerController>().holdHandNo;
+            //if (No != -1)
+            //{
+            //    holdCardFlag = true;
+            //}
+            bool holdCardFlag = pMain.playerManager.GetMyPlayer().GetComponent<PlayerController>().isCardHold;
+            //if (pMain.playerManager.GetMyPlayer().isSetStrikerOK() == false)
+            if (pMain.playerManager.GetMyPlayer().deckManager.isSetStriker() == false) 
+            {
+                pMain.playerManager.GetMyPlayer().cardObjectManager.CheakActiveUseCard(holdCardFlag);
+
+            }else 
+            {
+                //　UV終了
+                pMain.playerManager.GetMyPlayer().cardObjectManager.StopActiveUseCard();
+            }
+            
+            //pMain.playerManager.GetMyPlayer().c
             //// 時間切れなったら
             //if (pMain.uiManager.isTimerEnd())
             //{
@@ -443,6 +462,9 @@ namespace SceneMainState
 
             // インフォメーションUI非表示
             pMain.uiManager.DisAppearBattleCardInfomation();
+
+            //　UV終了
+            pMain.playerManager.GetMyPlayer().cardObjectManager.StopActiveUseCard();
         }
 
         public override bool OnMessage(SceneMain pMain, MessageInfo message)
@@ -771,11 +793,33 @@ namespace SceneMainState
 
             // UIに時間セット
             pMain.uiManager.SetTimer(setLimitTime);
+
+            pMain.playerManager.GetMyPlayer().cardObjectManager.CheakActiveUseCard();
+
         }
 
         public override void Execute(SceneMain pMain)
         {
+            //bool holdCardFlag = false;
+            //int No = pMain.playerManager.GetMyPlayer().GetComponent<PlayerController>().holdHandNo;
+            //if (No != -1)
+            //{
+            //    holdCardFlag = true;
+            //}
+            //pMain.playerManager.GetMyPlayer().cardObjectManager.CheakActiveUseCard(pMain.playerManager.GetMyPlayer().GetComponent<PlayerController>().isCardHold);
 
+            bool holdCardFlag = pMain.playerManager.GetMyPlayer().GetComponent<PlayerController>().isCardHold;
+            if (pMain.playerManager.GetMyPlayer().isPushedJunbiKanryo == false)
+            //if (pMain.playerManager.GetMyPlayer().deckManager.isHaveInterceptCard() == false)
+            {
+                pMain.playerManager.GetMyPlayer().cardObjectManager.CheakActiveUseCard(holdCardFlag);
+
+            }
+            else
+            {
+                //　UV終了
+                pMain.playerManager.GetMyPlayer().cardObjectManager.StopActiveUseCard();
+            }
             //// 時間切れなったら
             //if (pMain.uiManager.isTimerEnd())
             //{
@@ -850,6 +894,8 @@ namespace SceneMainState
 
             // プレイヤーステート変更(何もなし)
             pMain.playerManager.SetState(PlayerState.None.GetInstance());
+
+            pMain.playerManager.GetMyPlayer().cardObjectManager.StopActiveUseCard();
         }
 
         public override bool OnMessage(SceneMain pMain, MessageInfo message)
@@ -1094,13 +1140,16 @@ namespace SceneMainState
         public static StrikerBattleResult GetInstance() { if (instance == null) { instance = new StrikerBattleResult(); } return instance; }
 
         int iLoserNo = 0;
+        int winnerPlayerID = 0;
         bool endFlag = false;
 
         public override void Enter(SceneMain pMain)
         {
+            endFlag = false;// ←初期化し忘れ　開幕相子痛み分け勝利エンド
+
             pMain.iWaitFrame = 0; // 初期化
 
-            var winnerPlayerID = pMain.playerManager.StrikerBattle();
+            winnerPlayerID = pMain.playerManager.StrikerBattle();
             if (winnerPlayerID != -1)
             {
                 // 負けてる方のIDを取得
@@ -1146,15 +1195,82 @@ namespace SceneMainState
                         //  演出
                         // +-----------------------
 
-                        // SE
-                        oulAudio.PlaySE("Attack_Middle");
-
                         Vector3 pos = pMain.playerManager.players[iLoserNo].GetFieldStrikerCard().cacheTransform.localPosition;
-                        pos.y += 1;
-                        Vector3 vec = pMain.playerManager.players[iLoserNo].GetFieldStrikerCard().cacheTransform.localPosition;
+                        pos.y += 2;
+                        // 攻撃の方向
+                        Vector3 vec = new Vector3(80.0f, 0, 0);
+                        // 負けているのが自分なら
+                        if (pMain.playerManager.players[iLoserNo].isMyPlayer == true)
+                        {
+                            vec = new Vector3(-80.0f, 0, 0);
+                        }
 
-                        pMain.PanelEffectMgr_My.Action(PANEL_EFFECT_TYPE.ORANGE_LIGHT, pos, vec);
-                        pMain.PanelEffectMgr_My.Action(PANEL_EFFECT_TYPE.DAMAGE, pos, vec);
+                        Vector3 Panelvec = new Vector3(0, 0, 0);
+
+                        // 勝った奴のパワーにより演出変更
+                        int WINPOW = pMain.playerManager.players[winnerPlayerID].jissainoPower;
+                        switch (WINPOW)
+                        {
+                            case 0:
+                            case 1:
+                            case 2:
+                            case 3:
+                                // 弱い
+
+                                // SE
+                                oulAudio.PlaySE("Attack_Mini");
+
+                                // ブラ―
+                                Camera.main.GetComponent<RadialBlur>().SetBlur(0, 0, 2);
+                                //Camera.main.GetComponent<ShakeCamera>().Set();
+
+                                pMain.PanelEffectMgr_My.Action(PANEL_EFFECT_TYPE.ORANGE_LIGHT, pos, Panelvec);
+
+                                break;
+
+                            case 4:
+                            case 5:
+                            case 6:
+                            case 7:
+                                // 強い
+
+                                // SE
+                                oulAudio.PlaySE("Attack_Middle");
+
+                                // ブラ―&カメラ
+                                Camera.main.GetComponent<RadialBlur>().SetBlur(0, 0, 5);
+                                //Camera.main.GetComponent<ShakeCamera>().Set();
+                                
+                                pMain.UvEffectMgr_My.Action(UV_EFFECT_TYPE.BIG_DAMAGE, pos, vec);
+
+                                Panelvec = new Vector3(0, 0, 0);
+                                pMain.PanelEffectMgr_My.Action(PANEL_EFFECT_TYPE.ORANGE_LIGHT, pos, Panelvec);
+                                pMain.PanelEffectMgr_My.Action(PANEL_EFFECT_TYPE.DAMAGE, pos, Panelvec);
+                                break;
+
+                            case 8:
+                            case 9:
+                            case 10:
+                            default:
+                                // 超強い
+
+                                // SE
+                                oulAudio.PlaySE("Attack_Strong");
+
+                                // ブラ―&カメラ
+                                Camera.main.GetComponent<RadialBlur>().SetBlur(0, 0, 17);
+                                Camera.main.GetComponent<ShakeCamera>().Set();
+
+                                pMain.UvEffectMgr_My.Action(UV_EFFECT_TYPE.BIG_DAMAGE, pos, vec);
+
+                                Panelvec = new Vector3(0, 0, 0);
+                                pMain.PanelEffectMgr_My.Action(PANEL_EFFECT_TYPE.ORANGE_LIGHT, pos, Panelvec);
+                                pMain.PanelEffectMgr_My.Action(PANEL_EFFECT_TYPE.DAMAGE, pos, Panelvec);
+
+                                break;
+                        }
+
+
                         //pMain.playerManager.GetPlayer(iLoserNo).GetFieldStrikerCard().Lose();
                     }
                 }else 
@@ -1169,6 +1285,10 @@ namespace SceneMainState
 
                         // SE
                         oulAudio.PlaySE("Attack_Middle");
+
+                        // ブラ―&カメラ
+                        Camera.main.GetComponent<RadialBlur>().SetBlur(0, 0, 5);
+                        Camera.main.GetComponent<ShakeCamera>().Set();
 
                         // +----------------------
                         //  演出
@@ -1310,7 +1430,7 @@ namespace SceneMainState
         public override void Execute(SceneMain pMain)
         {
             // 演出終わったら
-            if (pMain.turnEndEffect.GetTrunEndType() == PHASE_TYPE.LEST)
+            if (pMain.turnEndEffect.GetFinishFlag() == true)
             {
                 // 終了ステートへ
                 pMain.ChangeState(Finish.GetInstance());
@@ -1342,7 +1462,7 @@ namespace SceneMainState
         public override void Execute(SceneMain pMain)
         {
             // 演出終わったら
-            if (pMain.turnEndEffect.GetTrunEndType() == PHASE_TYPE.LEST)
+            if (pMain.turnEndEffect.GetFinishFlag() == true)
             {
                 // 終了ステートへ
                 pMain.ChangeState(Finish.GetInstance());

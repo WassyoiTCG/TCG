@@ -48,6 +48,7 @@ public class Card : MonoBehaviour
 
     public UVScroll cardFrameEffect;
     public UVScroll cardFrameEffect2;
+    public bool isCardFrameEffect = false;
 
     void Awake()
     {
@@ -57,6 +58,13 @@ public class Card : MonoBehaviour
         // ステート初期化
         stateMachine = new BaseEntityStateMachine<Card>(this);
         stateMachine.ChangeState(CardObjectState.None.GetInstance());
+
+       // this.animator.Play("Idle");
+    }
+
+    public void ClearMotion()
+    {
+        //this.animator.Play("Idle");
     }
 
     void Update()
@@ -185,12 +193,10 @@ public class Card : MonoBehaviour
             cardImageRenderer.materials[0].color = new Color(0.5f, 0.5f, 0.5f);
             cardFrameRenderer.materials[0].color = new Color(0.5f, 0.5f, 0.5f);
    
-            StopUseCard();
         }
         else
         {
-
-            ActiveUseCard();  
+ 
 
             cardImageRenderer.materials[0].color = new Color(1, 1, 1);
             cardFrameRenderer.materials[0].color = new Color(1, 1, 1);
@@ -363,19 +369,27 @@ public class Card : MonoBehaviour
     // カードエフェクト　カード使用可能
     public void ActiveUseCard()
     {
-        cardFrameEffect.gameObject.SetActive(true);
-        cardFrameEffect.Action();
-        cardFrameEffect2.gameObject.SetActive(true);
-        cardFrameEffect2.Action(0.75f);
+        if (isCardFrameEffect == false)
+        {
+            isCardFrameEffect = true;
+
+            cardFrameEffect.gameObject.SetActive(true);
+            cardFrameEffect.Action();
+            cardFrameEffect2.gameObject.SetActive(true);
+            cardFrameEffect2.Action(0.75f);
+        }
+
     }
 
     // カードエフェクト　止める
     public void StopUseCard()
     {
-        cardFrameEffect.Stop();
-        cardFrameEffect.gameObject.SetActive(false);
-        cardFrameEffect2.Stop();
-        cardFrameEffect2.gameObject.SetActive(false);
+        isCardFrameEffect = false;
+            cardFrameEffect.Stop();
+            cardFrameEffect.gameObject.SetActive(false);
+            cardFrameEffect2.Stop();
+            cardFrameEffect2.gameObject.SetActive(false);
+        
     }
 
     // カードを出す

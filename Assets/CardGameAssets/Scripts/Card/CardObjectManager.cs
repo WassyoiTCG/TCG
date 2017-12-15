@@ -99,15 +99,20 @@ public class CardObjectManager : MonoBehaviour
             yamahudaCards.Add(card);
         }
 
-        // 山札座標更新
-        UpdateYamahudaPosition();
+        // 山札
+        
+
+         // 山札座標更新
+         UpdateYamahudaPosition();
     }
 
     // Update is called once per frame
     void Update ()
     {
-		
-	}
+        // マイフレームチェック
+       // CheakActiveUseCard();
+
+    }
 
     public Card[] GetHandCardObject() { return handCards.ToArray(); }
 
@@ -394,11 +399,13 @@ public class CardObjectManager : MonoBehaviour
         for (int i = 0; i < cemeteryCards.Count; i++)
         {
             var card = cemeteryCards[i];
+            
+            //  墓地表向き防止
 
             // 表
-            card.SetUraomote(true);
+            //card.SetUraomote(true);
             // 描画順
-            card.SetOrder(i);
+            //card.SetOrder(i);
 
             // 位置設定
             var position = cemeteryPosition;
@@ -409,7 +416,7 @@ public class CardObjectManager : MonoBehaviour
 
             //card.handPosition = position;
             card.cacheTransform.localPosition = position;
-            card.cacheTransform.localEulerAngles = angle;
+           // card.cacheTransform.localEulerAngles = angle;
         }
     }
 
@@ -564,6 +571,7 @@ public class CardObjectManager : MonoBehaviour
         card.Draw(handCards.Count - 1, handCards.Count);
         // 手札位置更新
         UpdateHandPosition();
+        
     }
 
     public void AddCemetery(Card card)
@@ -709,4 +717,100 @@ public class CardObjectManager : MonoBehaviour
         // 誰も動いてるステートにいない
         return false;
     }
+
+    // カードエフェクト　カード使用可能
+    public void CheakActiveUseCard(bool CardHold = false)
+    {
+
+        if (CardHold == false)
+        {
+        
+        // 手札かつ 使用可能なら
+        foreach (Card card in handCards)
+        {
+            if (card.notSelectFlag == false)
+            {
+                card.ActiveUseCard();
+            }else 
+            {
+                card.StopUseCard();
+
+            }         
+        }
+
+        }else {
+
+            // 手札かつ 使用可能なら
+            foreach (Card card in handCards)
+            {
+                card.StopUseCard();
+                
+            }
+
+        }
+           
+        // それ以外は全部光を消す
+        foreach (Card card in yamahudaCards)
+        {
+            card.StopUseCard();
+        }
+
+        foreach (Card card in cemeteryCards)
+        {
+            card.StopUseCard();
+        }
+        
+        if (fieldStrikerCard)
+        {
+            fieldStrikerCard.StopUseCard();
+        }
+
+        if (fieldEventCard)
+        {
+            fieldEventCard.StopUseCard();
+        }
+    }
+
+
+    // 全部止める
+    public void StopActiveUseCard()
+    {
+
+        // 手札かつ 使用可能なら
+        foreach (Card card in handCards)
+        {
+            card.StopUseCard();
+        }
+
+        // それ以外は全部光を消す
+        foreach (Card card in yamahudaCards)
+        {
+            card.StopUseCard();
+        }
+
+        foreach (Card card in cemeteryCards)
+        {
+            card.StopUseCard();
+        }
+
+        if (fieldStrikerCard)
+        {
+            fieldStrikerCard.StopUseCard();
+        }
+
+        if (fieldEventCard)
+        {
+            fieldEventCard.StopUseCard();
+        }
+    }
+
+    //// カードエフェクト　止める
+    //public void StopUseCard()
+    //{
+    //    foreach (Card card in handCards)
+    //    {
+    //        card.StopUseCard();
+    //    }
+    //}
+
 }

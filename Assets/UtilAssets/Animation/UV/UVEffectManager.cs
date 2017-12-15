@@ -5,7 +5,7 @@ using UnityEngine;
 
 public enum UV_EFFECT_TYPE
 {
-    SUMMON, UP_STATUS, DOWN_STATUS,
+    SUMMON, UP_STATUS, DOWN_STATUS,SKILL_WIN, SKILL_LOSE,BIG_DAMAGE,
     END
 }
 
@@ -29,6 +29,10 @@ public class UVEffectManager : MonoBehaviour {
     public GameObject SummonRing;
     public GameObject DownWave;
     public GameObject UpWave;
+    
+    public GameObject SkiilWin;
+    public GameObject SkiilLose;
+    public GameObject BigDamage;
 
     //+------------------------------------------
     //      
@@ -69,6 +73,21 @@ public class UVEffectManager : MonoBehaviour {
             case UV_EFFECT_TYPE.DOWN_STATUS:
                 DownWave.SetActive(true);
                 DownWave.GetComponent<UVScroll>().Action(vPos, iDelay);
+
+                break;
+            case UV_EFFECT_TYPE.SKILL_WIN:
+                SkiilWin.SetActive(true);
+                SkiilWin.GetComponent<UVScroll>().Action(vPos, iDelay);
+
+                break;
+            case UV_EFFECT_TYPE.SKILL_LOSE:
+                SkiilLose.SetActive(true);
+                SkiilLose.GetComponent<UVScroll>().Action(vPos, iDelay);
+
+                break;
+            case UV_EFFECT_TYPE.BIG_DAMAGE:
+                BigDamage.SetActive(true);
+                BigDamage.GetComponent<UVScroll>().Action(vPos, vVec, vVec, iDelay);
 
                 break;
             case UV_EFFECT_TYPE.END:

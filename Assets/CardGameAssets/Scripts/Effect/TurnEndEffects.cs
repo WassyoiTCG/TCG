@@ -53,6 +53,8 @@ public class TurnEndEffects : MonoBehaviour
 
     private int m_iSelfFrame = 0;
 
+    private bool m_bFinishFlag = false;
+
     const int iAnimationEndFrame = 90;// 90フレームで演出強制終了
 
     // Use this for initialization
@@ -66,13 +68,14 @@ public class TurnEndEffects : MonoBehaviour
         Font_MainPhase.SetActive(false);
         Font_BattlePhase.SetActive(false);
 
+        m_bFinishFlag = false;
     }
 
     // Update is called once per frame
     void Update()
     {
         // 休憩中よ
-        if (m_eType == PHASE_TYPE.LEST) { m_iSelfFrame = 0; return; }
+        if (m_eType == PHASE_TYPE.LEST) { m_iSelfFrame = 0; m_bFinishFlag = false; return; }
 
         // フレーム更新
         m_iSelfFrame++;
@@ -141,17 +144,20 @@ public class TurnEndEffects : MonoBehaviour
                     StarDust.GetComponent<Ripple>().Action();
                 }
                 // (TODO)仮で直打ち
-                if (m_iSelfFrame >= 120)
+                if (m_iSelfFrame >= 180)
                 {
-                    m_eType = PHASE_TYPE.LEST;
+                    //m_eType = PHASE_TYPE.LEST;
+                    m_bFinishFlag = true;
                     Debug.Log("演出終了- TurnEndEffects");
                 }
+                
                 break;
             case PHASE_TYPE.LOSER:
                 // (TODO)仮で直打ち
-                if (m_iSelfFrame >= 120)
+                if (m_iSelfFrame >= 180)
                 {
-                    m_eType = PHASE_TYPE.LEST;
+                    //m_eType = PHASE_TYPE.LEST;
+                    m_bFinishFlag = true;
                     Debug.Log("演出終了- TurnEndEffects");
                 }
                 break;
@@ -180,6 +186,7 @@ public class TurnEndEffects : MonoBehaviour
 
         // まず残ってる演出止める
         // Stop();
+        m_bFinishFlag = false;
 
         // フレーム初期化
         m_iSelfFrame = 0;
@@ -274,6 +281,7 @@ public class TurnEndEffects : MonoBehaviour
 
     }
 
-
+    public bool GetFinishFlag() {return  m_bFinishFlag; }
+    public int GetSelfFrame() { return m_iSelfFrame;  } 
     public PHASE_TYPE GetTrunEndType() { return m_eType; }// Lestだったら○○とか
 }

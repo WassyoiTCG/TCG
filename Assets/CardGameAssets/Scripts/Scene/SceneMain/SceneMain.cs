@@ -38,6 +38,7 @@ public class SceneMain : MonoBehaviour
     public int currentPoint { get; set; }                       // 現在表示されているポイント
     public List<int> aikoPoint { get; private set; }            // あいこポイント
     public int turn;                                            // 現在のターン
+    //public PlayerController playerControl;                      // 
 
     public UVEffectManager UvEffectMgr_My;
     public UVEffectManager UvEffectMgr_Cpu;

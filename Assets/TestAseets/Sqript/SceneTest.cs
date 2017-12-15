@@ -51,20 +51,30 @@ public class SceneTest : MonoBehaviour
 
         if (Input.GetKey(KeyCode.Keypad0))
         {
-            remainingpoints.GetComponent<RemainingPoints>().Reset();
+            //remainingpoints.GetComponent<RemainingPoints>().Reset();
+            UVMgr.GetComponent<UVEffectManager>().
+          Action(UV_EFFECT_TYPE.BIG_DAMAGE, new Vector3(1, 0, 0), new Vector3(90, 0, 0));
+
         }
 
         if (Input.GetKey(KeyCode.Keypad1))
         {
-            remainingpoints.GetComponent<RemainingPoints>().NotRemaining(1);
+            //remainingpoints.GetComponent<RemainingPoints>().NotRemaining(1);
+            UVMgr.GetComponent<UVEffectManager>().
+            Action(UV_EFFECT_TYPE.SKILL_LOSE, new Vector3(1, 0, 0), new Vector3(0, 0, 90));
+
         }
+
         if (Input.GetKey(KeyCode.Keypad2))
         {
-            remainingpoints.GetComponent<RemainingPoints>().NotRemaining(5);
+            //remainingpoints.GetComponent<RemainingPoints>().NotRemaining(5);
+
         }
+
         if (Input.GetKey(KeyCode.Keypad3))
         {
-            remainingpoints.GetComponent<RemainingPoints>().NotRemaining(7);
+            //remainingpoints.GetComponent<RemainingPoints>().NotRemaining(7);
+
         }
 
         if (Input.GetKey(KeyCode.Keypad4))
@@ -238,8 +248,11 @@ public class SceneTest : MonoBehaviour
         {
             TurnEndEffects.GetComponent<TurnEndEffects>().Action(PHASE_TYPE.LOSER);
         }
-
-        Card.GetComponent<ScreenOutAppeared>().SelfUpdate();
+        if (Input.GetKey(KeyCode.K))
+        {
+            TurnEndEffects.GetComponent<TurnEndEffects>().Stop();
+        }
+            Card.GetComponent<ScreenOutAppeared>().SelfUpdate();
         Card.GetComponent<Rotation>().SelfUpdate();
 
         
