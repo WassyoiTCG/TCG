@@ -52,8 +52,9 @@ public class UIManager : MonoBehaviour
 
     public GameObject connectingUI;
 
-    public GameObject selectNumberUI;   // 宝箱とかの
-    public Button[] numberButtons = new Button[11];
+    public NumberSelectUIManager selectNumberUI;       // 宝箱とかの
+    public GameObject selectNumberWaitUI;               // 宝箱待ち
+
 
     // クリックエフェクト
     public GameObject ClickEffect;
@@ -424,24 +425,27 @@ public class UIManager : MonoBehaviour
 
     public void AppearSelectNumberUI(DeckManager deckManager)
     {
-        selectNumberUI.SetActive(true);
-
-        // 全部選択不可能
-        foreach (Button numberButton in numberButtons) numberButton.interactable = false;
-
-        // 山札にあるカードが選択できる
-        foreach(CardData card in deckManager.GetYamahuda())
-        {
-            // イベントカードはスルー
-            if (card.isEventCard()) continue;
-            // ボタン有効化
-            numberButtons[card.power].interactable = true;
-        }
+        selectNumberUI.Action(deckManager);
     }
 
-    public void DisAppearSelectNumberUI()
+    public void DisAppearSelectNumberUI(int selectNumber)
     {
-        selectNumberUI.SetActive(false);
+        selectNumberUI.End(selectNumber);        
+    }
+
+    public bool isSelectNumberUIEnd()
+    {
+        return !selectNumberUI.gameObject.activeSelf;
+    }
+
+    public void AppearSelectNumberWaitUI()
+    {
+        selectNumberWaitUI.SetActive(true);
+    }
+
+    public void DisAppearSelectNumberWaitUI()
+    {
+        selectNumberWaitUI.SetActive(false);
     }
 }
 

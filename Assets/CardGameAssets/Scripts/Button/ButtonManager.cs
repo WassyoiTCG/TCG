@@ -142,7 +142,7 @@ public class ButtonManager : MonoBehaviour
         MessageManager.Dispatch(myPlayerID, MessageType.SelectNumber, info);
 
         // ボタン非表示
-        uiManager.DisAppearSelectNumberUI();
+        //uiManager.DisAppearSelectNumberUI(number);
     }
 
     public void OnClickRestart()

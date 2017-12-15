@@ -177,6 +177,8 @@ namespace CardObjectState
             }
 
             var rate = card.timer / endTime;
+            // 緩急
+            rate = Mathf.Pow(rate, 0.15f);
 
             // 座標
             card.cacheTransform.localPosition = oulMath.LerpVector(card.startPosition, card.nextPosition, rate);
@@ -190,6 +192,66 @@ namespace CardObjectState
 
             // 半分過ぎたらとりあえずて感じで(相手サイドのときは表にする必要なし)
             if(card.isMyPlayerSide) if(rate > 0.5f)card.SetUraomote(true);
+        }
+        public override void Exit(Card card)
+        {
+        }
+
+        public override bool OnMessage(Card card, MessageInfo message)
+        {
+            return false;
+        }
+    }
+
+    // 見せる用のドローの動き
+    public class ShowDraw : BaseEntityState<Card>
+    {
+        static ShowDraw instance;
+        public static ShowDraw GetInstance() { if (instance == null) { instance = new ShowDraw(); } return instance; }
+
+        readonly float endTime = 1.0f;
+
+        public override void Enter(Card card)
+        {
+            card.animator.Play("Idle");
+
+            card.timer = 0;
+
+            //card.nextPosition = card.cacheTransform.localPosition;
+            //card.nextAngle = card.cacheTransform.localEulerAngles;
+            card.cacheTransform.localPosition = card.startPosition;
+            card.cacheTransform.localEulerAngles = card.startAngle;
+
+            // 大丈夫だと思うが一応裏状態にしとく
+            //card.SetUraomote(false);
+        }
+
+        public override void Execute(Card card)
+        {
+            if ((card.timer += Time.deltaTime) > endTime)
+            {
+                card.timer = endTime;
+
+                // ステートチェンジ
+                card.ChangeState(None.GetInstance());
+            }
+
+            var rate = card.timer / endTime;
+            // 緩急
+            rate = Mathf.Pow(rate, 0.15f);
+
+            // 座標
+            card.cacheTransform.localPosition = oulMath.LerpVector(card.startPosition, card.nextPosition, rate);
+
+            // アングルも変える
+            var angle = Vector3.zero;
+            angle.x = Mathf.LerpAngle(card.startAngle.x, card.nextAngle.x, rate);
+            angle.y = Mathf.LerpAngle(card.startAngle.y, card.nextAngle.y, rate);
+            angle.z = Mathf.LerpAngle(card.startAngle.z, card.nextAngle.z, rate);
+            card.cacheTransform.localEulerAngles = angle;
+
+            // 半分過ぎたらとりあえずて感じで(相手サイドのときは表にする必要なし)
+            if (card.isMyPlayerSide) if (rate > 0.5f) card.SetUraomote(true);
         }
         public override void Exit(Card card)
         {

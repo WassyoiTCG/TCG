@@ -293,7 +293,8 @@ namespace Cost
             drawCard = null;
 
             // 数字選択UI表示
-            if (abilityData.isMyPlayer) CardAbilityData.uiManager.AppearSelectNumberUI(abilityData.myPlayer.deckManager);
+            CardAbilityData.uiManager.AppearSelectNumberUI(abilityData.myPlayer.deckManager);
+            if (!abilityData.isMyPlayer) CardAbilityData.uiManager.AppearSelectNumberWaitUI();
 
             // Ability列車 宝箱発動した瞬間
         }
@@ -306,6 +307,12 @@ namespace Cost
                     // 数字選択中
                     break;
                 case 1:
+                    // 数字UIの演出が終わるまでまつ
+                    if (CardAbilityData.uiManager.isSelectNumberUIEnd())
+                        step++;
+                    break;
+                case 2:
+
                     // ドロー！モンスターカード！が終わったら
                     // ドロー！
                     drawCard = abilityData.myPlayer.deckManager.DequeueYamahuda();
@@ -317,7 +324,7 @@ namespace Cost
                     step++;
                     break;
 
-                case 2:
+                case 3:
                     if (!drawCard.isInMovingState())
                     {
                         // モンスターカード！なら次のステート(isStrikerはジョーカーがfalseになるのでこの書き方)
@@ -335,7 +342,7 @@ namespace Cost
                     }
                     break;
 
-                case 3:
+                case 4:
                     // プレイヤーの選択した数字と引いたストライカーの数字が同じなら
                     if (selectNumber == drawCard.cardData.power)
                     {
@@ -374,6 +381,9 @@ namespace Cost
             {
                 case MessageType.SelectNumber:
                     {
+                        // ★(2回選択しても入ってこれないようにする)
+                        if (step > 0) return true;
+
                         SelectNumberInfo selectNumberInfo = new SelectNumberInfo();
                         message.GetExtraInfo<SelectNumberInfo>(ref selectNumberInfo);
 
@@ -381,12 +391,13 @@ namespace Cost
                         selectNumber = selectNumberInfo.selectNumber;
 
                         // UI非表示
-                        CardAbilityData.uiManager.DisAppearSelectNumberUI();
+                        CardAbilityData.uiManager.DisAppearSelectNumberUI(selectNumber);
+                        CardAbilityData.uiManager.DisAppearSelectNumberWaitUI();
 
                         // 次のステップへ
                         step++;
                     }
-                    break;
+                    return true;
             }
 
             return false;
@@ -414,7 +425,7 @@ namespace Cost
             step = 0;
 
             // 数字選択UI表示
-            CardAbilityData.uiManager.DisAppearSelectNumberUI();
+            //CardAbilityData.uiManager.DisAppearSelectNumberUI();
         }
 
         public override void Execute(CardAbilityData abilityData)

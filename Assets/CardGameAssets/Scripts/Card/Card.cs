@@ -271,7 +271,7 @@ public class Card : MonoBehaviour
         //// 時間指定
         //CardObjectState.Draw.GetInstance().endTime = endTime;
         // ステートてぇんじ
-        stateMachine.ChangeState(CardObjectState.Draw.GetInstance());
+        stateMachine.ChangeState(CardObjectState.ShowDraw.GetInstance());
     }
 
     public void SetSupport()

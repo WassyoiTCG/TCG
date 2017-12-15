@@ -110,9 +110,10 @@ public class Player : MonoBehaviour
 
         InitializeDeck();
 
-        // プレイヤーマネージャーに追加
+        //// プレイヤーマネージャーに追加
         playerManager = GameObject.Find("PlayerManager").GetComponent<PlayerManager>();
         playerID = playerManager.AddPlayer(this);
+        //playerID = (int)IDType.NONE;
 	}
 
     public void InitializeDeck()
@@ -172,6 +173,12 @@ public class Player : MonoBehaviour
 	// Update is called once per frame
 	void Update ()
     {
+        //if(playerID == (int)IDType.NONE)
+        //{
+        //    // プレイヤーマネージャーに追加
+        //    playerManager = GameObject.Find("PlayerManager").GetComponent<PlayerManager>();
+        //    playerID = playerManager.AddPlayer(this);
+        //}
         //var axis = Vector2.zero;
 
         //// 入力

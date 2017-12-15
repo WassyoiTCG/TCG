@@ -49,6 +49,7 @@ public class SceneMain : MonoBehaviour
 
     // ステート同期用
     public string[] currentStateNames = new string[2];
+    public Text debugText;
 
     //public bool isOnline = false;
 
@@ -104,7 +105,12 @@ public class SceneMain : MonoBehaviour
         if (MessageManager.isNetwork)
         {
             // ステート同期チェック
-            if (currentStateNames[0] != currentStateNames[1]) return;
+            if (currentStateNames[0] != currentStateNames[1])
+            {
+                if (debugText)
+                    debugText.text = "ステート同期中\r\n" + "自分:" + currentStateNames[0] + "\r\n" + "相手:" + currentStateNames[1];
+                return;
+            }
         }
 
         // ステートマシン更新
