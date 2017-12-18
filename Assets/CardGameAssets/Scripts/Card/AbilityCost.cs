@@ -5,6 +5,13 @@ using UnityEngine;
 
 namespace Cost
 {
+    public enum PowerRange
+    {
+        Pinpoint,
+        Ijou,
+        Ika,
+    }
+
     // 発動チェック関数を作りたかったので自前で作る
     public abstract class Base
     {
@@ -17,6 +24,28 @@ namespace Cost
         // 発動条件を満たしているかどうか(主にイベントカードが出せるかどうかに使う)
         public abstract bool HatsudouCheck(CardAbilityData abilityData, Player player);
         public bool EndCheck() { return endFlag; }
+
+        protected bool CheckRange(PowerRange range, int value0, int value1)
+        {
+            switch (range)
+            {
+                case PowerRange.Pinpoint:
+                    Debug.Log(value0 + "==" + value1);
+                    return (value0 == value1);
+
+                case PowerRange.Ijou:
+                    Debug.Log(value0 + ">=" + value1);
+                    return (value0 >= value1);
+
+                case PowerRange.Ika:
+                    Debug.Log(value0 + "<=" + value1);
+                    return (value0 <= value1);
+
+                default:
+                    Debug.LogWarning("パワーレンジの値おかしいクマ");
+                    return false;
+            }
+        }
     }
 
     // 条件なし
@@ -625,12 +654,6 @@ namespace Cost
         }
     }
 
-    public enum PowerRange
-    {
-        Pinpoint,
-        Ijou,
-        Ika,
-    }
 
     // 相手のストライカーのパワーがx
     public class YouStrikerPower : Base
@@ -650,27 +673,27 @@ namespace Cost
             }
 
             var power = abilityData.c_value0;
-            var hantei = false;
-            switch ((PowerRange)abilityData.c_value1)
-            {
-                case PowerRange.Pinpoint:
-                    hantei = (striker.cardData.power == power);
-                    break;
+            //var hantei = false;
+            //switch ((PowerRange)abilityData.c_value1)
+            //{
+            //    case PowerRange.Pinpoint:
+            //        hantei = (striker.cardData.power == power);
+            //        break;
 
-                case PowerRange.Ijou:
-                    hantei = (striker.cardData.power >= power);
-                    break;
+            //    case PowerRange.Ijou:
+            //        hantei = (striker.cardData.power >= power);
+            //        break;
 
-                case PowerRange.Ika:
-                    hantei = (striker.cardData.power <= power);
-                    break;
+            //    case PowerRange.Ika:
+            //        hantei = (striker.cardData.power <= power);
+            //        break;
 
-                default:
-                    Debug.LogWarning("パワーレンジの値おかしいクマ");
-                    break;
-            }
+            //    default:
+            //        Debug.LogWarning("パワーレンジの値おかしいクマ");
+            //        break;
+            //}
 
-            if (hantei)
+            if (CheckRange((PowerRange)abilityData.c_value1, striker.cardData.power, power))
                 JoukenOK(abilityData);
             else
                 JoukenNG(abilityData);
@@ -787,25 +810,25 @@ namespace Cost
 
         public override bool HatsudouCheck(CardAbilityData abilityData, Player player)
         {
-            Func<int, int, bool> check;
-            switch ((PowerRange)abilityData.c_value1)
-            {
-                case PowerRange.Pinpoint:
-                    check = (a, b) => { return (a == b); };
-                    break;
+            //Func<int, int, bool> check;
+            //switch ((PowerRange)abilityData.c_value1)
+            //{
+            //    case PowerRange.Pinpoint:
+            //        check = (a, b) => { return (a == b); };
+            //        break;
 
-                case PowerRange.Ijou:
-                    check = (a, b) => { return (a >= b); };
-                    break;
+            //    case PowerRange.Ijou:
+            //        check = (a, b) => { return (a >= b); };
+            //        break;
 
-                case PowerRange.Ika:
-                    check = (a, b) => { return (a <= b); };
-                    break;
+            //    case PowerRange.Ika:
+            //        check = (a, b) => { return (a <= b); };
+            //        break;
 
-                default:
-                    Debug.LogWarning("おかしいおかしい");
-                    return false;
-            }
+            //    default:
+            //        Debug.LogWarning("おかしいおかしい");
+            //        return false;
+            //}
 
             var deckManager = player.deckManager;
             var numHand = deckManager.GetNumHand();
@@ -814,7 +837,7 @@ namespace Cost
                 var card = deckManager.GetHandCard(i);
                 if (card.isEventCard()) continue;
                 // 条件満たしたら
-                if (check(card.power, abilityData.c_value0))
+                if (CheckRange((PowerRange)abilityData.c_value1, card.power, abilityData.c_value0))
                 {
                     selectHandIndex = i;
                     return true;
@@ -822,6 +845,72 @@ namespace Cost
             }
 
             return false;
+        }
+    }
+
+    // ターン条件
+    public class Turn : Base
+    {
+        static Turn instance;
+        public static Turn GetInstance() { if (instance == null) { instance = new Turn(); } return instance; }
+
+
+        public override void Enter(CardAbilityData abilityData)
+        {
+            base.Enter(abilityData);
+
+            // 現在のターンを取得
+            int turn = MessageManager.sceneMain.turn;
+            int joukenTurn = abilityData.c_value0;
+            PowerRange range = (PowerRange)abilityData.c_value1;
+
+            Debug.Log("ターン条件チェックするクマ");
+
+            // 条件チェック
+            bool isOK = CheckRange(range, turn, joukenTurn);
+
+            if(isOK)
+            {
+                Debug.Log("条件満たしてる");
+
+                // 成功時の効果に移行
+                abilityData.skillNumber = abilityData.c_value2;
+
+                // Ability列車 ターン条件効果発動(条件成功時)
+
+            }
+            else
+            {
+                Debug.Log("条件満たしていない");
+
+                // 失敗時の効果に移行
+                abilityData.skillNumber = abilityData.c_value3;
+
+                // Ability列車 ターン条件効果発動(条件満たしてない時)
+
+            }
+
+        }
+
+        public override void Execute(CardAbilityData abilityData)
+        {
+            // Ability列車 ターン条件効果終了時
+            if (true)
+            {
+                // 終了
+                abilityData.isJoukenOK = true;
+                endFlag = true;
+            }
+        }
+
+        public override bool OnMessage(CardAbilityData abilityData, MessageInfo message)
+        {
+            return false;
+        }
+
+        public override bool HatsudouCheck(CardAbilityData abilityData, Player player)
+        {
+            return true;
         }
     }
 }

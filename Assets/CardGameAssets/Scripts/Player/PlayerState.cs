@@ -240,14 +240,18 @@ namespace PlayerState
             var card = player.GetFieldStrikerCard();
             if (card == null) return;
             if (card.cardData.cardType != CardType.AbilityFighter) return;
-            var ability = card.cardData.abilityFighterCard.abilityData;
-            if (ability.abilityTriggerType != AbilityTriggerType.BeforeBattle) return;
 
-            // 効果の条件を満たしているかどうか(爪痕とかのチェック)
-            if (!ability.HatsudouOK(player)) return;
+            var abilityes = card.cardData.abilityFighterCard.abilityDatas;
+            foreach (CardAbilityData ability in abilityes)
+            {
+                if (ability.abilityTriggerType != AbilityTriggerType.BeforeBattle) continue;
 
-            // 効果発動!
-            GameObject.Find("GameMain/AbilityManager").GetComponent<CardAbilityManager>().PushAbility(ability, player.isMyPlayer);
+                // 効果の条件を満たしているかどうか(爪痕とかのチェック)
+                if (!ability.HatsudouOK(player)) continue;
+
+                // 効果発動!
+                GameObject.Find("GameMain/AbilityManager").GetComponent<CardAbilityManager>().PushAbility(ability, player.isMyPlayer);
+            }
         }
 
         public override void Execute(Player player)
@@ -277,14 +281,18 @@ namespace PlayerState
             var card = player.GetFieldStrikerCard();
             if (card == null) return;
             if (card.cardData.cardType != CardType.AbilityFighter) return;
-            var ability = card.cardData.abilityFighterCard.abilityData;
-            if (ability.abilityTriggerType != AbilityTriggerType.AfterBattle) return;
 
-            // 効果の条件を満たしているかどうか(爪痕とかのチェック)
-            if (!ability.HatsudouOK(player)) return;
+            var abilityes = card.cardData.abilityFighterCard.abilityDatas;
+            foreach (CardAbilityData ability in abilityes)
+            {
+                if (ability.abilityTriggerType != AbilityTriggerType.AfterBattle) continue;
 
-            // 効果発動!
-            GameObject.Find("GameMain/AbilityManager").GetComponent<CardAbilityManager>().PushAbility(ability, player.isMyPlayer);
+                // 効果の条件を満たしているかどうか(爪痕とかのチェック)
+                if (!ability.HatsudouOK(player)) continue;
+
+                // 効果発動!
+                GameObject.Find("GameMain/AbilityManager").GetComponent<CardAbilityManager>().PushAbility(ability, player.isMyPlayer);
+            }
         }
 
         public override void Execute(Player player)

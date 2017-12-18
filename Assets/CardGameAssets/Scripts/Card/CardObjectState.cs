@@ -342,8 +342,12 @@ namespace CardObjectState
 
                 // ★移動終わってカードの効果発動
                 var abilityManager = GameObject.Find("GameMain/AbilityManager").GetComponent<CardAbilityManager>();
-                abilityManager.PushAbility(card.cardData.supportCard.abilityData, card.isMyPlayerSide);
 
+                var abilityes = card.cardData.supportCard.abilityDatas;
+                foreach (CardAbilityData ability in abilityes)
+                {
+                    abilityManager.PushAbility(ability, card.isMyPlayerSide);
+                }
                 // ステートチェンジ
                 card.MoveToCemetery();
                 return;

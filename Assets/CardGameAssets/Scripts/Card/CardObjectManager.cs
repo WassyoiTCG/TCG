@@ -65,19 +65,38 @@ public class CardObjectManager : MonoBehaviour
 
     public void Restart()
     {
+        // 共通処理なのでラムダ
+        Func<Card, int> addYamahuda = (card) => 
+        {
+            // アビリティから作られたカードなら削除
+            if (card.isAbilityCreate)
+            {
+                GameObject.Destroy(card);
+            }
+            else
+            {
+                // 山札に加える(再利用)
+                yamahudaCards.Add(card);
+            }
+
+            return 0;
+        };
+
         // フィールドカード
         //fieldStrikerCard.gameObject.SetActive(false);
         //fieldEventCard.gameObject.SetActive(false);
 
         if (fieldStrikerCard)
         {
-            yamahudaCards.Add(fieldStrikerCard);
+            addYamahuda(fieldStrikerCard);
+            //yamahudaCards.Add(fieldStrikerCard);
             fieldStrikerCard = null;
         }
 
         if (fieldEventCard)
         {
-            yamahudaCards.Add(fieldEventCard);
+            addYamahuda(fieldEventCard);
+            //yamahudaCards.Add(fieldEventCard);
             fieldEventCard = null;
         }
 
@@ -87,7 +106,8 @@ public class CardObjectManager : MonoBehaviour
             var card = handCards[0];
             handCards.Remove(card);
             card.gameObject.SetActive(true);
-            yamahudaCards.Add(card);
+            addYamahuda(card);
+            //yamahudaCards.Add(card);
         }
 
         // 墓地を空にする
@@ -96,7 +116,8 @@ public class CardObjectManager : MonoBehaviour
             var card = cemeteryCards[0];
             cemeteryCards.Remove(card);
             card.gameObject.SetActive(true);
-            yamahudaCards.Add(card);
+            addYamahuda(card);
+            //yamahudaCards.Add(card);
         }
 
         // 山札
@@ -186,14 +207,17 @@ public class CardObjectManager : MonoBehaviour
 
                 case CardType.Support:
                 case CardType.Connect:
+                    // はつどう条件を満たしているなら(今日は休みますならジョーカーが手札にあるかとか)
+                    var abilityes = card.cardData.GetEventCard().abilityDatas;
+                    foreach (CardAbilityData ability in abilityes)
                     {
-                        // はつどう条件を満たしているなら(今日は休みますならジョーカーが手札にあるかとか)
-                        if (card.cardData.GetEventCard().abilityData.HatsudouOK(player))
+                        if (ability.HatsudouOK(player))
                         {
                             card.SetNotSelectFlag(false);
+                            return;
                         }
-                        else card.SetNotSelectFlag(true);
                     }
+                    card.SetNotSelectFlag(true);
                     break;
 
                     // インターセプトは無条件で選択不可能
@@ -222,11 +246,16 @@ public class CardObjectManager : MonoBehaviour
                 // インターセプト
                 case CardType.Intercept:
                     // はつどう条件を満たしているなら(今日は休みますならジョーカーが手札にあるかとか)
-                    if (card.cardData.interceptCard.abilityData.HatsudouOK(player))
+                    var abilityes = card.cardData.interceptCard.abilityDatas;
+                    foreach (CardAbilityData ability in abilityes)
                     {
-                        card.SetNotSelectFlag(false);
+                        if (ability.HatsudouOK(player))
+                        {
+                            card.SetNotSelectFlag(false);
+                            return;
+                        }
                     }
-                    else card.SetNotSelectFlag(true);
+                    card.SetNotSelectFlag(true);
                     break;
             }
         }
@@ -621,6 +650,9 @@ public class CardObjectManager : MonoBehaviour
             }
             else card = yamahudaCards[i];
 
+            // アビリティから新規作成ではない
+            card.isAbilityCreate = false;
+
             card.isMyPlayerSide = isMyPlayer;
 
             //card.SetCardData(yamahuda[i]);
@@ -802,6 +834,19 @@ public class CardObjectManager : MonoBehaviour
         {
             fieldEventCard.StopUseCard();
         }
+    }
+
+    // アビリティの生成系で使う
+    public Card CreateCardObject(CardData data, bool isMyPlayer)
+    {
+        Card newCreateCard = Instantiate(cardPrefab, transform);
+        newCreateCard.gameObject.SetActive(true);
+        newCreateCard.isMyPlayerSide = isMyPlayer;
+        // カードデータセット
+        newCreateCard.SetCardData(data);
+        // アビリティから作られたフラグoN
+        newCreateCard.isAbilityCreate = true;
+        return newCreateCard;
     }
 
     //// カードエフェクト　止める

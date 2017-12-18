@@ -579,19 +579,19 @@ public class DeckManager
         return false;
     }
 
-    public bool isHaveInterceptCard()
-    {
-        // 1枚でもインターセプトカードを持っているなら
-        foreach (CardData card in hand)
-        {
-            if (card.cardType != CardType.Intercept) continue;
+    //public bool isHaveInterceptCard()
+    //{
+    //    // 1枚でもインターセプトカードを持っているなら
+    //    foreach (CardData card in hand)
+    //    {
+    //        if (card.cardType != CardType.Intercept) continue;
 
-            // ★さらにインターセプトの発動条件を満たしているかどうか(持ってても発動条件を満たしていないなら選べない)
-            if (!card.interceptCard.abilityData.HatsudouOK(player)) continue;
+    //        // ★さらにインターセプトの発動条件を満たしているかどうか(持ってても発動条件を満たしていないなら選べない)
+    //        if (!card.interceptCard.abilityData.HatsudouOK(player)) continue;
 
-            // OK
-            return true;
-        }
-        return false;
-    }
+    //        // OK
+    //        return true;
+    //    }
+    //    return false;
+    //}
 }

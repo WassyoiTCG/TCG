@@ -12,7 +12,7 @@ EditorBuildSettings:
     path: Assets/Scenes/Main.unity
     guid: ffc26e0517855a8478b11ec3740ea1c2
   - enabled: 0
-    path: 
+    path: Assets/NetworkLobby/SampleScenes/Scenes/NetworkLobby.unity
     guid: 3c0d76c55eed6214f9d3b070caede5d3
   - enabled: 1
     path: Assets/Scenes/Deck.unity

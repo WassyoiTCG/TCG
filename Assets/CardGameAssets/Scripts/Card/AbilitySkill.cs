@@ -487,10 +487,13 @@ namespace Skill
             searchInfo.sSyuzoku = skillData.s_sValue1;
             searchInfo.sName = skillData.s_sValue2;
 
+            // もふりとか、生成系の処理
             if (fromPlace == From.NewCreate)
             {
-                // もふりとか、生成系の処理
-                //drawCard = 
+                CardData createCardData = CardDataBase.GetCardData(skillData.s_iValue2);
+                // 生成
+                drawCard = toPlayer.cardObjectManager.CreateCardObject(createCardData, toPlayer.isMyPlayer);
+                drawCard.ShowDraw(0.75f, false);
             }
             else
             {
@@ -751,6 +754,7 @@ namespace Skill
                 //    //else step++;
                 //    break;
                 case 0:// メッセージ待ち
+                    if (drawCard != null) step++;
                     break;
                 case 1:
                     // カードの動きが終わるまで待つ
@@ -819,7 +823,7 @@ namespace Skill
                         drawCard = fromPlayer.deckManager.DequeueYamahuda(index);
                         if (info.iMoveFlag == (int)CardMoveFlag.ShowDraw)
                             drawCard.ShowDraw(0.75f, false);
-                        step++;
+                        //step++;
                     }
                     break;
                 case MessageType.SelectHand:
@@ -830,7 +834,7 @@ namespace Skill
                         Debug.Assert(index != (int)IDType.NONE, "カードサーチのIDが不正");
                         drawCard = fromPlayer.deckManager.DequeueHand(index);
                         drawCard.ShowDraw(0.75f, false);
-                        step++;
+                        //step++;
                     }
                     break;
 
@@ -842,7 +846,7 @@ namespace Skill
                         Debug.Assert(index != (int)IDType.NONE, "カードサーチのIDが不正");
                         drawCard = fromPlayer.deckManager.DequeCemetery(index);
                         drawCard.ShowDraw(0.75f, false);
-                        step++;
+                        //step++;
                     }
                     break;
             }

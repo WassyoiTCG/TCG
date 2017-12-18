@@ -42,6 +42,7 @@ public enum CostType
     Kisikaisei, // 起死回生の一手
     YouStrikerPower,    // 相手ストライカーのパワーがx
     PowerStriker,       // パワーxのストライカーが手札にあるか
+    Turn,       // ターン条件
 }
 
 
@@ -139,7 +140,7 @@ public class FighterCard
 
 public class AbilityFighterCard : FighterCard
 {
-    public CardAbilityData abilityData;
+    public CardAbilityData[] abilityDatas;
 }
 
 public class JokerCard
@@ -150,7 +151,7 @@ public class JokerCard
 
 public class EventCard
 {
-    public CardAbilityData abilityData;
+    public CardAbilityData[] abilityDatas;
 }
 
 public class SupportCard : EventCard
@@ -196,18 +197,18 @@ public class CardData
 
     public FighterCard GetFighterCard() { if (cardType == CardType.Fighter) return fighterCard; else if (cardType == CardType.AbilityFighter) return abilityFighterCard; else return null; }
     public EventCard GetEventCard() { if (cardType == CardType.Support) return supportCard; else if (cardType == CardType.Connect) return connectCard; else if (cardType == CardType.Intercept) return interceptCard; else return null; }
-    public CardAbilityData GetAbilityData()
+    public CardAbilityData[] GetAbilityDatas()
     {
         switch (cardType)
         {
             case CardType.AbilityFighter:
-                return abilityFighterCard.abilityData;
+                return abilityFighterCard.abilityDatas;
             case CardType.Support:
-                return supportCard.abilityData;
+                return supportCard.abilityDatas;
             case CardType.Connect:
-                return connectCard.abilityData;
+                return connectCard.abilityDatas;
             case CardType.Intercept:
-                return interceptCard.abilityData;
+                return interceptCard.abilityDatas;
         }
         return null;
     }
@@ -238,7 +239,7 @@ public static class CardDataBase
         //}
 
         // けつばん
-        if(id == (int)IDType.NONE)
+        if(id < 0 || id >= cardDatas.Length)
         {
             return missingCard;
         }
@@ -523,8 +524,14 @@ public static class CardDataBase
 
                             // 効果読み込み
                             skip = loader.ReadString();
-                            abilityFighterCard.abilityData = new CardAbilityData();
-                            LoadAbility(loader, out abilityFighterCard.abilityData);
+                            var numAbility = loader.ReadInt();
+                            abilityFighterCard.abilityDatas = new CardAbilityData[numAbility];
+                            for (int j = 0; j < numAbility; j++)
+                            {
+                                abilityFighterCard.abilityDatas[j] = new CardAbilityData();
+                                LoadAbility(loader, out abilityFighterCard.abilityDatas[j]);
+                            }
+
                         }
                         break;
 
@@ -539,8 +546,13 @@ public static class CardDataBase
                             var eventCard = cardDatas[i].GetEventCard();
 
                             // 効果
-                            eventCard.abilityData = new CardAbilityData();
-                            LoadAbility(loader, out eventCard.abilityData);
+                            var numAbility = loader.ReadInt();
+                            eventCard.abilityDatas = new CardAbilityData[numAbility];
+                            for (int j = 0; j < numAbility; j++)
+                            {
+                                eventCard.abilityDatas[j] = new CardAbilityData();
+                                LoadAbility(loader, out eventCard.abilityDatas[j]);
+                            }
                         }
                         break;
                 }
@@ -599,6 +611,9 @@ public static class CardDataBase
                 break;
             case CostType.PowerStriker:
                 abilityData.cost = new Cost.PowerStriker();
+                break;
+            case CostType.Turn:
+                abilityData.cost = new Cost.Turn();
                 break;
             default:
                 Debug.LogWarning("超すとおかしいクマ" + (int)abilityData.costType);

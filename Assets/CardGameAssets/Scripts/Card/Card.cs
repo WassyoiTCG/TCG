@@ -50,6 +50,9 @@ public class Card : MonoBehaviour
     public UVScroll cardFrameEffect2;
     public bool isCardFrameEffect = false;
 
+    // アビリティの生成系によって手札に加えられたかのフラグ(リトライ時に削除せずに使いまわしているためtrueなら消すように使う)
+    public bool isAbilityCreate = false;
+
     void Awake()
     {
         //canvas = GetComponent<Canvas>();

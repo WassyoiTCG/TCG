@@ -173,19 +173,25 @@ public class PlayerManager : MonoBehaviour
         {
             if (card1 == null) return;
 
-            var ability = card1.interceptCard.abilityData;
-            // 効果の条件を満たしているかどうか(爪痕とかのチェック)
-            if (!ability.HatsudouOK(players[1])) return;
-            // 効果発動!
-            abilityManager.PushAbility(ability, players[1].isMyPlayer);
+            var abilityes = card1.interceptCard.abilityDatas;
+            foreach (CardAbilityData ability in abilityes)
+            {
+                // 効果の条件を満たしているかどうか(爪痕とかのチェック)
+                if (!ability.HatsudouOK(players[1])) return;
+                // 効果発動!
+                abilityManager.PushAbility(ability, players[1].isMyPlayer);
+            }
         }
         else if(card1 == null)
         {
-            var ability = card0.interceptCard.abilityData;
-            // 効果の条件を満たしているかどうか(爪痕とかのチェック)
-            if (!ability.HatsudouOK(players[0])) return;
-            // 効果発動!
-            abilityManager.PushAbility(ability, players[0].isMyPlayer);
+            var abilityes = card0.interceptCard.abilityDatas;
+            foreach (CardAbilityData ability in abilityes)
+            {
+                // 効果の条件を満たしているかどうか(爪痕とかのチェック)
+                if (!ability.HatsudouOK(players[0])) return;
+                // 効果発動!
+                abilityManager.PushAbility(ability, players[0].isMyPlayer);
+            }
         }
         else
         {
@@ -196,41 +202,53 @@ public class PlayerManager : MonoBehaviour
             //    return;
             //}
 
-            var ability0 = card0.interceptCard.abilityData;
-            var ability1 = card1.interceptCard.abilityData;
-            if (!ability0.HatsudouOK(players[0]))
+            var abilityes0 = card0.interceptCard.abilityDatas;
+            var abilityes1 = card1.interceptCard.abilityDatas;
+
+            foreach(CardAbilityData ability in abilityes0)
             {
-                if (!ability1.HatsudouOK(players[1])) return;
-                abilityManager.PushAbility(ability1, players[1].isMyPlayer);
+                if (ability.HatsudouOK(players[0]))
+                    abilityManager.PushAbility(ability, players[0].isMyPlayer);
             }
-            else if (!ability1.HatsudouOK(players[1]))
+            foreach(CardAbilityData ability in abilityes1)
             {
-                abilityManager.PushAbility(ability0, players[0].isMyPlayer);
+                if (ability.HatsudouOK(players[1]))
+                    abilityManager.PushAbility(ability, players[1].isMyPlayer);
             }
-            // 両方発動できる
-            else
-            {
-                // パワーの高い方から処理する
-                if (card0.power > card1.power)
-                {
-                    abilityManager.PushAbility(ability0, players[0].isMyPlayer);
-                    abilityManager.PushAbility(ability1, players[1].isMyPlayer);
-                }
-                else
-                {
-                    abilityManager.PushAbility(ability1, players[1].isMyPlayer);
-                    abilityManager.PushAbility(ability0, players[0].isMyPlayer);
-                }
-            }
+
+            //if (!ability0.HatsudouOK(players[0]))
+            //{
+            //    if (!ability1.HatsudouOK(players[1])) return;
+            //    abilityManager.PushAbility(ability1, players[1].isMyPlayer);
+            //}
+            //else if (!ability1.HatsudouOK(players[1]))
+            //{
+            //    abilityManager.PushAbility(ability0, players[0].isMyPlayer);
+            //}
+            //// 両方発動できる
+            //else
+            //{
+            //    // パワーの高い方から処理する
+            //    if (card0.power > card1.power)
+            //    {
+            //        abilityManager.PushAbility(ability0, players[0].isMyPlayer);
+            //        abilityManager.PushAbility(ability1, players[1].isMyPlayer);
+            //    }
+            //    else
+            //    {
+            //        abilityManager.PushAbility(ability1, players[1].isMyPlayer);
+            //        abilityManager.PushAbility(ability0, players[0].isMyPlayer);
+            //    }
+            //}
         }
     }
 
-    public bool isHaveInterceptCard()
-    {
-        foreach (Player player in players)
-            if (player.isHaveInterceptCard()) return true;
-        return false;
-    }
+    //public bool isHaveInterceptCard()
+    //{
+    //    foreach (Player player in players)
+    //        if (player.isHaveInterceptCard()) return true;
+    //    return false;
+    //}
 
     public bool HandleMessage(MessageInfo message)
     {

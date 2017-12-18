@@ -396,8 +396,8 @@ public class Player : MonoBehaviour
         return deckManager.isHaveStrikerCard();
     }
 
-    public bool isHaveInterceptCard()
-    {
-        return deckManager.isHaveInterceptCard();
-    }
+    //public bool isHaveInterceptCard()
+    //{
+    //    return deckManager.isHaveInterceptCard();
+    //}
 }
