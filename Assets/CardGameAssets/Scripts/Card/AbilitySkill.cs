@@ -1088,6 +1088,8 @@ namespace Skill
         public int[] AutoRandomSearch(List<int> buf, List<CardData> cards, SearchInfo searchInfo)
         {
             List<int> searchIndices = new List<int>();
+            searchIndices.Clear();
+
             foreach (int i in buf)
             {
                 var searchOK = true;

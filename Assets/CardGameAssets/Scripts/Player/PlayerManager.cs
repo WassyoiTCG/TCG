@@ -424,7 +424,7 @@ public class PlayerManager : MonoBehaviour
             message.GetExtraInfo<SyncNameInfo>(ref syncNameInfo);
 
             // プレイヤーの名前設定
-            players[message.fromPlayerID].playerName = syncNameInfo.name;//new string(syncNameInfo.cName);
+            players[message.fromPlayerID].playerName = syncNameInfo.playerName;//new string(syncNameInfo.cName);
         }
         if(message.messageType == MessageType.SyncDeck)
         { 

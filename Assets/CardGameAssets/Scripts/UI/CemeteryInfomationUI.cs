@@ -126,7 +126,7 @@ public class CemeteryInfomationUI : MonoBehaviour
     public void SetDatas(List<CardData> datas)
     {
         // パワー順にソートする
-        datas.Sort(((a, b) => a.power - b.power));
+        //datas.Sort(((a, b) => a.power - b.power));
 
         for (int i = 0; i < 15; i++)
         {

@@ -74,7 +74,7 @@ public struct SyncNameInfo
 {
     //[MarshalAs(UnmanagedType.ByValArray, SizeConst = 64)]
     //public char[] cName;
-    public string name;
+    public string playerName;
 }
 
 public struct SyncStateInfo
