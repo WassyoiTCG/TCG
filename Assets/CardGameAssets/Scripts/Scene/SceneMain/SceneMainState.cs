@@ -51,6 +51,82 @@ namespace SceneMainState
         {
             switch (message.messageType)
             {
+                case MessageType.ActionEffectUV:
+
+                    if (message.exInfo == null)
+                    {
+                        Debug.Log("えふぇくとおむりやった");
+                        return false;
+                    }
+
+                    // byte[]→構造体
+                    ActionEffectUVInfo actionEffectUVInfo = new ActionEffectUVInfo();
+                    message.GetExtraInfo<ActionEffectUVInfo>(ref actionEffectUVInfo);
+
+                    UV_EFFECT_TYPE eType= (UV_EFFECT_TYPE)actionEffectUVInfo.iEffectType;
+
+                    Vector3 Pos;
+                    Pos.x = actionEffectUVInfo.fPosX;
+                    Pos.y = actionEffectUVInfo.fPosY;
+                    Pos.z = actionEffectUVInfo.fPosZ;
+
+                    Vector3 Angle = new Vector3(0, 0, 0);
+                    //// [1216] ゴレイヌ
+                    //if (eType == UV_EFFECT_TYPE.UP_STATUS ||
+                    //    eType == UV_EFFECT_TYPE.DOWN_STATUS)
+                    //{
+                    //    Angle.x = 90;
+
+                    //}
+
+                    // UVエフェクト発動
+                    if (message.fromPlayerID == 0)
+                    {
+                        pMain.UvEffectMgr_My.Action(eType, Pos, Angle);
+                    }
+                    else
+                    {
+                        pMain.UvEffectMgr_Cpu.Action(eType, Pos, Angle);
+                    }
+                 
+                    
+                    // pMain.PanelEffectMgr_My.Action(PANEL_EFFECT_TYPE.ABILITY, MyPos, MyAngle);
+
+                        break;
+                case MessageType.ActionEffectPanel:
+
+                    if (message.exInfo == null)
+                    {
+                        Debug.Log("えふぇくとおむりやった");
+                        return false;
+                    }
+
+                    // byte[]→構造体
+                    ActionEffectPanelInfo actionEffectPanleInfo = new ActionEffectPanelInfo();
+                    message.GetExtraInfo<ActionEffectPanelInfo>(ref actionEffectPanleInfo);
+
+                    PANEL_EFFECT_TYPE eType2 = (PANEL_EFFECT_TYPE)actionEffectPanleInfo.iEffectType;
+
+                    Vector3 Pos2;
+                    Pos2.x = actionEffectPanleInfo.fPosX;
+                    Pos2.y = actionEffectPanleInfo.fPosY;
+                    Pos2.z = actionEffectPanleInfo.fPosZ;
+
+         
+                    Vector3 Angle2 = new Vector3(0, 0, 0);
+
+                    // Pエフェクト発動
+                    if (message.fromPlayerID == 0)
+                    {
+                        pMain.PanelEffectMgr_My.Action(eType2, Pos2, Angle2);
+                    }
+                    else
+                    {
+                        pMain.PanelEffectMgr_Cpu.Action(eType2, Pos2, Angle2);
+                    }
+
+
+                    break;
                 case MessageType.Restart:
                     pMain.Restart();
                     break;
@@ -114,13 +190,68 @@ namespace SceneMainState
                 pMain.playerManager.Restart();
 
                 // ステートチェンジ
-                pMain.ChangeState(BattleStart.GetInstance());
+                pMain.ChangeState(SyncPlayerName.GetInstance());
             }
         }
 
         public override void Exit(SceneMain pMain)
         {
             pMain.uiManager.DisAppearMatchingWait();
+        }
+
+        public override bool OnMessage(SceneMain pMain, MessageInfo message)
+        {
+            return false;
+        }
+    }
+
+    // 名前同期
+    public class SyncPlayerName : BaseEntityState<SceneMain>
+    {
+        static SyncPlayerName instance;
+        public static SyncPlayerName GetInstance() { if (instance == null) { instance = new SyncPlayerName(); } return instance; }
+
+        public override void Enter(SceneMain pMain)
+        {
+            // ★名前の設定と相手に名前を送る
+            SyncNameInfo info = new SyncNameInfo();
+            /*char[]*/ string playerName = PlayerDataManager.GetPlayerData().playerName/*.ToCharArray()*/;
+            //info.cName = new char[64];
+            if (playerName.Length >= 64)
+            {
+                Debug.LogWarning("名前最大オーバー(64バイトまで)");
+                //info.cName[0] = 'N';
+                //info.cName[1] = 'o';
+                //info.cName[2] = 'N';
+                //info.cName[3] = 'a';
+                //info.cName[4] = 'm';
+                //info.cName[5] = 'e';
+                //info.cName[6] = '\0';
+                info.name = "NoName";
+            }
+            else
+            {
+                //for (int i = 0; i < playerName.Length; i++)
+                //{
+                //    info.cName[i] = playerName[i];
+                //}
+                info.name = playerName;
+            }
+            MessageManager.Dispatch(pMain.playerManager.GetMyPlayerID(), MessageType.SyncName, info);
+        }
+
+        public override void Execute(SceneMain pMain)
+        {
+            // 相手からの名前を受け取ったら終了
+            if (pMain.playerManager.isPlayerNameSync())
+            {
+                // ステートチェンジ
+                pMain.ChangeState(BattleStart.GetInstance());
+            }
+        }
+
+        public override void Exit(SceneMain pMain)
+        {
         }
 
         public override bool OnMessage(SceneMain pMain, MessageInfo message)
@@ -149,14 +280,23 @@ namespace SceneMainState
                 exInfo.points = pMain.pointManager.randomIndexArray;
                 MessageManager.Dispatch(pMain.playerManager.GetMyPlayerID(), MessageType.SyncPoint, exInfo);
             }
+            // プレイヤー名
+            pMain.turnEndEffect.nameText2.text = pMain.playerManager.GetMyPlayer().playerName;
+            pMain.turnEndEffect.nameText1.text = pMain.playerManager.GetCPUPlayer().playerName;
+            // バトルスタートエフェクト発動
+            pMain.turnEndEffect.Action(PHASE_TYPE.BATTLE_START);
         }
 
         public override void Execute(SceneMain pMain)
         {
-            if (pMain.playerManager.isPlayesStandbyOK())
+            // 演出終わったら
+            if (pMain.turnEndEffect.GetTrunEndType() == PHASE_TYPE.BATTLE_START)
             {
-                // ステートチェンジ
-                pMain.ChangeState(SyncDeck.GetInstance());
+                if (pMain.playerManager.isPlayesStandbyOK())
+                {
+                    // ステートチェンジ
+                    pMain.ChangeState(SyncDeck.GetInstance());
+                }
             }
         }
 
@@ -408,7 +548,7 @@ namespace SceneMainState
             //}
             ////+----------------------------------------------------------------------------------
 
-            pMain.playerManager.GetMyPlayer().cardObjectManager.CheakActiveUseCard();
+            pMain.playerManager.GetMyPlayer().cardObjectManager.CheakActiveUseCard(); // これが使用できる関数
         }
 
         public override void Execute(SceneMain pMain)
@@ -1157,7 +1297,7 @@ namespace SceneMainState
 
                 pMain.aikoPoint.Clear();
                 
-                endFlag = pMain.uiManager.Damage(!pMain.playerManager.players[winnerPlayerID].isMyPlayer, pMain.currentPoint);
+                //endFlag = pMain.uiManager.Damage(!pMain.playerManager.players[winnerPlayerID].isMyPlayer, pMain.currentPoint);
                 //if (pMain.uiManager.Damage(!pMain.playerManager.players[winnerPlayerID].isMyPlayer, pMain.currentPoint))
                 //{
                 //    pMain.Finish();
@@ -1185,6 +1325,9 @@ namespace SceneMainState
                 // どっち勝かってる
                 if (iLoserNo != -1)
                 {
+                    // [1217] ここでダメージ 
+                    endFlag = pMain.uiManager.Damage(!pMain.playerManager.players[winnerPlayerID].isMyPlayer, pMain.currentPoint);
+
                     Card FieldCard = pMain.playerManager.GetPlayer(iLoserNo).GetFieldStrikerCard();
                     if (FieldCard != null)
                     {

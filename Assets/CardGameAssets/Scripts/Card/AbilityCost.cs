@@ -54,17 +54,59 @@ namespace Cost
         static NoneLimit instance;
         public static NoneLimit GetInstance() { if (instance == null) { instance = new NoneLimit(); } return instance; }
 
+        int iWaitFrame = 0;
         public override void Enter(CardAbilityData abilityData)
         {
+            iWaitFrame = 0;
+
             base.Enter(abilityData);
+
+            // ゴリゴリのゴリ[12/16] 発動元のカードタイプが知りたかったとさ
+
+            Card FieldCard = abilityData.myPlayer.cardObjectManager.fieldStrikerCard;
+            Card EventCard = abilityData.myPlayer.cardObjectManager.fieldEventCard;
+            if (FieldCard != null && EventCard == null) 
+            {
+                // Ability列車 勝利の雄たけびの成功時
+                ActionEffectUVInfo info = new ActionEffectUVInfo();
+                info.iEffectType = (int)UV_EFFECT_TYPE.SKILL_WIN;
+                info.fPosX = abilityData.GetFieldStrikerPosition().x;
+                info.fPosY = abilityData.GetFieldStrikerPosition().y;
+                info.fPosZ = abilityData.GetFieldStrikerPosition().z;
+
+                MessageManager.DispatchOffline(CardAbilityData.playerManager.GetPlayerID(abilityData.isMyPlayer), MessageType.ActionEffectUV, info);
+            }
+
+            if (EventCard != null)
+            {
+                // Ability列車 勝利の雄たけびの成功時
+                ActionEffectUVInfo info = new ActionEffectUVInfo();
+                info.iEffectType = (int)UV_EFFECT_TYPE.SKILL_WIN;
+                info.fPosX = abilityData.GetFieldEventPosition().x;
+                info.fPosY = abilityData.GetFieldEventPosition().y;
+                info.fPosZ = abilityData.GetFieldEventPosition().z;
+
+                MessageManager.DispatchOffline(CardAbilityData.playerManager.GetPlayerID(abilityData.isMyPlayer), MessageType.ActionEffectUV, info);
+
+            }
+
+
+            // 効果発動SE
+            oulAudio.PlaySE("action_ability");
         }
 
         public override void Execute(CardAbilityData abilityData)
         {
-            // 即終了
-            endFlag = true;
-            // 条件OK
-            abilityData.isJoukenOK = true;
+            const int iMaxFrame = 40;
+            iWaitFrame++;
+            if (iWaitFrame >= iMaxFrame)
+            {
+
+                // 即終了
+                endFlag = true;
+                // 条件OK
+                abilityData.isJoukenOK = true;
+            }
         }
 
 
@@ -82,8 +124,12 @@ namespace Cost
         static Otakebi instance;
         public static Otakebi GetInstance() { if (instance == null) { instance = new Otakebi(); } return instance; }
 
+        int iWaitFrame = 0;
+         
         public override void Enter(CardAbilityData abilityData)
         {
+            iWaitFrame = 0; // 初期化
+
             base.Enter(abilityData);
 
             var range = (DifferenceRangeType)abilityData.c_value0;  // 条件タイプ
@@ -123,13 +169,29 @@ namespace Cost
             }
 
             // Ability列車 勝利の雄たけびの成功時
+            ActionEffectUVInfo info = new ActionEffectUVInfo();
+            info.iEffectType = (int)UV_EFFECT_TYPE.SKILL_WIN;
+            info.fPosX = abilityData.GetFieldStrikerPosition().x;
+            info.fPosY = abilityData.GetFieldStrikerPosition().y;
+            info.fPosZ = abilityData.GetFieldStrikerPosition().z;
+
+            MessageManager.DispatchOffline(CardAbilityData.playerManager.GetPlayerID(abilityData.isMyPlayer), MessageType.ActionEffectUV, info);
+
+            // 効果発動SE
+            oulAudio.PlaySE("action_ability");
+
+            int a = 0;
+            a++;
 
         }
 
         public override void Execute(CardAbilityData abilityData)
         {
+            const int iMaxFrame = 40;
+
+            iWaitFrame++;
             // Ability列車 勝利の雄たけびの演出終了判定
-            if (true)
+            if (iWaitFrame >= iMaxFrame)
             {
                 endFlag = true;
             }
@@ -149,8 +211,12 @@ namespace Cost
         static Tsumeato instance;
         public static Tsumeato GetInstance() { if (instance == null) { instance = new Tsumeato(); } return instance; }
 
+        int iWaitFrame = 0;
+
         public override void Enter(CardAbilityData abilityData)
         {
+            iWaitFrame = 0;
+
             base.Enter(abilityData);
 
             var range = (DifferenceRangeType)abilityData.c_value0;  // 条件タイプ
@@ -191,13 +257,29 @@ namespace Cost
             }
 
             // Ability列車 爪痕の成功時
+            ActionEffectUVInfo info = new ActionEffectUVInfo();
+            info.iEffectType = (int)UV_EFFECT_TYPE.SKILL_LOSE;
+            info.fPosX = abilityData.GetFieldStrikerPosition().x;
+            info.fPosY = abilityData.GetFieldStrikerPosition().y;
+            info.fPosZ = abilityData.GetFieldStrikerPosition().z;
 
+            MessageManager.DispatchOffline(CardAbilityData.playerManager.GetPlayerID(abilityData.isMyPlayer), MessageType.ActionEffectUV, info);
+
+            // 効果発動SE
+            oulAudio.PlaySE("action_ability");
+
+            int a = 0;
+            a++;
         }
 
         public override void Execute(CardAbilityData abilityData)
         {
+
+            const int iMaxFrame = 40;
+
+            iWaitFrame++;
             // Ability列車 爪痕の演出終了判定
-            if (true)
+            if (iWaitFrame >= iMaxFrame)
             {
                 endFlag = true;
             }
@@ -434,8 +516,15 @@ namespace Cost
 
         public override bool HatsudouCheck(CardAbilityData abilityData, Player player)
         {
-            // 山札が1以上のときに発動可能
-            return (player.deckManager.GetNumYamahuda() > 0);
+            // 山札が1以上で、ストライカーカードが存在するときに発動可能
+            for (int i = 0; i < player.deckManager.GetNumYamahuda(); i++)
+            {
+                // イベントじゃないカードがあるのでOK
+                if (player.deckManager.GetYamahudaCard(i).isEventCard() == false) return true;
+            }
+
+            return false;
+            //return (player.deckManager.GetNumYamahuda() > 0);
         }
     }
 
@@ -525,9 +614,12 @@ namespace Cost
         float timer;
 
         Card drawCard;
+        int iWaitFrame = 0;
 
         public override void Enter(CardAbilityData abilityData)
         {
+            iWaitFrame = 0;
+
             base.Enter(abilityData);
 
             timer = 0;
@@ -552,70 +644,91 @@ namespace Cost
             }
 
             // Ability列車 仲間と共に発動した瞬間
+            ActionEffectUVInfo UVInfo = new ActionEffectUVInfo();
+            UVInfo.iEffectType = (int)UV_EFFECT_TYPE.SKILL_WIN;
+            UVInfo.fPosX = abilityData.GetFieldEventPosition().x;
+            UVInfo.fPosY = abilityData.GetFieldEventPosition().y;
+            UVInfo.fPosZ = abilityData.GetFieldEventPosition().z;
+
+            MessageManager.DispatchOffline(CardAbilityData.playerManager.GetPlayerID(abilityData.isMyPlayer), MessageType.ActionEffectUV, UVInfo);
+
+            // 効果発動SE
+            oulAudio.PlaySE("action_ability");
+
+            int a = 0;
+            a++;
         }
 
         public override void Execute(CardAbilityData abilityData)
         {
-            switch (step)
+            const int iMAXFRAME = 40;
+            iWaitFrame++;
+            if (iWaitFrame>= iMAXFRAME)
             {
-                case 0:
-                    // メッセージ待ち
-                    break;
-                case 1:
-                    // 例外処理
-                    if (!drawCard)
-                    {
-                        Debug.LogWarning("墓地にストライカーがいないのに引こうとしている。事前にその効果を発動しないようにしましょう。");
 
-                        // 終了
-                        endFlag = true;
+                switch (step)
+                {
+                    case 0:
+                        // メッセージ待ち
+                        break;
+                    case 1:
+                        // 例外処理
+                        if (!drawCard)
+                        {
+                            Debug.LogWarning("墓地にストライカーがいないのに引こうとしている。事前にその効果を発動しないようにしましょう。");
 
-                        return;
-                    }
+                            // 終了
+                            endFlag = true;
 
-                    // パワーを足す用の変数に格納
-                    abilityData.delvValue0 = drawCard.cardData.power;
+                            return;
+                        }
 
-                    // 見せる用のドローの動きにする
-                    drawCard.ShowDraw(0.75f, true);
+                        // パワーを足す用の変数に格納
+                        abilityData.delvValue0 = drawCard.cardData.power;
 
-                    step++;
-                    break;
-                case 2:
-                    // ドローの動きが終わったら
-                    if (!drawCard.isInMovingState())
-                    {
+                        // 見せる用のドローの動きにする
+                        drawCard.ShowDraw(0.75f, true);
+
                         step++;
-                    }
-                    break;
+                        break;
+                    case 2:
+                        // ドローの動きが終わったら
+                        if (!drawCard.isInMovingState())
+                        {
+                            step++;
+                        }
+                        break;
 
-                case 3:
-                    // 若干待ってみる
-                    if ((timer += Time.deltaTime) > 2)
-                    {
+                    case 3:
+                        // 若干待ってみる
+                        if ((timer += Time.deltaTime) > 1)
+                        {
+                            step++;
+                        }
+                        break;
+                    case 4:
+
+                        // 引いたカードを墓地に送る
+                        abilityData.myPlayer.deckManager.AddBochi(drawCard);
+
+                        // 引いたカードを墓地に送る動き
+                        //drawCard.MoveToCemetery();
+
                         step++;
-                    }
-                    break;
-                case 4:
+                        break;
+                    case 5:
+                        // ドローの動きが終わったら
+                        if (!drawCard.isInMovingState())
+                        {
+                            // 終了
+                            endFlag = true;
+                            abilityData.isJoukenOK = true;
+                        }
+                        break;
+                }
 
-                    // 引いたカードを墓地に送る
-                    abilityData.myPlayer.deckManager.AddBochi(drawCard);
-
-                    // 引いたカードを墓地に送る動き
-                    //drawCard.MoveToCemetery();
-
-                    step++;
-                    break;
-                case 5:
-                    // ドローの動きが終わったら
-                    if (!drawCard.isInMovingState())
-                    {
-                        // 終了
-                        endFlag = true;
-                        abilityData.isJoukenOK = true;
-                    }
-                    break;
             }
+
         }
 
 
@@ -661,8 +774,12 @@ namespace Cost
         static YouStrikerPower instance;
         public static YouStrikerPower GetInstance() { if (instance == null) { instance = new YouStrikerPower(); } return instance; }
 
+        int iWaitFrame = 0;
+
         public override void Enter(CardAbilityData abilityData)
         {
+            iWaitFrame = 0;
+
             base.Enter(abilityData);
 
             var striker = abilityData.youPlayer.GetFieldStrikerCard();
@@ -697,6 +814,20 @@ namespace Cost
                 JoukenOK(abilityData);
             else
                 JoukenNG(abilityData);
+
+            // [1216] ゴリ　効果がモンスターかイベントか知りたい 
+            // Ability列車 仲間と共に発動した瞬間
+            ActionEffectUVInfo UVInfo = new ActionEffectUVInfo();
+            UVInfo.iEffectType = (int)UV_EFFECT_TYPE.SKILL_WIN;
+            UVInfo.fPosX = abilityData.GetFieldStrikerPosition().x;
+            UVInfo.fPosY = abilityData.GetFieldStrikerPosition().y;
+            UVInfo.fPosZ = abilityData.GetFieldStrikerPosition().z;
+
+            MessageManager.DispatchOffline(CardAbilityData.playerManager.GetPlayerID(abilityData.isMyPlayer), MessageType.ActionEffectUV, UVInfo);
+
+            // 効果発動SE
+            oulAudio.PlaySE("action_ability");
+
         }
 
         void JoukenOK(CardAbilityData abilityData)
@@ -718,8 +849,11 @@ namespace Cost
 
         public override void Execute(CardAbilityData abilityData)
         {
+            const int MaxFrame = 40;
+            iWaitFrame++;
+
             // Ability列車 パワー判定の演出終わったら
-            if (true)
+            if (iWaitFrame >= MaxFrame)
             {
                 // 終了
                 endFlag = true;
@@ -747,11 +881,30 @@ namespace Cost
         Card suteCard;
         int selectHandIndex;
 
+        int iFrame = 0;
+
         public override void Enter(CardAbilityData abilityData)
         {
+            iFrame = 0;
+
             base.Enter(abilityData);
 
             suteCard = null;
+
+
+            // [1216] ゴリ　効果がモンスターかイベントか知りたい 
+            // Ability列車 仲間と共に発動した瞬間
+            ActionEffectUVInfo UVInfo = new ActionEffectUVInfo();
+            UVInfo.iEffectType = (int)UV_EFFECT_TYPE.SKILL_WIN;
+            UVInfo.fPosX = abilityData.GetFieldEventPosition().x;
+            UVInfo.fPosY = abilityData.GetFieldEventPosition().y;
+            UVInfo.fPosZ = abilityData.GetFieldEventPosition().z;
+
+            MessageManager.DispatchOffline(CardAbilityData.playerManager.GetPlayerID(abilityData.isMyPlayer), MessageType.ActionEffectUV, UVInfo);
+
+            // 効果発動SE
+            oulAudio.PlaySE("action_ability");
+
 
             // (TODO)手札からドローする番号を決定(無造作)
             if (abilityData.isMyPlayer || !SelectData.isNetworkBattle)
@@ -766,29 +919,36 @@ namespace Cost
 
         public override void Execute(CardAbilityData abilityData)
         {
-            switch (step)
+            const int iMaxFrame = 40;
+            iFrame++;
+            if (iFrame >= iMaxFrame)
             {
-                case 0: // カード選択中
-                    break;
-                case 1: // 捨てカード移動中
-                    if (!suteCard.isInMovingState())
-                    {
-                        // 墓地に送る
-                        abilityData.myPlayer.deckManager.AddBochi(suteCard);
-                        // 墓地に行く動き
-                        //suteCard.MoveToCemetery();
-                        step++;
-                    }
-                    break;
-                case 2: // 墓地に行くカードの動きが終わったら
-                    if (!suteCard.isInMovingState())
-                    {
-                        // 終了
-                        abilityData.isJoukenOK = true;
-                        endFlag = true;
-                    }
-                    break;
+                switch (step)
+                {
+                    case 0: // カード選択中
+                        break;
+                    case 1: // 捨てカード移動中
+                        if (!suteCard.isInMovingState())
+                        {
+                            // 墓地に送る
+                            abilityData.myPlayer.deckManager.AddBochi(suteCard);
+                            // 墓地に行く動き
+                            //suteCard.MoveToCemetery();
+                            step++;
+                        }
+                        break;
+                    case 2: // 墓地に行くカードの動きが終わったら
+                        if (!suteCard.isInMovingState())
+                        {
+                            // 終了
+                            abilityData.isJoukenOK = true;
+                            endFlag = true;
+                        }
+                        break;
+                }
+
             }
+
         }
 
         public override bool OnMessage(CardAbilityData abilityData, MessageInfo message)

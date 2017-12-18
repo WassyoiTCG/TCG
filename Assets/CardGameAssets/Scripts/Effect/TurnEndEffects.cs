@@ -13,6 +13,7 @@ public enum PHASE_TYPE
     BATTLE,
     WINNER,
     LOSER,
+    BATTLE_START,
     LEST,   // 休憩
     END
 }
@@ -49,6 +50,14 @@ public class TurnEndEffects : MonoBehaviour
 
     public GameObject Font_WinnerRip;
 
+    public GameObject VS;
+    public GameObject BlackPanel_VS;
+    public GameObject NAME_1;
+    public GameObject NAME_2;
+
+    public Text nameText1;
+    public Text nameText2;
+
     private PHASE_TYPE m_eType = PHASE_TYPE.MAIN;
 
     private int m_iSelfFrame = 0;
@@ -60,6 +69,9 @@ public class TurnEndEffects : MonoBehaviour
     // Use this for initialization
     void Awake()
     {
+        nameText1.text = "たなかのなかたたいすけん";
+        nameText2.text = "まっちょりぬす";
+
         m_iSelfFrame = 0;
 
         m_eType = PHASE_TYPE.LEST;
@@ -67,6 +79,8 @@ public class TurnEndEffects : MonoBehaviour
         BlackPanel.SetActive(false);
         Font_MainPhase.SetActive(false);
         Font_BattlePhase.SetActive(false);
+
+        BlackPanel_VS.SetActive(false);
 
         m_bFinishFlag = false;
     }
@@ -105,6 +119,14 @@ public class TurnEndEffects : MonoBehaviour
         // 敗者
         Font_Loser.GetComponent<ScreenOutAppeared>().SelfUpdate();
         Font_Loser.GetComponent<AlphaMove>().SelfUpdate();
+
+        // VS
+        VS.GetComponent<ScaleAppeared>().SelfUpdate();
+        VS.GetComponent<AlphaMove>().SelfUpdate();
+        NAME_1.GetComponent<ScreenOutAppeared>().SelfUpdate();
+        NAME_2.GetComponent<ScreenOutAppeared>().SelfUpdate();
+
+        BlackPanel_VS.GetComponent<AlphaMove>().SelfUpdate();
 
         const int iScaleAnim = 52;
         switch (m_eType)
@@ -158,6 +180,31 @@ public class TurnEndEffects : MonoBehaviour
                 {
                     //m_eType = PHASE_TYPE.LEST;
                     m_bFinishFlag = true;
+                    Debug.Log("演出終了- TurnEndEffects");
+                }
+                break;
+            case PHASE_TYPE.BATTLE_START:
+
+                if (m_iSelfFrame == 110)
+                {
+
+                    NAME_1.GetComponent<ScreenOutAppeared>().Action();
+                    NAME_2.GetComponent<ScreenOutAppeared>().Action();
+                    NAME_1.GetComponent<ScreenOutAppeared>().SetPosReCalcNextPos(NAME_1.transform.localPosition);
+                    NAME_2.GetComponent<ScreenOutAppeared>().SetPosReCalcNextPos(NAME_2.transform.localPosition);
+                }
+
+                if (m_iSelfFrame >= 115)
+                {
+                    VS.transform.localScale -= new Vector3(0.075f, 0.075f, 0.075f);
+                }
+
+                if (m_iSelfFrame >= 135)
+                {
+
+                    NAME_1.GetComponent<ScreenOutAppeared>().Stop();
+                    NAME_2.GetComponent<ScreenOutAppeared>().Stop();
+                    m_eType = PHASE_TYPE.LEST;
                     Debug.Log("演出終了- TurnEndEffects");
                 }
                 break;
@@ -254,6 +301,7 @@ public class TurnEndEffects : MonoBehaviour
                 Font_WinnerRip.GetComponent<Ripple>().Action();
 
                 break;
+
             case PHASE_TYPE.LOSER:
 
                 BlackPanel.GetComponent<AlphaMove>().ActionRoop();
@@ -263,6 +311,28 @@ public class TurnEndEffects : MonoBehaviour
 
                 Vector3 vAwakePos = Font_Loser.GetComponent<ScreenOutAppeared>().GetAwakPos();
                 Font_Loser.GetComponent<ScreenOutAppeared>().SetPos(vAwakePos);
+
+                break;
+            case PHASE_TYPE.BATTLE_START:
+                // SE
+                oulAudio.PlaySE("phase");
+
+                BlackPanel_VS.GetComponent<AlphaMove>().Action();
+                
+                //StarDust.GetComponent<Ripple>().Action();
+
+                VS.GetComponent<ScaleAppeared>().Action();
+                VS.GetComponent<AlphaMove>().Action();
+                AwakeScale = VS.GetComponent<ScaleAppeared>().GetAwakScale();
+                VS.GetComponent<ScaleAppeared>().SetScale(AwakeScale);
+
+                //NAME_1.GetComponent<ScreenOutAppeared>().SetNextVectorReCalcNextPos(NAME_1.GetComponent<ScreenOutAppeared>().GetAwakeNextPos());
+                //NAME_2.GetComponent<ScreenOutAppeared>().SetNextVectorReCalcNextPos(NAME_2.GetComponent<ScreenOutAppeared>().GetAwakPos());
+
+                NAME_1.GetComponent<ScreenOutAppeared>().Action();
+                NAME_2.GetComponent<ScreenOutAppeared>().Action();
+                NAME_1.GetComponent<ScreenOutAppeared>().SetPosReCalcNextPos(NAME_1.GetComponent<ScreenOutAppeared>().GetAwakPos());
+                NAME_2.GetComponent<ScreenOutAppeared>().SetPosReCalcNextPos(NAME_2.GetComponent<ScreenOutAppeared>().GetAwakPos());
 
                 break;
             case PHASE_TYPE.END:

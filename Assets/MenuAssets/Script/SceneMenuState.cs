@@ -1056,6 +1056,126 @@ namespace SceneMenuState
 
     }
 
+
+
+    //+-------------------------------------------
+    //  説明ボタン
+    //+-------------------------------------------
+    public class Tips : BaseEntityState<SceneMenu>
+    {
+        static Tips m_pInstance;
+        public static Tips GetInstance()
+        {
+            if (m_pInstance == null) { m_pInstance = new Tips(); }
+            return m_pInstance;
+        }
+
+        public override void Enter(SceneMenu e)
+        {
+          
+            // 黒背景
+            e.BlackPanel.SetActive(true);
+
+            e.TipsGroup.SetActive(true);
+            int a = 0;
+            a++;
+
+        }
+
+        public override void Execute(SceneMenu e)
+        {
+
+
+
+        }
+
+        public override void Exit(SceneMenu e)
+        {
+            e.TipsGroup.SetActive(false);
+        }
+
+        public override bool OnMessage(SceneMenu e, MessageInfo message)
+        {
+
+            // メッセージタイプが一致している箇所に
+            switch (message.messageType)
+            {
+                case MessageType.ClickAnyButton:
+
+                    // byte[]→構造体
+                    AnyButton info = new AnyButton();
+                    IntPtr ptr = Marshal.AllocHGlobal(Marshal.SizeOf(info));
+                    Marshal.Copy(message.exInfo, 0, ptr, Marshal.SizeOf(info));
+                    info = (AnyButton)Marshal.PtrToStructure(ptr, info.GetType());
+                    Marshal.FreeHGlobal(ptr);
+                    //+-------------------------------------------------------------
+                    // ★選択したアイコンのタイプに変更
+                    switch (info.Index)
+                    {
+                        case 1:
+                            e.Tips1.SetActive(false);
+                            e.Tips2.SetActive(false);
+                            e.Tips3.SetActive(false);
+                            e.Tips4.SetActive(false);
+                            e.Tips5.SetActive(false);
+
+                            e.Tips1.SetActive(true);
+                            break;
+                        case 2:
+                            e.Tips1.SetActive(false);
+                            e.Tips2.SetActive(false);
+                            e.Tips3.SetActive(false);
+                            e.Tips4.SetActive(false);
+                            e.Tips5.SetActive(false);
+
+                            e.Tips2.SetActive(true);
+                            break;
+                        case 3:
+                            e.Tips1.SetActive(false);
+                            e.Tips2.SetActive(false);
+                            e.Tips3.SetActive(false);
+                            e.Tips4.SetActive(false);
+                            e.Tips5.SetActive(false);
+
+                            e.Tips3.SetActive(true);
+                            break;
+                        case 4:
+                            e.Tips1.SetActive(false);
+                            e.Tips2.SetActive(false);
+                            e.Tips3.SetActive(false);
+                            e.Tips4.SetActive(false);
+                            e.Tips5.SetActive(false);
+
+                            e.Tips4.SetActive(true);
+                            break;
+                        case 5:
+                            e.Tips1.SetActive(false);
+                            e.Tips2.SetActive(false);
+                            e.Tips3.SetActive(false);
+                            e.Tips4.SetActive(false);
+                            e.Tips5.SetActive(false);
+
+                            e.Tips5.SetActive(true);
+                            break;
+                        default:
+                            //+-------------------------------------------------------------------
+                            // もどる
+                            e.m_pStateMachine.ChangeState(SceneMenuState.BattleSelect.GetInstance());
+                            break;
+                    }
+
+                    return true; // trueを返して終り
+
+                default:
+
+                    break;
+            }
+            return false; // 何も引っかからなかった
+        }
+
+    }
+
+
 }// namespace
 
 

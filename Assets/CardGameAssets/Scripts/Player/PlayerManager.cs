@@ -26,6 +26,14 @@ public class PlayerManager : MonoBehaviour
         return allOK;
     }
 
+    public bool isPlayerNameSync()
+    {
+        bool allOK = true;
+        foreach (Player player in players)
+            if (player.playerName == "") allOK = false;
+        return allOK;
+    }
+
     public bool isSyncDeckOK()
     {
         bool allOK = true;
@@ -59,6 +67,14 @@ public class PlayerManager : MonoBehaviour
 
     // 自分が操作しているプレイヤーのIDを取得
     public Player GetPlayer(int id) { return players[id]; }
+
+    public int GetPlayerID(bool isMyPlayer)
+    {
+        foreach (Player player in players)
+            if (player.isMyPlayer == isMyPlayer) return player.playerID;
+
+        return (int)IDType.NONE;
+    }
 
     // 自分が操作しているプレイヤーのIDを取得
     public int GetMyPlayerID()
@@ -284,6 +300,21 @@ public class PlayerManager : MonoBehaviour
                 uiManager.DisableSetStrikerButton();
             return true;
         }
+
+        // もう一回NEXT押してどうぞ
+        if (message.messageType == MessageType.AgainNextButton)
+        {
+            players[message.fromPlayerID].JunbiKanryoOFF();
+            players[message.fromPlayerID].PushedNextButtonOFF();
+            return true;
+        }
+
+        if (message.messageType == MessageType.SetStrikerOK)
+        {
+            players[message.fromPlayerID].JunbiKanryoON();
+            return true;
+        }
+
         if (message.messageType == MessageType.SetStriker)
         {
             if (message.exInfo == null)
@@ -340,6 +371,19 @@ public class PlayerManager : MonoBehaviour
             //players[message.fromPlayerID].isStateEnd = true;
             players[message.fromPlayerID].isPushedJunbiKanryo = true;
 
+            //+---------------------------------------------------
+            // ★★送られてきた方じゃないプレイヤーのステートが
+            // 操作しているやつならもう一回操作できるように
+            int iID = (message.fromPlayerID == 0) ? 1 : 0;
+            if (iID == GetMyPlayerID())
+            {
+                AgainSetIntercept(iID);
+            }
+            //players[iID].stateMachine.currentState
+
+
+
+
             // [1212] インターセプトカードを伏せた後も押さす用に
             // ボタン非表示
             //if (players[message.fromPlayerID].isMyPlayer)
@@ -366,6 +410,21 @@ public class PlayerManager : MonoBehaviour
                 uiManager.DisableSetStrikerButton();
 
             return true;
+        }
+        if(message.messageType == MessageType.SyncName)
+        {
+            if (message.exInfo == null)
+                return false;
+
+            // 自分の名前なら同期する必要なし
+            //if (players[message.fromPlayerID].isMyPlayer) return true;
+
+            SyncNameInfo syncNameInfo = new SyncNameInfo();
+            //syncNameInfo.cName = new char[64];
+            message.GetExtraInfo<SyncNameInfo>(ref syncNameInfo);
+
+            // プレイヤーの名前設定
+            players[message.fromPlayerID].playerName = syncNameInfo.name;//new string(syncNameInfo.cName);
         }
         if(message.messageType == MessageType.SyncDeck)
         { 
@@ -410,6 +469,25 @@ public class PlayerManager : MonoBehaviour
         }
 
         return false;
+    }
+
+
+    // 戻す
+    public void AgainSetIntercept(int playerID)
+    {
+        // プレイヤーステート変更(インターセプトセットステート)
+        //players[playerID].stateMachine.ChangeState(PlayerState.SetIntercept.GetInstance());
+        GetMyPlayer().stateMachine.ChangeState(PlayerState.SetIntercept.GetInstance());
+
+        //pMain.uiManager.AppearStrikerOK(false);  // falseにするとパスが出る
+        uiManager.AppearInterceptOK();// [1211] NextButton
+
+        //players[playerID].cardObjectManager.CheakActiveUseCard();
+        GetMyPlayer().cardObjectManager.CheakActiveUseCard();
+
+        // 相手側に自分のIDはまだおしてないことを伝える
+        MessageManager.Dispatch(playerID, MessageType.AgainNextButton, null);
+        //players[playerID].isPushedNextButton = false; // ボタンを押していなかったことに
     }
 
     public int StrikerBattle()

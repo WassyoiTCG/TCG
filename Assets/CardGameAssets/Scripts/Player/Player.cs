@@ -29,19 +29,39 @@ public class Player : MonoBehaviour
     bool isStart = false;
 
     public bool isPushedNextButton;
+
+    public string playerName = "";   // プレイヤー名
     
     // ステートマシン用
     public int step;
     public bool isMarigan;
+
+
 
     public void JunbiKanryoON()
     {
         isPushedJunbiKanryo = true;
     }
 
+    public void JunbiKanryoOFF()
+    {
+        isPushedJunbiKanryo = false;
+    }
+
     public void PushedNextButtonON()
     {
         isPushedNextButton = true;
+        //var striker = GetFieldStrikerCard();
+        //if (striker != null)
+        //{
+        //    jissainoPower = striker.cardData.power;
+        //}
+        //else jissainoPower = noSetStrikerPower;
+    }
+
+    public void PushedNextButtonOFF()
+    {
+        isPushedNextButton = false;
         //var striker = GetFieldStrikerCard();
         //if (striker != null)
         //{

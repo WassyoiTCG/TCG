@@ -94,7 +94,7 @@ public class CemeteryInfomationUI : MonoBehaviour
         List<CardData> list = new List<CardData>();
         //foreach (CardData card in datas) list.Add(card);
         list.AddRange(datas);
-        list.Sort(((a, b) => a.power - b.power));
+        //list.Sort(((a, b) => a.power - b.power));
 
         //for (int i = 0; i < list.Count - 1; i++)
         //{

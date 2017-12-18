@@ -277,7 +277,7 @@ Transform:
   m_GameObject: {fileID: 1063374949471438}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 200, y: 200, z: 200}
+  m_LocalScale: {x: 300, y: 200, z: 300}
   m_Children: []
   m_Father: {fileID: 4227705096053772}
   m_RootOrder: 1
@@ -343,7 +343,7 @@ Transform:
   m_GameObject: {fileID: 1777967725363236}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 200, y: 200, z: 200}
+  m_LocalScale: {x: 300, y: 300, z: 300}
   m_Children: []
   m_Father: {fileID: 4227705096053772}
   m_RootOrder: 0
@@ -891,7 +891,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8674c4cb02a09dc4d84be1d633609bcf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  endTime: 0.6
+  endTime: 0.9
   isRoop: 0
   actionOnAwake: 0
   useAlpha: 0
@@ -904,7 +904,7 @@ MonoBehaviour:
   startAngle: {x: 0, y: 0, z: 0}
   endAngle: {x: 0, y: 0, z: 0}
   moveU: 0
-  moveV: 1.4
+  moveV: 1
 --- !u!114 &114517349983314540
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -916,7 +916,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8674c4cb02a09dc4d84be1d633609bcf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  endTime: 0.5
+  endTime: 0.7
   isRoop: 0
   actionOnAwake: 0
   useAlpha: 0
@@ -929,7 +929,7 @@ MonoBehaviour:
   startAngle: {x: 0, y: 0, z: 0}
   endAngle: {x: 0, y: 0, z: 0}
   moveU: 0
-  moveV: -2
+  moveV: -1.25
 --- !u!114 &114708012857977148
 MonoBehaviour:
   m_ObjectHideFlags: 1

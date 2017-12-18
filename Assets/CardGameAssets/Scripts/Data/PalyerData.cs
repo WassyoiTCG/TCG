@@ -77,6 +77,7 @@ public class PlayerData
     PlayerDeckData[] deckDatas;
     public PlayerDeckData GetDeckData(int slotNo) { return deckDatas[slotNo]; }
 
+    public string playerName;
     public uint coin;
     public uint playCount;
     public uint playTime;
@@ -142,6 +143,9 @@ public static class PlayerDataManager
         var loader = new TextLoader();
         loader.LoadText(path);
 
+        // プレイヤー名
+        playerData.playerName = loader.ReadDoubleQuotation();
+        if (playerData.playerName == "") playerData.playerName = "NoName";
 
         // コイン
         playerData.coin = (uint)loader.ReadInt();

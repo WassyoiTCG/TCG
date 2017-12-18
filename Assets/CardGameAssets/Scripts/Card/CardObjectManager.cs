@@ -71,7 +71,7 @@ public class CardObjectManager : MonoBehaviour
             // アビリティから作られたカードなら削除
             if (card.isAbilityCreate)
             {
-                GameObject.Destroy(card);
+                GameObject.Destroy(card.gameObject);
             }
             else
             {
@@ -207,6 +207,7 @@ public class CardObjectManager : MonoBehaviour
 
                 case CardType.Support:
                 case CardType.Connect:
+                    bool hatsudouOK = false;
                     // はつどう条件を満たしているなら(今日は休みますならジョーカーが手札にあるかとか)
                     var abilityes = card.cardData.GetEventCard().abilityDatas;
                     foreach (CardAbilityData ability in abilityes)
@@ -214,10 +215,11 @@ public class CardObjectManager : MonoBehaviour
                         if (ability.HatsudouOK(player))
                         {
                             card.SetNotSelectFlag(false);
-                            return;
+                            hatsudouOK = true;
+                            break;
                         }
                     }
-                    card.SetNotSelectFlag(true);
+                    if(!hatsudouOK)card.SetNotSelectFlag(true);
                     break;
 
                     // インターセプトは無条件で選択不可能
@@ -577,6 +579,8 @@ public class CardObjectManager : MonoBehaviour
         if(fieldStrikerCard)
         {
             //fieldStrikerCard.gameObject.SetActive(false);
+
+            fieldStrikerCard.SetPower(fieldStrikerCard.cardData.power); // パワーの数値もとに戻す
             cemeteryCards.Add(fieldStrikerCard);
             fieldStrikerCard.MoveToCemetery(/*cemeteryCards.Count*/);
             fieldStrikerCard = null;

@@ -53,6 +53,9 @@ public class SceneDeck : MonoBehaviour
     public Text TypeText;
     public Text AbilityText;
 
+    public GameObject SaveText;
+    public GameObject DontSaveText;
+
     // Use this for initialization
     void Start()
     {
@@ -394,6 +397,8 @@ public class SceneDeck : MonoBehaviour
     {
         uGUICard GraspCard = m_uGraspCard.GetComponent<uGUICard>();
 
+        bool ChangeFlag = false;
+        int ChangeCardID = 0;
 
         Vector3 EffectPos = new Vector3(0, 0, 0);
 
@@ -403,7 +408,17 @@ public class SceneDeck : MonoBehaviour
         {
             // パワーと同じ場所の所へ書き換え
             int iGraspCardPower = GraspCard.cardData.power;
+
+            // 変える前のカードに何か入ってたら
+            if (m_aMyDeckCard[iGraspCardPower - 1].GetComponent<uGUICard>().cardData.id != (int)IDType.NONE)
+            {
+                ChangeFlag = true;
+                ChangeCardID = m_aMyDeckCard[iGraspCardPower - 1].GetComponent<uGUICard>().cardData.id;
+            }
+
+            // 変える
             m_aMyDeckCard[iGraspCardPower - 1].GetComponent<uGUICard>().SetCardData(GraspCard.cardData);
+
 
             // エフェクトポジション
             EffectPos = m_aMyDeckCard[iGraspCardPower - 1].transform.localPosition;
@@ -413,8 +428,16 @@ public class SceneDeck : MonoBehaviour
         // 握ってるカードがJOKERなら
         if (GraspCard.cardData.cardType == CardType.Joker)
         {
+            // 変える前のカードに何か入ってたら
+            if (m_aMyDeckCard[PlayerDeckData.numStriker].GetComponent<uGUICard>().cardData.id != (int)IDType.NONE)
+            {
+                ChangeFlag = true;
+                ChangeCardID = m_aMyDeckCard[PlayerDeckData.numStriker].GetComponent<uGUICard>().cardData.id;
+            }
+
             // JOKERゾーンを書き換え
             m_aMyDeckCard[PlayerDeckData.numStriker].GetComponent<uGUICard>().SetCardData(GraspCard.cardData);
+
 
 
             // エフェクトポジション
@@ -480,6 +503,23 @@ public class SceneDeck : MonoBehaviour
                 break;
             }
 
+        }
+
+        if (ChangeFlag == true)
+        {
+
+            iNextNo = SelectData.iDeckCollectLineNo * SelectData.DECK_COLLECTCARD_MAX;
+            for (int i = 0; i < SelectData.DECK_COLLECTCARD_MAX; i++)
+            {
+                if (m_aCollectCard[i].GetComponent<uGUICard>().cardData.id == ChangeCardID)
+                {
+                    // ★デッキに入っていない状態に
+                    m_aCollectCard[i].GetComponent<uGUICard>().NotGrasp_Off();
+
+                    break;
+                }
+
+            }
         }
 
         EventMANTAN();
@@ -660,15 +700,36 @@ public class SceneDeck : MonoBehaviour
         // SE
         oulAudio.PlaySE("edit_end");
 
-        // まず15毎のIDを保存
-        int[] allDeckData = new int[15];
-        for (int i = 0; i < PlayerDeckData.deckMax; i++)
+
+        bool bCheak = true;
+        for (int i = 0; i < PlayerDeckData.numStriker + PlayerDeckData.numJoker; i++)
         {
-            allDeckData[i] = m_aMyDeckCard[i].GetComponent<uGUICard>().cardData.id;
+            if (m_aMyDeckCard[i].GetComponent<uGUICard>().cardData.id == (int)IDType.NONE )
+            {
+                bCheak = false;
+            }
         }
 
-        // (11/14)(TODO) 仮で0番目セーブ
-        PlayerDataManager.DeckSave(0, allDeckData);
+        if (bCheak)
+        {
+
+
+            // まず15毎のIDを保存
+            int[] allDeckData = new int[15];
+            for (int i = 0; i < PlayerDeckData.deckMax; i++)
+            {
+                allDeckData[i] = m_aMyDeckCard[i].GetComponent<uGUICard>().cardData.id;
+            }
+
+            SaveText.GetComponent<TextAnimation>().Action();
+
+            // (11/14)(TODO) 仮で0番目セーブ
+            PlayerDataManager.DeckSave(0, allDeckData);
+
+        }else 
+        {
+            DontSaveText.GetComponent<TextAnimation>().Action();
+        }
 
     }
 

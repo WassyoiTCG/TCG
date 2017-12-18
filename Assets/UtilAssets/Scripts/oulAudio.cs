@@ -94,7 +94,7 @@ public static class oulAudio
         LoadSE("Attack_Middle", "SE/Main/Attack_Middle");
         LoadSE("Attack_Mini", "SE/Main/Attack_Mini");
         LoadSE("Attack_Strong", "SE/Main/Attack_Strong");
-
+        LoadSE("Heal", "SE/Main/Heal");
 
         //LoadSE("Trigger0", "Customizes/SE/Trigger0");
         //LoadSE("Wolf", "Sound/SE/wolf");

@@ -54,11 +54,23 @@ public class SceneMenu : MonoBehaviour {
     public oulNetwork networkManager;
     public InputField ipInput;
 
+    // Tips
+    public GameObject TipsGroup;
+    public GameObject Tips1;
+    public GameObject Tips2;
+    public GameObject Tips3;
+    public GameObject Tips4;
+    public GameObject Tips5;
+
+
     // Use this for initialization
     void Start () {
 
         // 追加1126 システムの初期化をする(WinMainのInitApp)
         oulSystem.Initialize();
+
+        //  BGM
+        oulAudio.PlayBGM("tori", true);
 
         // ネットワークオブジェクト取得
         networkManager = GameObject.Find("NetworkManager").GetComponent<oulNetwork>();
@@ -175,6 +187,14 @@ public class SceneMenu : MonoBehaviour {
 
     }
 
+    // 終了時
+    void OnDisable()
+    {
+        //  BGM
+        oulAudio.StopBGM();
+
+    }
+
     // Update is called once per frame
     void Update () 
     {
@@ -182,6 +202,12 @@ public class SceneMenu : MonoBehaviour {
         m_pStateMachine.currentState.Execute(this);
 
         //a.GetComponent<ScreenOutAppeared>().SelfUpdate();
+    }
+
+    // 説明ボタン押したとき
+    public void ClickTipsButton()
+    {
+        m_pStateMachine.ChangeState(SceneMenuState.Tips.GetInstance());
     }
 
     // なんかのボタン達に触れた時
@@ -321,6 +347,9 @@ public class SceneMenu : MonoBehaviour {
         //m_pStateMachine.ChangeState(SceneMenuState.SceneChange.GetInstance());
 
     }
+
+
+
 
 
     public bool HandleMessge(MessageInfo message)

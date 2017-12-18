@@ -50,6 +50,8 @@ public class Card : MonoBehaviour
     public UVScroll cardFrameEffect2;
     public bool isCardFrameEffect = false;
 
+    public Transform rootTransform;
+
     // アビリティの生成系によって手札に加えられたかのフラグ(リトライ時に削除せずに使いまわしているためtrueなら消すように使う)
     public bool isAbilityCreate = false;
 
@@ -181,6 +183,14 @@ public class Card : MonoBehaviour
 
     public void SetPower(int power)
     {
+        if (cardData.cardType == CardType.Support ||
+            cardData.cardType == CardType.Intercept ||
+            cardData.cardType == CardType.Connect)
+        {
+            Debug.LogWarning("ファイター以外パワーつけるなああああああああああああああああああああああああああへぷし");
+            return;
+        }
+
         // パワーフレームのパワー設定
         powerNumber.SetNumber(power);
     }

@@ -116,8 +116,11 @@ namespace Skill
         static Score instance;
         public static Score GetInstance() { if (instance == null) { instance = new Score(); } return instance; }
 
+        int iFrame = 0;
+
         public override void Enter(CardAbilityData abilityData)
         {
+            iFrame = 0;
             base.Enter(abilityData);
         }
 
@@ -137,11 +140,68 @@ namespace Skill
                     case Arithmetic.Addition:
                         // 足し算なので回復
                         uiManager.Heal(player.isMyPlayer, value);
+
+                        //+-------------------------------------------
+                        // 演出
+                        // Ability列車
+                        ActionEffectPanelInfo info = new ActionEffectPanelInfo();
+                        info.iEffectType = (int)PANEL_EFFECT_TYPE.STAR;
+                        Vector3 vPos = player.GetFieldStrikerCard().cacheTransform.localPosition;
+                        // 相手と味方でZ値変える
+                        if (player.isMyPlayer == true)
+                        {
+                            vPos.z -= strikerCard.rootTransform.localPosition.z;
+                        }
+                        else
+                        {
+                            vPos.z += strikerCard.rootTransform.localPosition.z;
+                        }
+                        
+                        info.fPosX = vPos.x;
+                        info.fPosY = vPos.y;
+                        info.fPosZ = vPos.z;
+
+                        MessageManager.DispatchOffline(CardAbilityData.playerManager.GetPlayerID(player.isMyPlayer),
+                         MessageType.ActionEffectPanel, info);
+                        // SE
+                        oulAudio.PlaySE("Heal");
+
+
                         break;
 
                     case Arithmetic.Subtraction:
                         // 引き算なのでダメージ
                         isEnd = uiManager.Damage(player.isMyPlayer, value);
+
+                        //+-------------------------------------------
+                        // 演出
+                        // Ability列車
+                        ActionEffectPanelInfo info2 = new ActionEffectPanelInfo();
+                        info2.iEffectType = (int)PANEL_EFFECT_TYPE.DAMAGE;
+                        Vector3 vPos2 = player.GetFieldStrikerCard().cacheTransform.localPosition;
+                        // 相手と味方でZ値変える
+                        if (player.isMyPlayer == true)
+                        {
+                            vPos2.z -= strikerCard.rootTransform.localPosition.z;
+                        }
+                        else
+                        {
+                            vPos2.z += strikerCard.rootTransform.localPosition.z;
+                        }
+
+                        info2.fPosX = vPos2.x;
+                        info2.fPosY = vPos2.y;
+                        info2.fPosZ = vPos2.z;
+
+                        MessageManager.DispatchOffline(CardAbilityData.playerManager.GetPlayerID(player.isMyPlayer),
+                         MessageType.ActionEffectPanel, info2);
+                        // SE
+                        oulAudio.PlaySE("Attack_Middle");
+
+                        // ブラ―&カメラ
+                        Camera.main.GetComponent<RadialBlur>().SetBlur(0, 0, 5);
+                        Camera.main.GetComponent<ShakeCamera>().Set();
+
                         break;
 
                     case Arithmetic.Multiplication:
@@ -211,8 +271,10 @@ namespace Skill
                     break;
 
                 case 1:
+                    const int iMaxFrame = 90;
+                    iFrame++;
                     // Ability列車 ライフ変化の演出が終わったら
-                    if (true)
+                    if (iFrame >= iMaxFrame)
                     {
                         endFlag = true;
                     }
@@ -233,14 +295,19 @@ namespace Skill
         }
     }
 
+    //+-----------------------------------------------------------------------
     // パワー変化系
     public class Power : Base
     {
         static Power instance;
         public static Power GetInstance() { if (instance == null) { instance = new Power(); } return instance; }
 
+        int iFrame = 0;
+
         public override void Enter(CardAbilityData abilityData)
         {
+            iFrame = 0;
+
             base.Enter(abilityData);
 
             var skillData = abilityData.GetCurrentSkillData();
@@ -285,10 +352,64 @@ namespace Skill
                 {
                     case Arithmetic.Addition:
                         // パワー加算エフェクト
+                        //+-------------------------------------------
+                        // 演出
+                        // Ability列車
+                        ActionEffectUVInfo info = new ActionEffectUVInfo();
+                        info.iEffectType = (int)UV_EFFECT_TYPE.UP_STATUS;
+                        Vector3 vPos = player.GetFieldStrikerCard().cacheTransform.localPosition;
+                        // 相手と味方でZ値変える
+                        if (player.isMyPlayer == true)
+                        {
+                            vPos.z -= strikerCard.rootTransform.localPosition.z;
+                        }
+                        else
+                        {
+                            vPos.z += strikerCard.rootTransform.localPosition.z;
+                        }
+
+                        //const int AbjustY = 10;
+                        info.fPosX = vPos.x;
+                        info.fPosY = vPos.y;
+                        info.fPosZ = vPos.z;
+
+                        MessageManager.DispatchOffline(CardAbilityData.playerManager.GetPlayerID(player.isMyPlayer),
+                         MessageType.ActionEffectUV, info);
+                        // SE
+                        oulAudio.PlaySE("Heal");
+
                         break;
 
                     case Arithmetic.Subtraction:
                         // パワー減算エフェクト
+                        //+-------------------------------------------
+                        // 演出
+                        // Ability列車
+                        ActionEffectUVInfo info2 = new ActionEffectUVInfo();
+                        info2.iEffectType = (int)UV_EFFECT_TYPE.DOWN_STATUS;
+                        Vector3 vPos2 = player.GetFieldStrikerCard().cacheTransform.localPosition;
+                        // 相手と味方でZ値変える
+                        if (player.isMyPlayer == true)
+                        {
+                            vPos2.z -= strikerCard.rootTransform.localPosition.z;
+                        }
+                        else
+                        {
+                            vPos2.z += strikerCard.rootTransform.localPosition.z;
+                        }
+                        
+                        int a = 0;
+                        a++;
+
+                        info2.fPosX = vPos2.x;
+                        info2.fPosY = vPos2.y;
+                        info2.fPosZ = vPos2.z;
+
+                        MessageManager.DispatchOffline(CardAbilityData.playerManager.GetPlayerID(player.isMyPlayer),
+                         MessageType.ActionEffectUV, info2);
+                        // SE
+                        oulAudio.PlaySE("Heal");
+
                         break;
 
                     case Arithmetic.Multiplication:
@@ -309,8 +430,11 @@ namespace Skill
 
         public override Result Execute(CardAbilityData abilityData)
         {
+            const int MAXFrame = 40;
+            iFrame++;
+
             // Ability列車 パワー変化の演出が終わったら
-            if (true)
+            if (iFrame >= MAXFrame)
             {
                 endFlag = true;
             }

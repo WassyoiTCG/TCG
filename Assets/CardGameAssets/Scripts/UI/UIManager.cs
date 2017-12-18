@@ -61,6 +61,10 @@ public class UIManager : MonoBehaviour
 
     public RemainingPoints remainingPoints;
 
+
+    public GameObject DamagePointText_My;
+    public GameObject DamagePointText_Cpu;
+
     public void Restart()
     {
         //myHP = MaxHP;
@@ -334,6 +338,7 @@ public class UIManager : MonoBehaviour
             //myHPNumber.SetNumber(myHP);
             //if (myHP == 0) return true;
             flag = myLP.AddLP(-score);
+            DamagePointText_My.GetComponent<TextAnimation>().Action(score, TextAnimation.NUM_COLOR.NORMAL);
         }
         else
         {
@@ -341,6 +346,7 @@ public class UIManager : MonoBehaviour
             //cpuHPNumber.SetNumber(cpuHP);
             //if (cpuHP == 0) return true;
             flag = cpuLP.AddLP(-score);
+            DamagePointText_Cpu.GetComponent<TextAnimation>().Action(score, TextAnimation.NUM_COLOR.NORMAL);
         }
 
         return flag;
@@ -356,6 +362,8 @@ public class UIManager : MonoBehaviour
             //myHPNumber.SetNumber(myHP);
             //if (myHP == 0) return true;
             flag = myLP.AddLP(score);
+
+            DamagePointText_My.GetComponent<TextAnimation>().Action(score, TextAnimation.NUM_COLOR.HEAL);
         }
         else
         {
@@ -363,6 +371,8 @@ public class UIManager : MonoBehaviour
             //cpuHPNumber.SetNumber(cpuHP);
             //if (cpuHP == 0) return true;
             flag = cpuLP.AddLP(score);
+
+            DamagePointText_Cpu.GetComponent<TextAnimation>().Action(score, TextAnimation.NUM_COLOR.HEAL);
         }
 
         return flag;

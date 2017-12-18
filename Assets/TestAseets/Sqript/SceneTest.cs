@@ -233,7 +233,7 @@ public class SceneTest : MonoBehaviour
 
         if (Input.GetKey(KeyCode.F))
         {
-            TurnEndEffects.GetComponent<TurnEndEffects>().Action(PHASE_TYPE.MAIN);
+            TurnEndEffects.GetComponent<TurnEndEffects>().Action(PHASE_TYPE.BATTLE_START);
         }
 
         if (Input.GetKey(KeyCode.G))

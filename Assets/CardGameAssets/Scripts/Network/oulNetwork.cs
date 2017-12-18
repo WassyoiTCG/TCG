@@ -598,4 +598,21 @@ public static class MessageManager
         //if (isNetwork)
         //    messageQueue.Add(message);
     }
+
+    public static void DispatchOffline(int fromPlayerID, MessageType messageType, object extraInfo)
+    {
+        // 
+        MessageInfo message = new MessageInfo();
+        message.messageType = messageType;
+        message.fromPlayerID = fromPlayerID;
+        if (extraInfo != null)
+            message.SetExtraInfo(extraInfo);
+
+        //Send(message);
+
+        ReceiveOffline(message);
+
+        //if (isNetwork)
+        //    messageQueue.Add(message);
+    }
 }

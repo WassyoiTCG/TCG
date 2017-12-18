@@ -849,6 +849,8 @@ MonoBehaviour:
   cardObjectManager: {fileID: 0}
   cardFrameEffect: {fileID: 114769506640968110}
   cardFrameEffect2: {fileID: 114526548436774814}
+  isCardFrameEffect: 0
+  rootTransform: {fileID: 4974951064394552}
 --- !u!137 &137581934852592594
 SkinnedMeshRenderer:
   m_ObjectHideFlags: 1

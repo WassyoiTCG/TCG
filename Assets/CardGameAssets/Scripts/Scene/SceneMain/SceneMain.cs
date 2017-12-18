@@ -193,7 +193,7 @@ public class SceneMain : MonoBehaviour
             offlinePlayers.SetActive(true);
             // プレイヤー初期化
             playerManager.Restart();
-            stateMachine.ChangeState(SceneMainState.BattleStart.GetInstance());
+            stateMachine.ChangeState(SceneMainState.SyncPlayerName.GetInstance());
         }
 
 

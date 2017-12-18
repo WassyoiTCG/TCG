@@ -16,10 +16,14 @@ public enum MessageType
     /* Deck */
     ClickLineButton,
   
+    // エフェクト
+    ActionEffectUV, // エフェクト
+    ActionEffectPanel, // エフェクト
 
     /* Main */
     //NetPlay,        // ネット対戦プレイ選択
     //OfflinePlay,    // オフライン対戦プレイ選択
+    SyncName,       // 名前の同期
     SyncDeck,       // 山札・手札・墓地・追放情報の同期
     SyncPoint,      // ポイント情報の同期
     SyncState,      // シーンメインステートの同期
@@ -37,6 +41,7 @@ public enum MessageType
     SelectNumber,   // 数字選択
     Restart,        // もう一度
     EndGame,        // ゲーム終了
+    AgainNextButton,// もう一回ネクスト押してどうぞ。
 
     ReMessage,      // もっかいそのメッセージおくって
     ReceiveOK,
@@ -65,6 +70,13 @@ public struct ReMessageInfo
     public int messageNumber;
 }
 
+public struct SyncNameInfo
+{
+    //[MarshalAs(UnmanagedType.ByValArray, SizeConst = 64)]
+    //public char[] cName;
+    public string name;
+}
+
 public struct SyncStateInfo
 {
     [MarshalAs(UnmanagedType.ByValArray, SizeConst = 128)]
@@ -87,6 +99,19 @@ public struct BackToHandInfo
 {
     public int iCardType;
 }
+
+public struct ActionEffectUVInfo
+{
+    public int iEffectType;
+    public float fPosX; public float fPosY; public float fPosZ;
+}
+
+public struct ActionEffectPanelInfo
+{
+    public int iEffectType;
+    public float fPosX; public float fPosY; public float fPosZ;
+}
+
 
 //public struct SelectCemeteryInfo
 //{

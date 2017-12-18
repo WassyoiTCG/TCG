@@ -41,6 +41,9 @@ public class UVEffectManager : MonoBehaviour {
     // Use this for initialization
     public void Awake() {
 
+        //  描画順を設定       
+        //gameObject.GetComponent<MeshRenderer>().sortingOrder = 114;
+
     }
 
     // 実行
@@ -67,12 +70,12 @@ public class UVEffectManager : MonoBehaviour {
                 break;
             case UV_EFFECT_TYPE.UP_STATUS:
                 UpWave.SetActive(true);
-                UpWave.GetComponent<UVScroll>().Action(vPos, iDelay);
+                UpWave.GetComponent<UVScroll>().Action(vPos, vVec, vVec, iDelay);
                 
                 break;
             case UV_EFFECT_TYPE.DOWN_STATUS:
                 DownWave.SetActive(true);
-                DownWave.GetComponent<UVScroll>().Action(vPos, iDelay);
+                DownWave.GetComponent<UVScroll>().Action(vPos, vVec, vVec, iDelay);
 
                 break;
             case UV_EFFECT_TYPE.SKILL_WIN:

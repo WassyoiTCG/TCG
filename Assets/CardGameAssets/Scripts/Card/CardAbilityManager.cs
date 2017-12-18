@@ -24,8 +24,14 @@ public class CardAbilityData
     public bool endFlag;    // 効果が終了したフラグ
 
     public bool isMyPlayer;                    // この効果を発動しようとしているプレイヤーが画面的に自分かどうか
+
     public static UIManager uiManager;
     public static PlayerManager playerManager;
+    public static UVEffectManager uvEffectManager_My;
+    public static PanelEffectManager panelEffectManager_My;
+    public static UVEffectManager uvEffectManager_Cpu;
+    public static PanelEffectManager panelEffectManager_Cpu;
+
     public Player myPlayer, youPlayer;      // 自分と相手のプレイヤーの実体
 
     public AbilityTriggerType abilityTriggerType;  // 発動トリガー
@@ -274,6 +280,51 @@ public class CardAbilityData
         work.delvValue3 = delvValue3;
 
         return work;
+    }
+
+    public Vector3 GetFieldStrikerPosition()
+    {
+        Vector3 ret = Vector3.zero;
+        if (myPlayer)
+        {
+            Card strikerCard = myPlayer.cardObjectManager.fieldStrikerCard;
+            if (strikerCard)
+            {
+                ret = strikerCard.cacheTransform.localPosition;
+
+                // 相手と味方でZ値変える
+                if (isMyPlayer == true)
+                {
+                    ret.z -= strikerCard.rootTransform.localPosition.z;
+                }
+                else
+                {
+                    ret.z += strikerCard.rootTransform.localPosition.z;
+                }
+            }
+            else Debug.LogWarning("すとらいかーがぬる");
+        }
+        else Debug.LogWarning("ぷれいやーがぬる");
+
+        return ret;
+    }
+
+
+    public Vector3 GetFieldEventPosition()
+    {
+        Vector3 ret = Vector3.zero;
+        if (myPlayer)
+        {
+            Card eventCard = myPlayer.cardObjectManager.fieldEventCard;
+            if (eventCard)
+            {
+                ret = eventCard.cacheTransform.localPosition;
+            }
+            else Debug.LogWarning("ibenntoganuru");
+        }
+        else Debug.LogWarning("ぷれいやーがぬる");
+
+        return ret;
     }
 
 }
