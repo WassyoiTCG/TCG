@@ -119,6 +119,7 @@
     <Compile Include="Assets\CardGameAssets\Scripts\UI\LifePoint.cs" />
     <Compile Include="Assets\CardGameAssets\Scripts\UI\NumberSelectUIManager.cs" />
     <Compile Include="Assets\CardGameAssets\Scripts\UI\RemainingPoints.cs" />
+    <Compile Include="Assets\CardGameAssets\Scripts\UI\TextAnimation.cs" />
     <Compile Include="Assets\CardGameAssets\Scripts\UI\TurnEndButton.cs" />
     <Compile Include="Assets\CardGameAssets\Scripts\UI\UIManager.cs" />
     <Compile Include="Assets\DeckAssets\Sqript\SceneDeck.cs" />
