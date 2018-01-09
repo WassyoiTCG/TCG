@@ -417,13 +417,17 @@ public class DeckManager
             case CardType.Intercept:
                 fieldEventCard = card;
                 break;
-
+            case CardType.Joker:
+                fieldEventCard = card;
+                Debug.Log("JOKERをインターセプトとしてセットしたんごクマ");
+                break;
             default:
-                Debug.LogWarning("インターセプト以外がセットされてるクマ");
+                Debug.LogWarning("インターセプト以外がセットされてるクマ");// ありがたい
                 break;
         }
 
-        cardObjectManager.FieldSet(handNo, player.isMyPlayer);
+        // フィールドにカードを置く
+        cardObjectManager.FieldSetToIntercept(handNo, player.isMyPlayer);
 
         // ★★★手札から消す
         hand.Remove(card);

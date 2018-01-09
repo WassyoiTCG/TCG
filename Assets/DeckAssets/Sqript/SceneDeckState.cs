@@ -382,8 +382,8 @@ namespace SceneDeckState
 
                     return true; // trueを返して終り
                 case MessageType.ClickBackButton:
-                    // SE
-                    oulAudio.PlaySE("edit_end");
+               
+
 
                     SceneManager.LoadScene("Menu");
                     return true; // trueを返して終り

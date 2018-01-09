@@ -1014,9 +1014,12 @@ namespace Cost
         static Turn instance;
         public static Turn GetInstance() { if (instance == null) { instance = new Turn(); } return instance; }
 
+        int iWaitFrame = 0;
 
         public override void Enter(CardAbilityData abilityData)
         {
+            iWaitFrame = 0;
+
             base.Enter(abilityData);
 
             // 現在のターンを取得
@@ -1037,7 +1040,16 @@ namespace Cost
                 abilityData.skillNumber = abilityData.c_value2;
 
                 // Ability列車 ターン条件効果発動(条件成功時)
+                ActionEffectUVInfo info = new ActionEffectUVInfo();
+                info.iEffectType = (int)UV_EFFECT_TYPE.SKILL_WIN;
+                info.fPosX = abilityData.GetFieldStrikerPosition().x;
+                info.fPosY = abilityData.GetFieldStrikerPosition().y;
+                info.fPosZ = abilityData.GetFieldStrikerPosition().z;
 
+                MessageManager.DispatchOffline(CardAbilityData.playerManager.GetPlayerID(abilityData.isMyPlayer), MessageType.ActionEffectUV, info);
+
+                // 効果発動SE
+                oulAudio.PlaySE("action_ability");
             }
             else
             {
@@ -1054,8 +1066,10 @@ namespace Cost
 
         public override void Execute(CardAbilityData abilityData)
         {
+            const int iMaxFrame = 50;
+            iWaitFrame++;
             // Ability列車 ターン条件効果終了時
-            if (true)
+            if (iWaitFrame >= iMaxFrame)
             {
                 // 終了
                 abilityData.isJoukenOK = true;

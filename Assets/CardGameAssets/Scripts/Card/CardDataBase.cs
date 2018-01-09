@@ -145,9 +145,8 @@ public class AbilityFighterCard : FighterCard
 
 public class JokerCard
 {
-
+    public CardAbilityData[] abilityDatas; // [NEW] 追加
 }
-
 
 public class EventCard
 {
@@ -196,7 +195,21 @@ public class CardData
     public InterceptCard interceptCard;             // インターセプト
 
     public FighterCard GetFighterCard() { if (cardType == CardType.Fighter) return fighterCard; else if (cardType == CardType.AbilityFighter) return abilityFighterCard; else return null; }
-    public EventCard GetEventCard() { if (cardType == CardType.Support) return supportCard; else if (cardType == CardType.Connect) return connectCard; else if (cardType == CardType.Intercept) return interceptCard; else return null; }
+    public EventCard GetEventCard()
+    {
+        if (cardType == CardType.Support) return supportCard;
+        else if (cardType == CardType.Connect) return connectCard;
+        else if (cardType == CardType.Intercept) return interceptCard;
+        else { Debug.LogError("Eventじゃない"); return null; };
+
+    }
+    public JokerCard GetJokerCard()
+    {
+        if (cardType == CardType.Joker) return jokerCard; // [NEW]JOKERもイベント扱い
+        else { Debug.LogError("Jokerじゃない");  return null; };
+
+    }
+
     public CardAbilityData[] GetAbilityDatas()
     {
         switch (cardType)
@@ -537,6 +550,29 @@ public static class CardDataBase
 
                     case CardType.Joker:
                         // 効果
+                        {
+                            var jokerCard = cardDatas[i].GetJokerCard();
+
+                            // [NEW] 今は種族考慮せず
+                            //// 種族
+                            //skip = loader.ReadLine();
+                            //// 種族の個数
+                            //int numSyuzoku = loader.ReadInt();
+                            //jokerCard.syuzokus = new Syuzoku[numSyuzoku];
+                            //// 個数に応じて読み込み
+                            //for (int j = 0; j < numSyuzoku; j++)
+                            //    abilityFighterCard.syuzokus[j] = (Syuzoku)loader.ReadInt();
+
+
+                            // 効果
+                            var numAbility = loader.ReadInt();
+                            jokerCard.abilityDatas = new CardAbilityData[numAbility];
+                            for (int j = 0; j < numAbility; j++)
+                            {
+                                jokerCard.abilityDatas[j] = new CardAbilityData();
+                                LoadAbility(loader, out jokerCard.abilityDatas[j]);
+                            }
+                        }
                         break;
 
                     case CardType.Support:

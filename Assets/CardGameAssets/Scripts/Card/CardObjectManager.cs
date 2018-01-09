@@ -239,7 +239,7 @@ public class CardObjectManager : MonoBehaviour
                 // インターセプト以外は選択不可能
                 case CardType.Fighter:
                 case CardType.AbilityFighter:
-                case CardType.Joker:
+                //case CardType.Joker:
                 case CardType.Support:
                 case CardType.Connect:
                     card.SetNotSelectFlag(true);
@@ -247,6 +247,8 @@ public class CardObjectManager : MonoBehaviour
 
                 // インターセプト
                 case CardType.Intercept:
+                // 1219編集
+                    bool hatsudouOK = false;
                     // はつどう条件を満たしているなら(今日は休みますならジョーカーが手札にあるかとか)
                     var abilityes = card.cardData.interceptCard.abilityDatas;
                     foreach (CardAbilityData ability in abilityes)
@@ -254,10 +256,28 @@ public class CardObjectManager : MonoBehaviour
                         if (ability.HatsudouOK(player))
                         {
                             card.SetNotSelectFlag(false);
-                            return;
+                            hatsudouOK = true;
+                            break;
                         }
                     }
-                    card.SetNotSelectFlag(true);
+                    if (!hatsudouOK) card.SetNotSelectFlag(true);
+                    break;
+
+                case CardType.Joker:
+                     bool hatsudouOK2 = false;
+                    // はつどう条件を満たしているなら(今日は休みますならジョーカーが手札にあるかとか)
+                     var abilityes2 = card.cardData.jokerCard.abilityDatas;
+                     foreach (CardAbilityData ability in abilityes2)
+                    {
+                        if (ability.HatsudouOK(player))
+
+                        {
+                            card.SetNotSelectFlag(false);
+                            hatsudouOK2 = true;
+                            break;
+                        }
+                    }
+                    if (!hatsudouOK2) card.SetNotSelectFlag(true);
                     break;
             }
         }
@@ -527,6 +547,85 @@ public class CardObjectManager : MonoBehaviour
         // ★★★手札から消す
         handCards.Remove(card);
     }
+
+
+    // インターセプト時にフィールドに置いた時
+    public void FieldSetToIntercept(int handNo, bool isMyPlayer)
+    {
+        var type = handCards[handNo].cardData.cardType;
+        var card = handCards[handNo];
+
+        // 最下層にする
+        card.SetOrder(0);
+
+        var position = Vector3.zero;
+        var angle = card.cacheTransform.localEulerAngles;
+        angle.x = 0;
+
+        switch (type)
+        {
+            case CardType.Fighter:
+            case CardType.AbilityFighter:
+
+                {
+                    // フィールドにおいてるストライカーのカード
+                    fieldStrikerCard = card;
+                    //fieldStrikerCard.gameObject.SetActive(true);
+                    //fieldStrikerCard.SetCardData(card.cardData, isMyPlayer);
+                    // カードを指定の位置にセット
+                    position = strikerField;
+                    // 逆サイド処理
+                    if (isMyPlayer == false)
+                    {
+                        position.x = -position.x;
+                        position.z = -position.z;
+                    }
+                    //fieldStrikerCard.cashTransform.localPosition = position;
+                    //fieldStrikerCard.nextPosition = position;
+                    //fieldStrikerCard.cacheTransform.localEulerAngles = angle;
+
+                    // 裏にする
+                    angle.z = 180;
+                    fieldStrikerCard.SetUraomote(false);
+
+                    // セットのステートにさせる
+                    fieldStrikerCard.FieldSet(position, angle);
+                }
+                break;
+
+            case CardType.Support:
+                //// フィールドにおいてるイベントのカード
+                //fieldEventCard = card;
+                // サポート発動モード移動設定
+                card.SetSupport();
+                break;
+            case CardType.Joker:
+            case CardType.Intercept:
+                // フィールドにおいてるイベントのカード
+                fieldEventCard = card;
+                // カードを指定の位置にセット
+                position = eventField;
+                // 逆サイド処理
+                if (isMyPlayer == false)
+                {
+                    position.x = -position.x;
+                    position.z = -position.z;
+                    angle.z = 180;
+                }
+
+                // 表にする
+                angle.z = 0;
+                fieldEventCard.SetUraomote(true);
+
+                // セットのステートにさせる
+                fieldEventCard.FieldSet(position, angle);
+                break;
+        }
+
+        // ★★★手札から消す
+        handCards.Remove(card);
+    }
+
 
     public void BackToHand(/*List<CardData> hand, DeckManager deckManager*/)
     {

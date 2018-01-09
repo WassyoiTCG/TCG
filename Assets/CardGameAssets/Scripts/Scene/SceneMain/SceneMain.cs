@@ -51,6 +51,7 @@ public class SceneMain : MonoBehaviour
     public string[] currentStateNames = new string[2];
     public Text debugText;
 
+    public Text debugCardText;
     //public bool isOnline = false;
 
     // Use this for initialization

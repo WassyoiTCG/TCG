@@ -86,10 +86,39 @@ public class PlayerController : NetworkBehaviour
 	// Update is called once per frame
 	void Update ()
     {
+        // 1219編集
+        // マリガン選択ステートにいたら
+        if (myPlayer.stateMachine.isInState(PlayerState.FirstDraw.GetInstance()))
+        {
+            // 押した瞬間
+            if (oulInput.GetTouchState() == oulInput.TouchState.Began)
+            {
+                // UIには触れていない
+                var touchObject = oulInput.Collision3D();
+                if (touchObject)
+                {
+                    // レイに触れたオブジェクトがカードかどうかチェック
+                    if (touchObject.tag == "Card")
+                    {
+                        var card = touchObject.GetComponent<Card>();
+                        if (!card.uraomoteFlag) return;
+
+                        // インフォメーション表示
+                        myPlayer.playerManager.uiManager.AppearBattleCardInfomation(card.cardData);
+                    }
+                }
+            }
+            // 離した瞬間
+            if (oulInput.GetTouchState() == oulInput.TouchState.Ended)
+            {
+                // インフォメーション非表示
+                myPlayer.playerManager.uiManager.DisAppearBattleCardInfomation();
+            }
+        }
+
         // ストライカーセットするステートにいたら
         if (myPlayer.stateMachine.isInState(PlayerState.SetStriker.GetInstance()))
         {
-            // もういや
             SetStrikerUpdate();
             CardTapUpdate();
         }

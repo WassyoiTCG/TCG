@@ -13,6 +13,8 @@ public class RemainingPoints : MonoBehaviour {
     public GameObject Frame;
     public Image[] Points = new Image[(int)POINTS_MAX];
 
+    public GameObject PointCurrsor;
+    public Text TrunText;
 
     // Use this for initialization
     void Awake () {
@@ -110,6 +112,25 @@ public class RemainingPoints : MonoBehaviour {
         Points[no].color = newColor;
 
 
+    }
+
+    // 今のポイント
+    public void SetPointCurrsor(int point)
+    {
+        // ゴレイヌ降臨
+        int no = point;
+        no /= 10;
+        no--;
+
+        PointCurrsor.transform.localPosition = new Vector2((no % 5) * 128, -(no / 5) * 128);
+
+
+    }
+
+    public void SetTrunText(int currentTrun)
+    {
+        // ターン数更新
+        TrunText.text = currentTrun.ToString() + "ターン目";
     }
 
 }

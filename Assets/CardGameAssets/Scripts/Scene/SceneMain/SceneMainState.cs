@@ -401,6 +401,9 @@ namespace SceneMainState
             
             // メインフェーズエフェクト発動
             pMain.turnEndEffect.Action(PHASE_TYPE.MAIN);
+
+            // ターン数更新
+            pMain.turn++;
         }
 
         public override void Execute(SceneMain pMain)
@@ -449,6 +452,9 @@ namespace SceneMainState
             }
             else
             {
+                pMain.uiManager.remainingPoints.SetPointCurrsor(pMain.pointManager.GetCurrentPoint());
+                pMain.uiManager.remainingPoints.SetTrunText(pMain.turn);
+
                 pMain.currentPoint = pMain.pointManager.GetCurrentPoint();
                 pMain.pointText.text = pMain.currentPoint.ToString();
                 pMain.restPointText.text = (pMain.pointManager.step + 1).ToString();
@@ -456,7 +462,8 @@ namespace SceneMainState
                 foreach (int add in pMain.aikoPoint)
                 {
                     pMain.currentPoint += add;
-                    pMain.pointText.text += " + " + add;
+                    pMain.pointText.text += "+" + add;
+                  
                 }
                 // ステートチェンジ
                 pMain.ChangeState(OneDraw.GetInstance());
@@ -482,22 +489,40 @@ namespace SceneMainState
         public override void Enter(SceneMain pMain)
         {
 
- 
+
             //// 初回ドロー
             //if (pMain.turn++ == 0)
             //{
             //    pMain.playerManager.SetState(PlayerState.Draw.GetInstance());
             //    return;
             //}
-            // 2ターンごとドロー
-            if (++pMain.turn % 2 == 1)
-            {           
-                //  SE
-                oulAudio.PlaySE("card_draw1");
 
-                pMain.playerManager.SetState(PlayerState.Draw.GetInstance());
+            
+            // 2ターンごとドロー
+            if (pMain.turn % 2 == 1)
+            {
+                // 山札がまだ存在していたら
+                if (pMain.playerManager.GetMyPlayer().deckManager.GetYamahuda().Count > 0)
+                {
+                    //  SE
+                    oulAudio.PlaySE("card_draw1");
+
+                    int id = pMain.playerManager.GetMyPlayerID();
+                    pMain.playerManager.SetState(PlayerState.Draw.GetInstance(), id);
+                    
+                }
+
+                // 相手の山札がまだ存在していたら
+                if (pMain.playerManager.GetCPUPlayer().deckManager.GetYamahuda().Count > 0)
+                {
+                    int id = pMain.playerManager.GetCpuPlayerID();
+                    pMain.playerManager.SetState(PlayerState.Draw.GetInstance(), id);
+                }
+
                 return;
             }
+
+            
             // ドローなしなのでステートチェンジ
             pMain.playerManager.SetState(PlayerState.None.GetInstance());
         }
@@ -579,7 +604,23 @@ namespace SceneMainState
                 //　UV終了
                 pMain.playerManager.GetMyPlayer().cardObjectManager.StopActiveUseCard();
             }
-            
+
+
+            // 
+            //  デバッグ
+            if (Input.GetKey(KeyCode.Alpha2))
+            {
+                pMain.debugCardText.gameObject.SetActive(true);
+
+                int power= pMain.playerManager.GetCPUPlayer().deckManager.fieldStrikerCard.power; 
+                pMain.debugCardText.text = power.ToString();
+            }else 
+            {
+                pMain.debugCardText.gameObject.SetActive(false);
+            }
+
+
+
             //pMain.playerManager.GetMyPlayer().c
             //// 時間切れなったら
             //if (pMain.uiManager.isTimerEnd())

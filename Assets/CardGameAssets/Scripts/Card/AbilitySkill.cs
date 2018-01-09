@@ -397,9 +397,7 @@ namespace Skill
                         {
                             vPos2.z += strikerCard.rootTransform.localPosition.z;
                         }
-                        
-                        int a = 0;
-                        a++;
+                      
 
                         info2.fPosX = vPos2.x;
                         info2.fPosY = vPos2.y;
@@ -414,6 +412,33 @@ namespace Skill
 
                     case Arithmetic.Multiplication:
                         // 掛け算(パワー0にするだったらvalueが0になってる)
+                        //+-------------------------------------------
+                        // 演出
+                        // Ability列車
+                        ActionEffectUVInfo info3 = new ActionEffectUVInfo();
+                        info3.iEffectType = (int)UV_EFFECT_TYPE.UP_STATUS;
+                        Vector3 vPos3 = player.GetFieldStrikerCard().cacheTransform.localPosition;
+                        // 相手と味方でZ値変える
+                        if (player.isMyPlayer == true)
+                        {
+                            vPos3.z -= strikerCard.rootTransform.localPosition.z;
+                        }
+                        else
+                        {
+                            vPos3.z += strikerCard.rootTransform.localPosition.z;
+                        }
+
+                        //const int AbjustY = 10;
+                        info3.fPosX = vPos3.x;
+                        info3.fPosY = vPos3.y;
+                        info3.fPosZ = vPos3.z;
+
+                        MessageManager.DispatchOffline(CardAbilityData.playerManager.GetPlayerID(player.isMyPlayer),
+                         MessageType.ActionEffectUV, info3);
+                        // SE
+                        oulAudio.PlaySE("Heal");
+
+
                         break;
 
                     case Arithmetic.Division:
