@@ -60,7 +60,7 @@ public class SceneMenu : MonoBehaviour {
     public GameObject Tips2;
     public GameObject Tips3;
     public GameObject Tips4;
-    public GameObject Tips5;
+    //public GameObject Tips5;
 
 
     // Use this for initialization

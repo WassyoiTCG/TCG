@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 //+---------------------------------------------------
 //  メニューステートマシン
@@ -1130,11 +1131,12 @@ namespace SceneMenuState
                     switch (info.Index)
                     {
                         case 1:
+                            
                             e.Tips1.SetActive(false);
                             e.Tips2.SetActive(false);
                             e.Tips3.SetActive(false);
                             e.Tips4.SetActive(false);
-                            e.Tips5.SetActive(false);
+                            //e.Tips5.SetActive(false);
 
                             e.Tips1.SetActive(true);
                             break;
@@ -1143,7 +1145,7 @@ namespace SceneMenuState
                             e.Tips2.SetActive(false);
                             e.Tips3.SetActive(false);
                             e.Tips4.SetActive(false);
-                            e.Tips5.SetActive(false);
+                           // e.Tips5.SetActive(false);
 
                             e.Tips2.SetActive(true);
                             break;
@@ -1152,7 +1154,7 @@ namespace SceneMenuState
                             e.Tips2.SetActive(false);
                             e.Tips3.SetActive(false);
                             e.Tips4.SetActive(false);
-                            e.Tips5.SetActive(false);
+                           // e.Tips5.SetActive(false);
 
                             e.Tips3.SetActive(true);
                             break;
@@ -1161,19 +1163,19 @@ namespace SceneMenuState
                             e.Tips2.SetActive(false);
                             e.Tips3.SetActive(false);
                             e.Tips4.SetActive(false);
-                            e.Tips5.SetActive(false);
+                            //e.Tips5.SetActive(false);
 
                             e.Tips4.SetActive(true);
                             break;
-                        case 5:
-                            e.Tips1.SetActive(false);
-                            e.Tips2.SetActive(false);
-                            e.Tips3.SetActive(false);
-                            e.Tips4.SetActive(false);
-                            e.Tips5.SetActive(false);
+                        //case 5:
+                        //    e.Tips1.SetActive(false);
+                        //    e.Tips2.SetActive(false);
+                        //    e.Tips3.SetActive(false);
+                        //    e.Tips4.SetActive(false);
+                        //    e.Tips5.SetActive(false);
 
-                            e.Tips5.SetActive(true);
-                            break;
+                        //    e.Tips5.SetActive(true);
+                        //    break;
                         default:
                             //+-------------------------------------------------------------------
                             // もどる
