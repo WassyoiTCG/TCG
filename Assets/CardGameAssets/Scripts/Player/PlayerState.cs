@@ -155,6 +155,11 @@ namespace PlayerState
             else player.SetPower(Player.noSetStrikerPower);
 
             player.playerManager.uiManager.DisAppearWaitYouUI();
+
+            // ★リミット処理を解除
+            Player.LimitPowerData data = new Player.LimitPowerData();
+            data.type = Player.LimitPowerType.NoneLimit;
+            player.SetLimitPowerData(data);
         }
 
         public override bool OnMessage(Player player, MessageInfo message)

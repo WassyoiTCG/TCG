@@ -159,9 +159,9 @@ public class ButtonManager : MonoBehaviour
         // SE
         oulAudio.PlaySE("decide2");
 
-        // 相手にも送る
-        int CPUID = 1 - myPlayerID;
-        MessageManager.Dispatch(CPUID, MessageType.EndGame, null);
+        // 相手にも送る(1/11両方送ってるので大丈夫)
+        //int CPUID = 1 - myPlayerID;
+        //MessageManager.Dispatch(CPUID, MessageType.EndGame, null);
 
         MessageManager.Dispatch(myPlayerID, MessageType.EndGame, null);
 

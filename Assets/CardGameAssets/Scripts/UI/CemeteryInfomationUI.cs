@@ -22,11 +22,14 @@ public class CemeteryInfomationUI : MonoBehaviour
     List<CardData> cemeteryCards;
     CardData[] expulsionCards;
 
-    readonly float offsetX = -140;
-    readonly float offsetY = 270;
-    readonly float kankakuX = 147;
-    readonly float kankakuY = 100;
-    readonly float scale = 0.3f;
+    const float offsetX = -380;
+    const float offsetY = 40;
+    const float kankakuX = 147;
+    const float kankakuY = 100;
+    const float scale = 0.3f;
+
+    const float cardWidth = 488 * scale;
+    const float cardHeight = 640 * scale;
 
     void Awake()
     {
@@ -36,7 +39,7 @@ public class CemeteryInfomationUI : MonoBehaviour
         for (int i = 0; i < uguiCards.Length; i++)
         {
             uguiCards[i] = Instantiate(prefab, cache);
-            uguiCards[i].transform.localPosition = new Vector3(offsetX + (i % 3) * kankakuX, offsetY - (i / 3) * kankakuY);
+            uguiCards[i].transform.localPosition = new Vector3(offsetX + (i % 6) * kankakuX, offsetY - (i / 6) * kankakuY);
             uguiCards[i].transform.localScale = new Vector3(scale, scale, 1);
             uguiCards[i].gameObject.SetActive(false);
         }
@@ -140,5 +143,38 @@ public class CemeteryInfomationUI : MonoBehaviour
                 uguiCards[i].gameObject.SetActive(true);
             }
         }
+    }
+
+    public uGUICard CollisionCards(Vector3 mousePosition)
+    {
+        //mousePosition.y = -mousePosition.y;
+
+        float cardX, cardY;
+
+        foreach(uGUICard card in uguiCards)
+        {
+            if(card.gameObject.activeSelf)
+            {
+                cardX = card.transform.position.x;
+                cardY = card.transform.position.y;
+
+                // x判定
+                if (mousePosition.x < cardX - cardWidth / 2 || mousePosition.x > cardX + cardWidth / 2) continue;
+
+                Debug.Log(mousePosition + "," + cardY + "," + cardHeight / 2);
+
+                // y判定
+                if (mousePosition.y < cardY - cardHeight / 2 || mousePosition.y > cardY + cardHeight / 2) continue;
+
+                // ここまで来たら当たってるので、そのカードを返す
+
+
+
+                return card;
+            }
+        }
+
+        // ヒットしていない
+        return null;
     }
 }

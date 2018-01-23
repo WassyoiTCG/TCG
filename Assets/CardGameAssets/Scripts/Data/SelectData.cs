@@ -10,6 +10,8 @@ enum MENU_SPHERE_TYPE { TOTORIAL, BATTLE,NET_BATTLE, DECK_CREATE, COLLECTION,
 
 enum CHANGE_LINE_TYPE { BACK,NEXT, END };
 
+public enum NETWORK_TYPE { HOST,CLIENT };
+
 
 public static class SelectData
 {
@@ -17,7 +19,8 @@ public static class SelectData
 
     public static int iDeckCollectLineNo = 0; // デッキ
 
-    public static bool isNetworkBattle;  // ネットワーク対戦フラグ
+    public static bool isNetworkBattle;     // ネットワーク対戦フラグ
+    public static NETWORK_TYPE networkType; // ネットワークタイプ
 
     public static int iMenuType = (int)(MENU_TYPE.TOTORIAL);
 

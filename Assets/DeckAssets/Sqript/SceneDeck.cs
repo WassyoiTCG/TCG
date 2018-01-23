@@ -78,8 +78,8 @@ public class SceneDeck : MonoBehaviour
         // カードのデータベースを初期化
         //CardDataBase.Start();
 
-        CardData data = CardDataBase.GetCardData(3);    // ID0番目のカードデータを取ってくる。
-        CardData[] all = CardDataBase.GetCardList();    // カード情報を全て取得する。
+        CardData data = CardDataBase.GetCardData(3);                // ID0番目のカードデータを取ってくる。
+        CardData[] all = CardDataBase.GetDeckSortedCardData();      // カード情報を全て取得する。1/12 デッキ選択用のソートした配列を取得
         int size = all.Length;  // カードの最大数
 
         //　★Findは非アクティブ状態ではとれないから取ってから消すやで
@@ -295,7 +295,7 @@ public class SceneDeck : MonoBehaviour
     {
         // (11/13)(TODO)この処理だと全部取ってきて重いので何とかする。
         // 解決案　最大サイズ取得したいだけなので最初にInt型にサイズを保存しておく。
-        CardData[] all = CardDataBase.GetCardList();    // カード情報を全て取得する。
+        CardData[] all = CardDataBase.GetDeckSortedCardData();    // カード情報を全て取得する。1/12 デッキ選択用のソートした配列を取得
         int iMaxSize = all.Length;  // カードの最大数
 
 
@@ -367,7 +367,8 @@ public class SceneDeck : MonoBehaviour
                 continue;
             }
 
-            m_aCollectCard[i].GetComponent<uGUICard>().SetCardData(CardDataBase.GetCardData(iNextNo + i));
+            // 01/12変更 ソートしたやつを左の表示をソートしたやつに変更
+            m_aCollectCard[i].GetComponent<uGUICard>().SetCardData(CardDataBase.GetSortedCardData(iNextNo + i));
 
 
 

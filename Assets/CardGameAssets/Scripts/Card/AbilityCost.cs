@@ -137,6 +137,24 @@ namespace Cost
 
             var myPower = abilityData.myPlayer.jissainoPower;
             var youPower = abilityData.youPlayer.jissainoPower;
+
+            // ジョーカーvs10チェック(負けてるのに勝った扱いになるから)
+            var myCard = abilityData.myPlayer.GetFieldStrikerCard();
+            // 自分自身のパワーが10なら
+            if (myCard.cardData.power == 10)
+            {
+                // 相手がジョーカーだったら効果は発動しない
+                var youCard = abilityData.youPlayer.GetFieldStrikerCard();
+                if (youCard)
+                {
+                    if (youCard.cardData.cardType == CardType.Joker)
+                    {
+                        abilityData.isJoukenOK = false;
+                        return;
+                    }
+                }
+            }
+
             bool ok = (myPower > youPower || youPower == Player.noSetStrikerPower);    // 勝ってたらtrue
             if (!ok)
             {
@@ -404,7 +422,8 @@ namespace Cost
             drawCard = null;
 
             // 数字選択UI表示
-            CardAbilityData.uiManager.AppearSelectNumberUI(abilityData.myPlayer.deckManager);
+            CardAbilityData.uiManager.AppearSelectNumberUI(abilityData.myPlayer.deckManager, abilityData.isMyPlayer);
+            // 相手がが選択中ですのUI
             if (!abilityData.isMyPlayer) CardAbilityData.uiManager.AppearSelectNumberWaitUI();
 
             // Ability列車 宝箱発動した瞬間
@@ -1023,7 +1042,7 @@ namespace Cost
             base.Enter(abilityData);
 
             // 現在のターンを取得
-            int turn = MessageManager.sceneMain.turn;
+            int turn = GameObject.Find("GameMain").GetComponent<SceneMain>().turn;
             int joukenTurn = abilityData.c_value0;
             PowerRange range = (PowerRange)abilityData.c_value1;
 

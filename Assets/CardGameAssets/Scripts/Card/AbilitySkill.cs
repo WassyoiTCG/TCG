@@ -100,6 +100,11 @@ namespace Skill
                         value = abilityData.delvValue3;
                         break;
 
+                    case 4:
+                        // 相手のパワー×10
+                        value = abilityData.youPlayer.jissainoPower * 10;
+                        break;
+
                     default:
                         Debug.LogWarning("参照関係のビット演算でエラークマ");
                         break;
@@ -482,57 +487,6 @@ namespace Skill
     {
         static CardMove instance;
         public static CardMove GetInstance() { if (instance == null) { instance = new CardMove(); } return instance; }
-
-        //public class Search
-        //{
-        //public Search()
-        //{
-
-        //}
-
-        //bool Check(MaskData data, CardData card)
-        //{
-        //    switch (data.maskType)
-        //    {
-        //        case MaskType.Power:
-        //            break;
-        //        case MaskType.Syuzoku:
-        //            break;
-        //        case MaskType.Name:
-        //            break;
-        //        default:
-        //            break;
-        //    }
-
-        //    return false;
-        //}
-
-        //public enum MaskType
-        //{
-        //    Power,      // パワー
-        //    Syuzoku,    // 種族
-        //    Name,       // ボーイと名のつくなど
-        //}
-        //public struct MaskData
-        //{
-        //    public MaskType maskType;  // タイプ
-        //    public string value;       // マスクに使う値
-        //}
-        //public MaskData[] maskDatas;
-
-        //public void SearchCards(CardData[] cards)
-        //{
-        //    //Queue<CardData> queue;
-
-        //    //foreach(CardData card in cards)
-        //    //{
-        //    //    if()
-        //    //}
-        //}
-        //}
-
-        //public AbilityTarget fromTarget;    // 対象
-        //public AbilityTarget toTarget;      // 対象
 
         public enum From
         {
@@ -1222,6 +1176,55 @@ namespace Skill
             }
 
             return searchIndex;
+        }
+    }
+
+    //+-----------------------------------------------------------------------
+    // 次のターンのパワー制限
+    public class LimitPower : Base
+    {
+        static LimitPower instance;
+        public static LimitPower GetInstance() { if (instance == null) { instance = new LimitPower(); } return instance; }
+
+        int iFrame;
+
+        public override void Enter(CardAbilityData abilityData)
+        {
+            iFrame = 0;
+
+            var skillData = abilityData.GetCurrentSkillData();
+
+            Player.LimitPowerData limitPowerData = new Player.LimitPowerData();
+
+            limitPowerData.type = (Player.LimitPowerType)skillData.s_iValue0;
+            limitPowerData.value = skillData.s_iValue1;
+            AbilityTarget target = (AbilityTarget)skillData.s_iValue2;
+            Player targetPlayer = abilityData.GetPlayerByAbilitiTarget(target);
+            // 対象プレイヤーに制限セット
+            targetPlayer.SetLimitPowerData(limitPowerData);
+        }
+
+        public override Result Execute(CardAbilityData abilityData)
+        {
+            const int MAXFrame = 40;
+            iFrame++;
+
+            // Ability列車 パワー変化の演出が終わったら
+            if (iFrame >= MAXFrame)
+            {
+                endFlag = true;
+            }
+            return Result.None;
+        }
+
+        public override void Exit(CardAbilityData abilityData)
+        {
+
+        }
+
+        public override bool OnMessage(CardAbilityData abilityData, MessageInfo message)
+        {
+            return false;
         }
     }
 }

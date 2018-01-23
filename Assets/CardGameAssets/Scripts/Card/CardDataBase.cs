@@ -59,7 +59,8 @@ public enum AbilityType
     None,               // 効果なし(ダミー)
     GettingPoint,       // ポイント系
     ChangePower,        // パワーの変化
-    CardMove,               // 手札系
+    CardMove,           // 手札系
+    LimitPower,         // 出すストライカーのパワー制限
     Lose = 9,           // 無条件敗北
     Victory = 10,       // 無条件勝利
 }
@@ -238,9 +239,19 @@ public enum CardMoveFlag
 public static class CardDataBase
 {
     static CardData[] cardDatas;
+    static CardData[] sortedCardDatas;
     static CardData missingCard;    // 欠番用のカード
 
     public static CardData[] GetCardList() { return cardDatas; }
+    public static CardData[] GetDeckSortedCardData()
+    {
+        // デッキセレクト用のソートを作成
+        if (sortedCardDatas == null)
+        {
+            CreateDeckSelectSortCard();
+        }
+        return sortedCardDatas;
+    }
 
     public static CardData GetCardData(int id)
     {
@@ -257,6 +268,21 @@ public static class CardDataBase
             return missingCard;
         }
         return cardDatas[id];
+    }
+
+    public static CardData GetSortedCardData(int id)
+    {
+        // けつばん
+        if (id < 0 || id >= cardDatas.Length)
+        {
+            return missingCard;
+        }
+        // デッキセレクト用のソートを作成
+        if(sortedCardDatas == null)
+        {
+            CreateDeckSelectSortCard();
+        }
+        return sortedCardDatas[id];
     }
 
     /*
@@ -603,6 +629,148 @@ public static class CardDataBase
         }
     }
 
+    static void CreateDeckSelectSortCard()
+    {
+        // ストライカーパワー順→イベント順にソートする
+        List<CardData> bufAll = new List<CardData>();
+        Queue<CardData> bufPower1 = new Queue<CardData>();
+        Queue<CardData> bufPower2 = new Queue<CardData>();
+        Queue<CardData> bufPower3 = new Queue<CardData>();
+        Queue<CardData> bufPower4 = new Queue<CardData>();
+        Queue<CardData> bufPower5 = new Queue<CardData>();
+        Queue<CardData> bufPower6 = new Queue<CardData>();
+        Queue<CardData> bufPower7 = new Queue<CardData>();
+        Queue<CardData> bufPower8 = new Queue<CardData>();
+        Queue<CardData> bufPower9 = new Queue<CardData>();
+        Queue<CardData> bufPower10 = new Queue<CardData>();
+        Queue<CardData> bufJoker = new Queue<CardData>();
+        Queue<CardData> bufSupport = new Queue<CardData>();
+        Queue<CardData> bufIntercept = new Queue<CardData>();
+        //buf.AddRange(cardDatas);
+        //buf.Sort(SortFunction);
+        for (int i = 0; i < cardDatas.Length; i++)
+        {
+            // イベントじゃない
+            if (!cardDatas[i].isEventCard())
+            {
+                // ジョーカーカード
+                if (cardDatas[i].cardType == CardType.Joker)
+                {
+                    bufJoker.Enqueue(cardDatas[i]);
+                }
+                // ストライカーカード
+                else
+                {
+                    // パワーで分岐
+                    switch (cardDatas[i].power)
+                    {
+                        case 1:
+                            bufPower1.Enqueue(cardDatas[i]);
+                            break;
+                        case 2:
+                            bufPower2.Enqueue(cardDatas[i]);
+                            break;
+                        case 3:
+                            bufPower3.Enqueue(cardDatas[i]);
+                            break;
+                        case 4:
+                            bufPower4.Enqueue(cardDatas[i]);
+                            break;
+                        case 5:
+                            bufPower5.Enqueue(cardDatas[i]);
+                            break;
+                        case 6:
+                            bufPower6.Enqueue(cardDatas[i]);
+                            break;
+                        case 7:
+                            bufPower7.Enqueue(cardDatas[i]);
+                            break;
+                        case 8:
+                            bufPower8.Enqueue(cardDatas[i]);
+                            break;
+                        case 9:
+                            bufPower9.Enqueue(cardDatas[i]);
+                            break;
+                        case 10:
+                            bufPower10.Enqueue(cardDatas[i]);
+                            break;
+                    }
+
+                }
+            }
+            else
+            {
+                // イベントカード追加
+                if (cardDatas[i].cardType == CardType.Support)
+                    bufSupport.Enqueue(cardDatas[i]);
+                if (cardDatas[i].cardType == CardType.Intercept)
+                    bufIntercept.Enqueue(cardDatas[i]);
+            }
+        }
+        // 順番にリストに格納
+        bufAll.AddRange(bufPower1);
+        bufAll.AddRange(bufPower2);
+        bufAll.AddRange(bufPower3);
+        bufAll.AddRange(bufPower4);
+        bufAll.AddRange(bufPower5);
+        bufAll.AddRange(bufPower6);
+        bufAll.AddRange(bufPower7);
+        bufAll.AddRange(bufPower8);
+        bufAll.AddRange(bufPower9);
+        bufAll.AddRange(bufPower10);
+        bufAll.AddRange(bufJoker);
+        bufAll.AddRange(bufSupport);
+        bufAll.AddRange(bufIntercept);
+
+        //for (int i = 0; i < buf1.Count - 1; i++)
+        //{
+        //    for (int j = i + 1; j < buf1.Count; j++)
+        //    {
+        //        if (buf[i].power >= buf[j].power)
+        //        {
+        //            CardData tmp = buf[i];
+        //            buf[i] = buf[j];
+        //            buf[j] = tmp;
+        //            //break;
+        //        }
+        //    }
+
+        //}
+        //for (int i = buf.Count - 1; i >= 0; i--)
+        //{
+        //    if (buf[i].isEventCard())
+        //    {
+        //        // 終端か、イベントカードに当たるまでまわす
+        //        for (int j = i + 1; j < buf.Count -1; j++)
+        //        {
+        //            if (buf[j].isEventCard()) break;
+
+        //            CardData tmp = buf[i];
+        //            buf[i] = buf[j];
+        //            buf[j] = tmp;
+        //            break;
+        //        }
+        //    }
+        //}
+
+        sortedCardDatas = bufAll.ToArray();
+    }
+
+    //private static int SortFunction(CardData a, CardData b)
+    //{
+    //    /*
+    //      •負の値 ： インスタンス a は、並べ替え順序において b の前になります。
+    //      •0　： インスタンス a は、並べ替え順序で、b と同じ位置に出現します。
+    //      •正の値 ： インスタンス a は、並べ替え順序において b の後になります。
+    //     */
+
+    //    if (a.isEventCard())
+    //    {
+    //        return (b.isEventCard()) ? 0 : 1;
+    //    }
+    //    return a.power - b.power;
+    //}
+
     static bool LoadAbility(TextLoader loader, out CardAbilityData abilityData)
     {
         // 効果
@@ -695,6 +863,9 @@ public static class CardDataBase
                 case AbilityType.CardMove:
                     skillData.skill = new Skill.CardMove();
                     break;
+                case AbilityType.LimitPower:
+                    skillData.skill = new Skill.LimitPower();
+                    break;
                 case AbilityType.Lose:
                     Debug.LogWarning("未実装: 無条件敗北");
                     break;
@@ -702,6 +873,7 @@ public static class CardDataBase
                     Debug.LogWarning("未実装: 無条件勝利");
                     break;
                 default:
+                    Debug.LogWarning("アビリティ実装されてない");
                     break;
             }
             // 汎用数値

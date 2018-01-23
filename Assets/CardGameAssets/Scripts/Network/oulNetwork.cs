@@ -78,6 +78,7 @@ public class oulNetwork : NetworkManager
     //    return true;
     //}
 
+    //[Server]
     void Update()
     {
         if (!MessageManager.isServer) return;
@@ -100,12 +101,21 @@ public class oulNetwork : NetworkManager
                     break;
             }
 
+
             // クライアントに送信
-            var res = NetworkServer.SendToAll(Msg.MyMessage, currentMessage);
+            //var res = NetworkServer.SendToAll(Msg.MyMessage, currentMessage);
+            bool result = false;
+
+            // this list holds all connections (local and remote)
+            foreach(NetworkConnection conn in NetworkServer.connections)
+            {
+                if (conn != null)
+                    result &= conn.Send(Msg.MyMessage, currentMessage);
+            }
 
             // クライアント全員に送信する
             Debug.Log("クライアント全員に" + currentMessage.myMessageInfo.number + "番のメッセージ送信[" + currentMessage.myMessageInfo.messageType.ToString() +
-                "]" + res.ToString());
+                "]" + result.ToString());
 
             currentMessage = null;
         }
@@ -354,7 +364,10 @@ public class oulNetwork : NetworkManager
     {
         base.OnStopHost();
 
+        clientConnections.Clear();
         serverConnections.Clear();
+
+        Debug.Log("OnStopHost");
     }
 
     public override void OnStopClient()
@@ -362,6 +375,8 @@ public class oulNetwork : NetworkManager
         base.OnStopClient();
 
         serverConnections.Clear();
+
+        Debug.Log("OnStopClient");
     }
 
     public void Spawn()
@@ -408,7 +423,7 @@ class Msg
 
 public static class MessageManager
 {
-    public static SceneMain sceneMain;    // ゲーム管理さん
+    public static BaseNetworkScene networkScene;    // ゲーム管理さん
     public static bool isNetwork;
     public static bool isServer = false;
 
@@ -423,12 +438,13 @@ public static class MessageManager
 
     static List<MessageInfo> messageBox = new List<MessageInfo>();
 
-    public static void Start(SceneMain main, bool network)
+    public static void Start(bool network)
     {
-        sceneMain = main;
         isNetwork = network;
         Restart();
     }
+
+    public static void SetNetworkScene(BaseNetworkScene scene) { networkScene = scene; }
 
     public static void Restart()
     {
@@ -440,7 +456,7 @@ public static class MessageManager
     public static void ReceiveOffline(MessageInfo message)
     {
         // 受診
-        sceneMain.HandleMessage(message);
+        networkScene.HandleMessage(message);
     }
 
     // ネットからの情報を受信
@@ -501,7 +517,7 @@ public static class MessageManager
         //    return;
         //}
         // 通信中UI非表示
-        sceneMain.uiManager.DisAppearConnectingUI();
+        //sceneMain.uiManager.DisAppearConnectingUI();
 
         //timer = 0;
 
@@ -517,7 +533,7 @@ public static class MessageManager
                 // 次のメッセージ待機
                 receiveMessageNumber++;
                 // 受け取ったことにする
-                sceneMain.HandleMessage(message);
+                networkScene.HandleMessage(message);
                 // 見つかったフラグ
                 ok = true;
                 break;

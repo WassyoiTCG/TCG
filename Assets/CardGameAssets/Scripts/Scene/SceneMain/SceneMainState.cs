@@ -134,12 +134,15 @@ namespace SceneMainState
                 case MessageType.EndGame:
                     //Application.Quit();
                     // ネットワーク終了
+                    // 多分ここでサーバーを切っているから、向こうに届く前にこっちだけ終了してしまってる
                     if(SelectData.isNetworkBattle)
                     {
-                        pMain.networkManager.Stop();
+                        //pMain.networkManager.Stop();
+                        //SceneManager.LoadScene("NetworkLobby");
+                        SceneManager.LoadScene("Menu");
                     }
                     // メニューに戻る
-                    SceneManager.LoadScene("Menu");
+                    else SceneManager.LoadScene("Menu");
                     break;
 
                 case MessageType.SyncPoint:

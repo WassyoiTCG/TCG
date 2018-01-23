@@ -14,13 +14,15 @@ public class PlayerController : NetworkBehaviour
     public int holdHandNo;                     // 手札の何番目のカードをつかんでいるか(ネット上では手札を同期させているのでメッセージで何番目の手札をつかったかの情報が欲しかった)
     readonly int noHoldCard = -1;       // 掴んでいないフラグ
     float setFieldBorderY;              // カード掴んでフィールドにセットできるライン
+    float backToHandBorderY;            // カード掴んで手札に戻すライン
     Vector3 orgHoldCardPosition;
     public Card holdCard;                      // 掴んでるカード
 
     bool cardSetOK;
     public bool isFieldCardHold;
 
-    public bool isCardHold = false;  // 真のカード掴んで動かしているフラグ
+    public bool isCardHold = false;     // 真のカード掴んで動かしているフラグ
+    public bool isCemeteryHold = false; // 墓地クリックしているフラグ
 
     // ステートポインタ
     //FirstDrawState firstDrawState;
@@ -54,7 +56,8 @@ public class PlayerController : NetworkBehaviour
         cardSetOK = false;
         myPlayer = GetComponent<Player>();
 
-        setFieldBorderY = Screen.height / 6;
+        setFieldBorderY = (int)(Screen.height / 4.5f);
+        backToHandBorderY = (int)(Screen.height / 3.0f);
 
         //battleCardInfomation = GameObject.Find("BattleCardInfomation").GetComponent<BattleCardInfomation>();
 
@@ -224,11 +227,14 @@ public class PlayerController : NetworkBehaviour
                         myPlayer.playerManager.uiManager.cemeteryInfoUIManager.Appear(cpuPlayer.deckManager.GetCemeteryCards(), cpuPlayer.deckManager.GetExpulsionCards());
                     }
                     else Debug.LogError("墓地の名前が違う");
+
+                    // 墓地ホールドフラグON
+                    isCemeteryHold = true;
                 }
-                else
-                {
-                    myPlayer.playerManager.uiManager.cemeteryInfoUIManager.DisAppear();
-                }
+                //else
+                //{
+                //    myPlayer.playerManager.uiManager.cemeteryInfoUIManager.DisAppear();
+                //}
             }
             else
             {
@@ -236,12 +242,31 @@ public class PlayerController : NetworkBehaviour
                 myPlayer.playerManager.uiManager.cpuWatchCard.DisAppear();
             }
         }
+        // 押しっぱなし中
+        if(oulInput.GetTouchState() == oulInput.TouchState.Moved || oulInput.GetTouchState() == oulInput.TouchState.Stationary)
+        {
+            // 墓地カードとの判定を取る
+            if (isCemeteryHold)
+            {
+                //var mousePosition = Input.mousePosition;
+                //mousePosition -= new Vector3(Screen.width / 2, Screen.height / 2, 0);
+                var mousePosition = oulInput.GetPosition(0, false);
+                myPlayer.playerManager.uiManager.CollisionCemeteryCard(mousePosition);
+            }
+        }
         // 離した瞬間
         if(oulInput.GetTouchState() == oulInput.TouchState.Ended)
         {
-            // 閉じる
+            // 残りポイント閉じる
             if (myPlayer.playerManager.uiManager.remainingPoints.gameObject.activeSelf)
                 myPlayer.playerManager.uiManager.remainingPoints.TouchEnded();
+            // 墓地情報閉じる
+            if (myPlayer.playerManager.uiManager.cemeteryInfoUIManager.gameObject.activeSelf)
+                myPlayer.playerManager.uiManager.cemeteryInfoUIManager.DisAppear();
+            // 墓地ホールドフラグOFF
+            isCemeteryHold = false;
+            // インフォメーション非表示
+            myPlayer.playerManager.uiManager.DisAppearBattleCardInfomation();
         }
     }
 
@@ -252,8 +277,15 @@ public class PlayerController : NetworkBehaviour
     {
         if (myPlayer.isPushedJunbiKanryo)
         {
+            // マウスクリック放したら
+            if (oulInput.GetTouchState() == oulInput.TouchState.Ended)
+            {
+                // インフォメーション非表示
+                myPlayer.playerManager.uiManager.DisAppearBattleCardInfomation();
+            }
+
             // 1秒待ってまだ相手が設置してないのでUIをだす
-            if((myPlayer.waitTimer += Time.deltaTime) > 0.5f)
+            if ((myPlayer.waitTimer += Time.deltaTime) > 0.5f)
             {
                 myPlayer.playerManager.uiManager.AppearWaitYouUI();
             }
@@ -267,8 +299,8 @@ public class PlayerController : NetworkBehaviour
 
             if (cardSetOK)
             {
-                // 手札に戻る判定
-                if (currentPosition.y <= setFieldBorderY)
+                // 手札に戻る判定(フィールドセットボーダーより上めで戻るようにする)
+                if (currentPosition.y <= ((isFieldCardHold) ? backToHandBorderY : setFieldBorderY))
                 {
                     cardSetOK = false;
                     
@@ -370,7 +402,7 @@ public class PlayerController : NetworkBehaviour
                 // 選択不可のカードなら情報は出すけどセットはできない
                 if (holdCard.notSelectFlag) return;
                 // 移動量を計算
-                if (currentPosition.y > setFieldBorderY)
+                if (currentPosition.y > ((isFieldCardHold) ? backToHandBorderY : setFieldBorderY))
                 {
                     cardSetOK = true;
                     // 一番前
@@ -502,14 +534,14 @@ public class PlayerController : NetworkBehaviour
     //+-------------------------------------------------------------
     void SetInterceptUpdate()
     {
-        if (myPlayer.isPushedJunbiKanryo) return;
-
         // マウスクリック放したら
         if (oulInput.GetTouchState() == oulInput.TouchState.Ended)
         {
             // インフォメーション非表示
             myPlayer.playerManager.uiManager.DisAppearBattleCardInfomation();
         }
+
+        if (myPlayer.isPushedJunbiKanryo) return;
 
         if (holdHandNo != noHoldCard)
         {
@@ -634,6 +666,11 @@ public class PlayerController : NetworkBehaviour
     public Vector3 RaypickHand(Vector3 screenPosition)
     {
         return oulMath.ScreenToWorldPlate(screenPosition, Vector3.up, myPlayer.cardObjectManager.handShift.magnitude + 2);
+    }
+
+    public void CheckCemeteryInfo(Vector3 pos)
+    {
+
     }
 
     public void SetStrikerTimeOver()

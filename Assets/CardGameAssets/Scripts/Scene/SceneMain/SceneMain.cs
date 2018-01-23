@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class SceneMain : MonoBehaviour
+public class SceneMain : BaseNetworkScene
 {
     //enum State
     //{
@@ -67,7 +67,8 @@ public class SceneMain : MonoBehaviour
         oulAudio.PlayBGM("RisingWinter", true);
 
         // メッセージ管理初期化
-        MessageManager.Start(this, SelectData.isNetworkBattle);
+        MessageManager.Start(SelectData.isNetworkBattle);
+        MessageManager.SetNetworkScene(this);
         //// カード初期化
         //CardDataBase.Start();
         // ポイントマネージェー初期化
@@ -118,7 +119,7 @@ public class SceneMain : MonoBehaviour
         stateMachine.Update();
     }
 
-    public void HandleMessage(MessageInfo message)
+    public override void HandleMessage(MessageInfo message)
     {
         if (MessageManager.isNetwork)
         {

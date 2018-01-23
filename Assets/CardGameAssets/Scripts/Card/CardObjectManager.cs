@@ -121,10 +121,21 @@ public class CardObjectManager : MonoBehaviour
         }
 
         // 山札
-        
+        for (int i = 0; i < yamahudaCards.Count; i++)
+        {
+            var card = yamahudaCards[i];
+            if (!card.gameObject.activeInHierarchy) break;
 
-         // 山札座標更新
-         UpdateYamahudaPosition();
+            // 位置情報設定
+            card.ChangeState(CardObjectState.None.GetInstance());
+            // ×エフェクトを消す
+            card.banEffect.gameObject.SetActive(false);
+            // 使えないフラグを戻す
+            card.SetNotSelectFlag(false);
+        }
+
+        // 山札座標更新
+        UpdateYamahudaPosition();
     }
 
     // Update is called once per frame
@@ -188,21 +199,123 @@ public class CardObjectManager : MonoBehaviour
     // 手札をストライカーセット状態にする(コネクトとインターセプトを選択不可に)
     public void ChangeHandSetStrikerMode(Player player)
     {
+        // 0123 パワー制限制限
+        Func<int, bool> CheckLimitPower = null;
+        int limitValue = player.GetLimitPowerData().value;
+        bool isLimit = true;
+        // ラムダ関数登録
+        switch(player.GetLimitPowerData().type)
+        {
+            case Player.LimitPowerType.Ika:
+                CheckLimitPower = (power) => { return (power <= limitValue); };
+                break;
+
+            case Player.LimitPowerType.Ijou:
+                CheckLimitPower = (power) => { return (power >= limitValue); };
+                break;
+
+            case Player.LimitPowerType.Kisuu:
+                CheckLimitPower = (power) => { return (power % 2 == 1); };
+                break;
+
+            case Player.LimitPowerType.Guusuu:
+                CheckLimitPower = (power) => { return (power % 2 == 0); };
+                break;
+
+            case Player.LimitPowerType.NoneLimit:
+            default:
+                isLimit = false;
+                break;
+        }
+
         foreach(Card card in handCards)
         {
             switch(card.cardData.cardType)
             {
                 // ストライカー系は無条件で選択可能
                 case CardType.Fighter:
-                    card.SetNotSelectFlag(false);
-                    break;
-                case CardType.AbilityFighter:
+                    // パワー制限がある場合
+                    if (isLimit)
+                    {
+                        // パワー制限に引っかかるかチェック
+                        // リミット条件満たしていないなら選べなくする
+                        if (CheckLimitPower(card.cardData.power))
+                        {
+                            card.SetNotSelectFlag(true);
+                            // ×発動
+                            card.banEffect.gameObject.SetActive(true);
+                            card.banEffect.Action();
+                        }
+                        else
+                        {
+                            card.SetNotSelectFlag(false);
+                            // ×を消す
+                            card.banEffect.gameObject.SetActive(false);
+                        }
+                    }
+                    // 制限がない状態なら、選べるようにする
+                    else
                     {
                         card.SetNotSelectFlag(false);
+                        // ×を消す
+                        card.banEffect.gameObject.SetActive(false);
+                    }
+                    break;
+                case CardType.AbilityFighter:
+                    // パワー制限がある場合
+                    if (isLimit)
+                    {
+                        // パワー制限に引っかかるかチェック
+                        // リミット条件満たしていないなら選べなくする
+                        if (CheckLimitPower(card.cardData.power))
+                        {
+                            card.SetNotSelectFlag(true);
+                            // ×発動
+                            card.banEffect.gameObject.SetActive(true);
+                            card.banEffect.Action();
+                        }
+                        else
+                        {
+                            card.SetNotSelectFlag(false);
+                            // ×を消す
+                            card.banEffect.gameObject.SetActive(false);
+                        }
+                    }
+                    // 制限がない状態なら、選べるようにする
+                    else
+                    {
+                        card.SetNotSelectFlag(false);
+                        // ×を消す
+                        card.banEffect.gameObject.SetActive(false);
                     }
                     break;
                 case CardType.Joker:
-                    card.SetNotSelectFlag(false);
+                    // パワー制限がある場合
+                    if (isLimit)
+                    {
+                        // パワー制限に引っかかるかチェック
+                        // リミット条件満たしていないなら選べなくする
+                        if (CheckLimitPower(card.cardData.power))
+                        {
+                            card.SetNotSelectFlag(true);
+                            // ×発動
+                            card.banEffect.gameObject.SetActive(true);
+                            card.banEffect.Action();
+                        }
+                        else
+                        {
+                            card.SetNotSelectFlag(false);
+                            // ×を消す
+                            card.banEffect.gameObject.SetActive(false);
+                        }
+                    }
+                    // 制限がない状態なら、選べるようにする
+                    else
+                    {
+                        card.SetNotSelectFlag(false);
+                        // ×を消す
+                        card.banEffect.gameObject.SetActive(false);
+                    }
                     break;
 
                 case CardType.Support:
@@ -950,6 +1063,22 @@ public class CardObjectManager : MonoBehaviour
         // アビリティから作られたフラグoN
         newCreateCard.isAbilityCreate = true;
         return newCreateCard;
+    }
+
+    // 出せるストライカーカードがあるか
+    public bool isHaveSetStrikerOKCard()
+    {
+        // 1枚でもストライカーカードを持っているならtrue
+        foreach(Card card in handCards)
+        {
+            // (isStrikerはジョーカーがfalseになるのでこの書き方)
+            if (card.cardData.isEventCard()) continue;
+
+            // 選べるストライカーカードがある
+            if (!card.notSelectFlag)
+                return true;
+        }
+        return false;
     }
 
     //// カードエフェクト　止める

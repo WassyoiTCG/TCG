@@ -572,16 +572,16 @@ public class DeckManager
         return false;
     }
 
-    public bool isHaveStrikerCard()
-    {
-        // 1枚でもストライカーカードを持っているならtrue
-        foreach(CardData card in hand)
-        {
-            // (isStrikerはジョーカーがfalseになるのでこの書き方)
-            if (!card.isEventCard()) return true;
-        }
-        return false;
-    }
+    //public bool isHaveStrikerCard()
+    //{
+    //    // 1枚でもストライカーカードを持っているならtrue
+    //    foreach(CardData card in hand)
+    //    {
+    //        // (isStrikerはジョーカーがfalseになるのでこの書き方)
+    //        if (!card.isEventCard()) return true;
+    //    }
+    //    return false;
+    //}
 
     //public bool isHaveInterceptCard()
     //{

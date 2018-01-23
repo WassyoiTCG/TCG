@@ -199,6 +199,23 @@ public class UIManager : MonoBehaviour
         firstDrawButtons.SetActive(false);
     }
 
+    public void CollisionCemeteryCard(Vector3 mousePosition)
+    {
+        // 墓地カードとあたり判定を取る
+        uGUICard hit = cemeteryInfoUIManager.CollisionCards(mousePosition);
+        // 当たっていたら
+        if (hit)
+        {
+            // ヒットしたカードの情報を表示させる
+            AppearBattleCardInfomation(hit.cardData);
+        }
+        else
+        {
+            // カード情報閉じる
+            DisAppearBattleCardInfomation();
+        }
+    }
+
     public void AppearBattleCardInfomation(CardData cardData)
     {
         // インフォメーション表示
@@ -433,9 +450,9 @@ public class UIManager : MonoBehaviour
         connectingUI.SetActive(false);
     }
 
-    public void AppearSelectNumberUI(DeckManager deckManager)
+    public void AppearSelectNumberUI(DeckManager deckManager, bool isMyPlayer)
     {
-        selectNumberUI.Action(deckManager);
+        selectNumberUI.Action(deckManager, isMyPlayer);
     }
 
     public void DisAppearSelectNumberUI(int selectNumber)

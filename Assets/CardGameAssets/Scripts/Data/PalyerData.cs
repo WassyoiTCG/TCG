@@ -77,7 +77,8 @@ public class PlayerData
     PlayerDeckData[] deckDatas;
     public PlayerDeckData GetDeckData(int slotNo) { return deckDatas[slotNo]; }
 
-    public string playerName;
+    public string playerName = "no_name";
+    public string ip = "127.0.0.1";
     public uint coin;
     public uint playCount;
     public uint playTime;
@@ -147,6 +148,9 @@ public static class PlayerDataManager
         playerData.playerName = loader.ReadDoubleQuotation();
         if (playerData.playerName == "") playerData.playerName = "NoName";
 
+        // IPアドレス
+        playerData.ip = loader.ReadString();
+
         // コイン
         playerData.coin = (uint)loader.ReadInt();
 
@@ -209,6 +213,12 @@ public static class PlayerDataManager
 
         using (StreamWriter writer = new StreamWriter(path, false, System.Text.Encoding.ASCII))
         {
+            // 名前
+            writer.Write("\"" + playerData.playerName + "\"");
+
+            // IPアドレス
+            writer.Write("\r\n" + playerData.ip);
+
             // コイン
             writer.Write("\r\n" + playerData.coin.ToString());
 

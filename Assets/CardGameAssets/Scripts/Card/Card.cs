@@ -48,6 +48,7 @@ public class Card : MonoBehaviour
 
     public UVScroll cardFrameEffect;
     public UVScroll cardFrameEffect2;
+    public UVScroll banEffect;
     public bool isCardFrameEffect = false;
 
     public Transform rootTransform;
@@ -88,6 +89,7 @@ public class Card : MonoBehaviour
         canvas.sortingOrder = no;
         cardFrameEffect.gameObject.GetComponent<MeshRenderer>().sortingOrder = no;
         cardFrameEffect2.gameObject.GetComponent<MeshRenderer>().sortingOrder = no;
+        banEffect.gameObject.GetComponent<MeshRenderer>().sortingOrder = no;
     }
 
     public void SetCardData(CardData data)

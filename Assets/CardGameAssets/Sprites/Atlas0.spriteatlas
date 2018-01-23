@@ -26,12 +26,12 @@ SpriteAtlas:
       enableTightPacking: 0
     packedHash:
       serializedVersion: 2
-      Hash: ad3c4f29d6b731479df5c2cc385445c6
+      Hash: d350302ce69fb28c0929ec207303fa28
     variantMultiplier: 1
     bindAsDefault: 1
     finalFormat: 4
-    hashString: ad3c4f29d6b731479df5c2cc385445c6
-    totalSpriteSurfaceArea: 3625180
+    hashString: d350302ce69fb28c0929ec207303fa28
+    totalSpriteSurfaceArea: 3661164
     packables:
     - {fileID: 102900000, guid: 39d912bb47ce4474ea62f4cd14c67bd4, type: 3}
     packedSpriteRenderDataKeys:
@@ -59,6 +59,7 @@ SpriteAtlas:
     - 73e12dd075bb6b74b83dfc42980f3100: 21300000
     - e2d5e75237adba4438006b4db550bee8: 21300000
     - 9bc300fd8235fd5419774afa309efe5a: 21300000
+    - 383101c4add9d334dba4da4a97748d50: 21300000
     - d7dd425f44c27a649867673b034d669b: 21300000
     - f40a087e5333d1e45bf4f32bc577de6c: 21300000
     - 3705524369085904dad7118d5dc171ad: 21300000
@@ -73,6 +74,7 @@ SpriteAtlas:
     - b60176e60b5f2754d908175e813302b1: 21300000
     - d749c45e8ada89143ad4e6affc36385e: 21300000
     - ec985e31bbf6f3a4e9aea36bb398a610: 21300000
+    - 95cde9b279cf4ee4aab6dffe9a4dae89: 21300000
     - d69d1b716243a8d4ab6641ec222a22d2: 21300000
     - 2b166794750d71342b296b7f0614343e: 21300000
     - 96bbedfa24fdf864b8108d83cb5538d4: 21300000
@@ -165,6 +167,7 @@ SpriteAtlas:
   - {fileID: 21300000, guid: 73e12dd075bb6b74b83dfc42980f3100, type: 3}
   - {fileID: 21300000, guid: e2d5e75237adba4438006b4db550bee8, type: 3}
   - {fileID: 21300000, guid: 9bc300fd8235fd5419774afa309efe5a, type: 3}
+  - {fileID: 21300000, guid: 383101c4add9d334dba4da4a97748d50, type: 3}
   - {fileID: 21300000, guid: d7dd425f44c27a649867673b034d669b, type: 3}
   - {fileID: 21300000, guid: f40a087e5333d1e45bf4f32bc577de6c, type: 3}
   - {fileID: 21300000, guid: 3705524369085904dad7118d5dc171ad, type: 3}
@@ -179,6 +182,7 @@ SpriteAtlas:
   - {fileID: 21300000, guid: b60176e60b5f2754d908175e813302b1, type: 3}
   - {fileID: 21300000, guid: d749c45e8ada89143ad4e6affc36385e, type: 3}
   - {fileID: 21300000, guid: ec985e31bbf6f3a4e9aea36bb398a610, type: 3}
+  - {fileID: 21300000, guid: 95cde9b279cf4ee4aab6dffe9a4dae89, type: 3}
   - {fileID: 21300000, guid: d69d1b716243a8d4ab6641ec222a22d2, type: 3}
   - {fileID: 21300000, guid: 2b166794750d71342b296b7f0614343e, type: 3}
   - {fileID: 21300000, guid: 96bbedfa24fdf864b8108d83cb5538d4, type: 3}
@@ -270,6 +274,7 @@ SpriteAtlas:
   - LPFrame
   - point
   - KindPlate
+  - CemeteryTag
   - Point_10
   - Point_60
   - Point_70
@@ -284,6 +289,7 @@ SpriteAtlas:
   - Point_90
   - Point_30
   - Point_50
+  - Window2
   - IconPlate
   - BoostIcon
   - ExpulsionButton_NoSelect

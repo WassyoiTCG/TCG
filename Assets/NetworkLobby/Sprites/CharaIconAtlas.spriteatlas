@@ -1,0 +1,45 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!687078895 &4343727234628468602
+SpriteAtlas:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_Name: CharaIconAtlas
+  m_EditorData:
+    textureSettings:
+      anisoLevel: 1
+      compressionQuality: 50
+      maxTextureSize: 2048
+      textureCompression: 0
+      colorSpace: 1
+      filterMode: 1
+      generateMipMaps: 0
+      readable: 0
+      crunchedCompression: 0
+    platformSettings: []
+    packingParameters:
+      paddingPower: 2
+      blockOffset: 1
+      allowAlphaSplitting: 0
+      enableRotation: 1
+      enableTightPacking: 1
+    packedHash:
+      serializedVersion: 2
+      Hash: b060c669945f74ed240ca8ca7093102b
+    variantMultiplier: 1
+    bindAsDefault: 1
+    finalFormat: 4
+    hashString: b060c669945f74ed240ca8ca7093102b
+    totalSpriteSurfaceArea: 65536
+    packables:
+    - {fileID: 102900000, guid: 910385126f60b8e4da72cbde7466bcaf, type: 3}
+    packedSpriteRenderDataKeys:
+    - 8adfa602ccb19a84d82e9d01d56a7d4f: 21300000
+  m_MasterAtlas: {fileID: 0}
+  m_PackedSprites:
+  - {fileID: 21300000, guid: 8adfa602ccb19a84d82e9d01d56a7d4f, type: 3}
+  m_PackedSpriteNamesToIndex:
+  - Icon000
+  m_Tag: CharaIconAtlas
+  m_IsVariant: 0

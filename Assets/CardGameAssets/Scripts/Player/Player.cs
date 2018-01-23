@@ -4,6 +4,25 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
+    // 0123追加 出すストライカーのパワー制限
+    public enum LimitPowerType
+    {
+        NoneLimit = -1, // 制限なし
+        Ika,            // x以下しか出せない
+        Ijou,           // x以上しか出せない
+        Kisuu,          // 奇数しか出せない
+        Guusuu,         // 偶数しか出せない
+    }
+
+    public struct LimitPowerData
+    {
+        public LimitPowerType type;
+        public int value;  // xの値
+    }
+    LimitPowerData limitPowerData = new LimitPowerData();
+    public void SetLimitPowerData(LimitPowerData data) { limitPowerData = data; }
+    public LimitPowerData GetLimitPowerData() { return limitPowerData; }
+
     public float moveSpeed = 1;
 
     public Vector3 move;
@@ -188,6 +207,7 @@ public class Player : MonoBehaviour
         isStateEnd = false;
         isSyncDeck = false;
         isPushedJunbiKanryo = false;
+        limitPowerData.type = LimitPowerType.NoneLimit;
     }
 	
 	// Update is called once per frame
@@ -413,7 +433,7 @@ public class Player : MonoBehaviour
 
     public bool isHaveStrikerCard()
     {
-        return deckManager.isHaveStrikerCard();
+        return cardObjectManager.isHaveSetStrikerOKCard();
     }
 
     //public bool isHaveInterceptCard()

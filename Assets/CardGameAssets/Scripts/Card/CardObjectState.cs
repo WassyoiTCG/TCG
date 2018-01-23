@@ -503,14 +503,14 @@ namespace CardObjectState
         {
             // 負けてるモーション中
             //if(card.animator.GetBool("DamageFlag"))
-            {
-                // モーション終了判定
-                if (card.animator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 1)
-                {
-                    card.ChangeState(None.GetInstance());
-                }
-                return;
-            }
+            //{
+            //    // モーション終了判定
+            //    if (card.animator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 1)
+            //    {
+            //        card.ChangeState(None.GetInstance());
+            //    }
+            //    return;
+            //}
 
             //// ぶつかった瞬間フレーム
             //if (card.animator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 1)

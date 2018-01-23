@@ -172,7 +172,10 @@ public class SceneMenu : MonoBehaviour {
         CoinPlate = Canvas.transform.Find("Info/CoinPlate").gameObject;
 
         // IP入力初期化
-        if (ipInput) ipInput.text = "127.0.0.1";
+        if (ipInput)
+        {
+            ipInput.text = PlayerDataManager.GetPlayerData().ip;
+        }
 
         // ステートマシンの初期化や切り替えは最後に行う
         m_pStateMachine = new BaseEntityStateMachine<SceneMenu>(this);

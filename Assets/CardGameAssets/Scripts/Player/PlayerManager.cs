@@ -475,6 +475,17 @@ public class PlayerManager : MonoBehaviour
             Debug.Assert(sceneMain, "PlayerManagerがscemeMainアタッチされてない");
             sceneMain.ChangeState(SceneMainState.SupportExcusionState.GetInstance());
 
+            // ★相手プレイヤーがすでにOKボタンを押していたら、もう一度表示させる。
+            var youPlayer = GetCPUPlayerByID(message.fromPlayerID);
+            if (youPlayer.isPushedJunbiKanryo)
+            {
+                // もう一回NEXT押してどうぞ
+                youPlayer.JunbiKanryoOFF();
+                // ボタン表示
+                if (youPlayer.isMyPlayer)
+                    uiManager.EnableSetStrikerButton();
+            }
+
             return true;
         }
         if (message.messageType == MessageType.SetIntercept)

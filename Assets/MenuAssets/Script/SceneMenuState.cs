@@ -843,8 +843,7 @@ namespace SceneMenuState
         public override void Exit(SceneMenu e)
         {
             e.NetBattleGroup.GetComponent<ScreenOutAppeared>().Stop();
-
-            e.BlackPanel.SetActive(false);
+            //e.BlackPanel.SetActive(false);
 
         }
 
@@ -860,25 +859,40 @@ namespace SceneMenuState
 
                     // byte[]→構造体
                     AnyButton info = new AnyButton();
-                    IntPtr ptr = Marshal.AllocHGlobal(Marshal.SizeOf(info));
-                    Marshal.Copy(message.exInfo, 0, ptr, Marshal.SizeOf(info));
-                    info = (AnyButton)Marshal.PtrToStructure(ptr, info.GetType());
-                    Marshal.FreeHGlobal(ptr);
+                    message.GetExtraInfo<AnyButton>(ref info);
                     //+-------------------------------------------------------------
                     // ★選択したアイコンのタイプに変更
                     switch ((NET_BATTLE_TYPE)info.Index)
                     {
+                        //case NET_BATTLE_TYPE.SERVER:
+                        //    e.m_pStateMachine.ChangeState(NetBattleHostSelected.GetInstance());
+                        //    break;
+                        //case NET_BATTLE_TYPE.CLIENT:
+                        //    e.m_pStateMachine.ChangeState(NetBattleClientSelected.GetInstance());
+                        //    break;
                         case NET_BATTLE_TYPE.SERVER:
-                            e.m_pStateMachine.ChangeState(NetBattleHostSelected.GetInstance());
+                            // セレクトデータ保存
+                            SelectData.networkType = NETWORK_TYPE.HOST;
+                            // ネットワークロビーに行く
+                            e.m_bSceneChange = true;
+                            SceneManager.LoadScene("NetworkLobby");
                             break;
                         case NET_BATTLE_TYPE.CLIENT:
-                            e.m_pStateMachine.ChangeState(NetBattleClientSelected.GetInstance());
+                            // セレクトデータ保存
+                            SelectData.networkType = NETWORK_TYPE.CLIENT;
+                            // IPアドレス保存
+                            PlayerDataManager.GetPlayerData().ip = e.ipInput.text;
+                            // ネットワークロビーに行く
+                            e.m_bSceneChange = true;
+                            SceneManager.LoadScene("NetworkLobby");
                             break;
                         case NET_BATTLE_TYPE.END:
                         default:
                             //+-------------------------------------------------------------------
                             // もどる
                             e.m_pStateMachine.ChangeState(SceneMenuState.BattleSelect.GetInstance());
+                            // 01/22 Exit関数からここに移動
+                            e.BlackPanel.SetActive(false);
                             break;
                     }
 
@@ -893,168 +907,174 @@ namespace SceneMenuState
 
     }
 
-    //+-------------------------------------------
-    //  ネットバトル時ホスト選択時
-    //+-------------------------------------------
-    public class NetBattleHostSelected : BaseEntityState<SceneMenu>
-    {
-        static NetBattleHostSelected m_pInstance;
-        public static NetBattleHostSelected GetInstance()
-        {
-            if (m_pInstance == null) { m_pInstance = new NetBattleHostSelected(); }
-            return m_pInstance;
-        }
+    ////+-------------------------------------------
+    ////  ネットバトル時ホスト選択時
+    ////+-------------------------------------------
+    //public class NetBattleHostSelected : BaseEntityState<SceneMenu>
+    //{
+    //    static NetBattleHostSelected m_pInstance;
+    //    public static NetBattleHostSelected GetInstance()
+    //    {
+    //        if (m_pInstance == null) { m_pInstance = new NetBattleHostSelected(); }
+    //        return m_pInstance;
+    //    }
 
-        public override void Enter(SceneMenu e)
-        {
-            // ホスト開始
-            e.networkManager.StartHost();
+    //    public override void Enter(SceneMenu e)
+    //    {
+    //        // ホスト開始
+    //        e.networkManager.StartHost();
 
-            // 黒背景
-            e.BlackPanel.SetActive(true);
+    //        // 黒背景
+    //        //e.BlackPanel.SetActive(true);
 
+    //        // ロビー表示
+    //        //e.NetBattleLobby.SetActive(true);
+    //    }
 
-        }
-
-        public override void Execute(SceneMenu e)
-        {
-            // 2人集まったら
-            if (e.networkManager.GetNumServerConnections() >= 2)
-            {
-                // シーンチェンジフラグ
-                e.m_bSceneChange = true;
-                // シーンメインにいく
-                SceneManager.LoadScene("Main");
-            }
+    //    public override void Execute(SceneMenu e)
+    //    {
+    //        // 2人集まったら
+    //        if (e.networkManager.GetNumServerConnections() >= 2)
+    //        {
+    //            // シーンチェンジフラグ
+    //            e.m_bSceneChange = true;
+    //            // シーンメインにいく
+    //            SceneManager.LoadScene("Main");
+    //        }
             
-        }
+    //    }
 
-        public override void Exit(SceneMenu e)
-        {
-         
-        }
+    //    public override void Exit(SceneMenu e)
+    //    {
+    //        // ロビー非表示
+    //        //e.NetBattleLobby.SetActive(false);
+    //    }
 
-        public override bool OnMessage(SceneMenu e, MessageInfo message)
-        {
+    //    public override bool OnMessage(SceneMenu e, MessageInfo message)
+    //    {
 
-            // メッセージタイプが一致している箇所に
-            switch (message.messageType)
-            {
-                case MessageType.ClickAnyButton:
+    //        // メッセージタイプが一致している箇所に
+    //        switch (message.messageType)
+    //        {
+    //            case MessageType.ClickAnyButton:
 
-                    // byte[]→構造体
-                    AnyButton info = new AnyButton();
-                    IntPtr ptr = Marshal.AllocHGlobal(Marshal.SizeOf(info));
-                    Marshal.Copy(message.exInfo, 0, ptr, Marshal.SizeOf(info));
-                    info = (AnyButton)Marshal.PtrToStructure(ptr, info.GetType());
-                    Marshal.FreeHGlobal(ptr);
-                    //+-------------------------------------------------------------
-                    // ★選択したアイコンのタイプに変更
-                    switch (info.Index)
-                    {
-                        case 0:
-                            // 戻るボタン
-                            // ホスト停止
-                            e.networkManager.StopHost();
-                            break;
-                        default:
-                            //+-------------------------------------------------------------------
-                            // もどる
-                            e.m_pStateMachine.ChangeState(SceneMenuState.BattleSelect.GetInstance());
-                            break;
-                    }
+    //                // byte[]→構造体
+    //                AnyButton info = new AnyButton();
+    //                message.GetExtraInfo<AnyButton>(ref info);
 
-                    return true; // trueを返して終り
+    //                //+-------------------------------------------------------------
+    //                // ★選択したアイコンのタイプに変更
+    //                switch (info.Index)
+    //                {
+    //                    case 0:
+    //                        // 戻るボタン
+    //                        // ホスト停止
+    //                        e.networkManager.StopHost();
+    //                        //+-------------------------------------------------------------------
+    //                        // もどる
+    //                        e.m_pStateMachine.ChangeState(SceneMenuState.NetBattleSecondSelect.GetInstance());
+    //                        break;
+    //                    default:
+    //                        //+-------------------------------------------------------------------
+    //                        // もどる
+    //                        //e.m_pStateMachine.ChangeState(SceneMenuState.BattleSelect.GetInstance());
+    //                        break;
+    //                }
 
-                default:
+    //                return true; // trueを返して終り
 
-                    break;
-            }
-            return false; // 何も引っかからなかった
-        }
+    //            default:
 
-    }
+    //                break;
+    //        }
+    //        return false; // 何も引っかからなかった
+    //    }
 
-    //+-------------------------------------------
-    //  ネットバトル時クライアント選択時
-    //+-------------------------------------------
-    public class NetBattleClientSelected : BaseEntityState<SceneMenu>
-    {
-        static NetBattleClientSelected m_pInstance;
-        public static NetBattleClientSelected GetInstance()
-        {
-            if (m_pInstance == null) { m_pInstance = new NetBattleClientSelected(); }
-            return m_pInstance;
-        }
+    //}
 
-        public override void Enter(SceneMenu e)
-        {
-            // クライアント開始(IPアドレスを引数に渡す)
-            e.networkManager.StartClient2(e.ipInput.text);
+    ////+-------------------------------------------
+    ////  ネットバトル時クライアント選択時
+    ////+-------------------------------------------
+    //public class NetBattleClientSelected : BaseEntityState<SceneMenu>
+    //{
+    //    static NetBattleClientSelected m_pInstance;
+    //    public static NetBattleClientSelected GetInstance()
+    //    {
+    //        if (m_pInstance == null) { m_pInstance = new NetBattleClientSelected(); }
+    //        return m_pInstance;
+    //    }
 
-            // 黒背景
-            e.BlackPanel.SetActive(true);
+    //    public override void Enter(SceneMenu e)
+    //    {
+    //        // クライアント開始(IPアドレスを引数に渡す)
+    //        e.networkManager.StartClient2(e.ipInput.text);
 
-        }
+    //        // 黒背景
+    //        //e.BlackPanel.SetActive(true);
 
-        public override void Execute(SceneMenu e)
-        { 
-            // サーバーと繋がったら
-            if (e.networkManager.GetNumClientConnections() >= 1)
-            {
-                // シーンチェンジフラグ
-                e.m_bSceneChange = true;
-                // シーンメインにいく
-                SceneManager.LoadScene("Main");
-            }
-        }
+    //        // ロビー表示
+    //        //e.NetBattleLobby.SetActive(true);
+    //    }
 
-        public override void Exit(SceneMenu e)
-        {
-  
-        }
+    //    public override void Execute(SceneMenu e)
+    //    { 
+    //        // サーバーと繋がったら
+    //        if (e.networkManager.GetNumClientConnections() >= 1)
+    //        {
+    //            // シーンチェンジフラグ
+    //            e.m_bSceneChange = true;
+    //            // シーンメインにいく
+    //            SceneManager.LoadScene("Main");
+    //        }
+    //    }
 
-        public override bool OnMessage(SceneMenu e, MessageInfo message)
-        {
+    //    public override void Exit(SceneMenu e)
+    //    {
+    //        // ロビー非表示
+    //        //e.NetBattleLobby.SetActive(false);
+    //    }
 
-            // メッセージタイプが一致している箇所に
-            switch (message.messageType)
-            {
-                case MessageType.ClickAnyButton:
+    //    public override bool OnMessage(SceneMenu e, MessageInfo message)
+    //    {
 
-                    // byte[]→構造体
-                    AnyButton info = new AnyButton();
-                    IntPtr ptr = Marshal.AllocHGlobal(Marshal.SizeOf(info));
-                    Marshal.Copy(message.exInfo, 0, ptr, Marshal.SizeOf(info));
-                    info = (AnyButton)Marshal.PtrToStructure(ptr, info.GetType());
-                    Marshal.FreeHGlobal(ptr);
-                    //+-------------------------------------------------------------
-                    // ★選択したアイコンのタイプに変更
-                    switch (info.Index)
-                    {
-                        case 0:
-                            // 戻るボタン
-                            // クライアント停止
-                            e.networkManager.StopHost();
-                            break;
-                        default:
-                            //+-------------------------------------------------------------------
-                            // もどる
-                            Debug.Log("c");
-                            e.m_pStateMachine.ChangeState(SceneMenuState.BattleSelect.GetInstance());
-                            break;
-                    }
+    //        // メッセージタイプが一致している箇所に
+    //        switch (message.messageType)
+    //        {
+    //            case MessageType.ClickAnyButton:
 
-                    return true; // trueを返して終り
+    //                // byte[]→構造体
+    //                AnyButton info = new AnyButton();
+    //                message.GetExtraInfo<AnyButton>(ref info);
+    //                //+-------------------------------------------------------------
+    //                // ★選択したアイコンのタイプに変更
+    //                switch (info.Index)
+    //                {
+    //                    case 0:
+    //                        // 戻るボタン
+    //                        // クライアント停止
+    //                        e.networkManager.StopClient();
+    //                        //+-------------------------------------------------------------------
+    //                        // もどる
+    //                        e.m_pStateMachine.ChangeState(SceneMenuState.NetBattleSecondSelect.GetInstance());
+    //                        break;
+    //                    default:
+    //                        //+-------------------------------------------------------------------
+    //                        // もどる
+    //                        Debug.Log("c");
+    //                        //e.m_pStateMachine.ChangeState(SceneMenuState.BattleSelect.GetInstance());
+    //                        break;
+    //                }
 
-                default:
+    //                return true; // trueを返して終り
 
-                    break;
-            }
-            return false; // 何も引っかからなかった
-        }
+    //            default:
 
-    }
+    //                break;
+    //        }
+    //        return false; // 何も引っかからなかった
+    //    }
+
+    //}
 
 
 
@@ -1104,10 +1124,7 @@ namespace SceneMenuState
 
                     // byte[]→構造体
                     AnyButton info = new AnyButton();
-                    IntPtr ptr = Marshal.AllocHGlobal(Marshal.SizeOf(info));
-                    Marshal.Copy(message.exInfo, 0, ptr, Marshal.SizeOf(info));
-                    info = (AnyButton)Marshal.PtrToStructure(ptr, info.GetType());
-                    Marshal.FreeHGlobal(ptr);
+                    message.GetExtraInfo<AnyButton>(ref info);
                     //+-------------------------------------------------------------
                     // ★選択したアイコンのタイプに変更
                     switch (info.Index)

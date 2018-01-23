@@ -65,7 +65,7 @@ public class NumberSelectUIManager : MonoBehaviour
         }
     }
 
-    public void Action(DeckManager deckManager)
+    public void Action(DeckManager deckManager, bool isMyPlayer)
     {
         // アクション開始
         gameObject.SetActive(true);
@@ -73,11 +73,14 @@ public class NumberSelectUIManager : MonoBehaviour
         step = 0;
         endFlag = false;
 
+        Color notSelectColor = (isMyPlayer) ? new Color(0.5f, 0.5f, 0.5f) : new Color(1.0f, 1.0f, 1.0f);
+
         // 全部選択不可能
         foreach (Button numberButton in numberButtons)
         {
             numberButton.gameObject.SetActive(true);
-            numberButton.interactable = false;
+            //numberButton.interactable = false;
+            numberButton.GetComponent<Image>().color = notSelectColor;
         }
 
         // αアニメ開始
@@ -87,13 +90,18 @@ public class NumberSelectUIManager : MonoBehaviour
             //numberAlphas[i].ActionRoop();
         }
 
+        // 相手プレイヤー視点なら後はいらない
+        if (!isMyPlayer) return;
+
         // 山札にあるカードが選択できる
         foreach (CardData card in deckManager.GetYamahuda())
         {
             // イベントカードはスルー
             if (card.isEventCard()) continue;
             // ボタン有効化
-            numberButtons[card.power].interactable = true;
+            //numberButtons[card.power].interactable = true;
+            float alpha = numberButtons[card.power].GetComponent<Image>().color.a;
+            numberButtons[card.power].GetComponent<Image>().color = new Color(1.0f, 1.0f, 1.0f, alpha);
         }
     }
 
