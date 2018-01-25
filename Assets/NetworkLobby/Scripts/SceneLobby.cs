@@ -2,14 +2,25 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Networking;
+using UnityEngine.SceneManagement;
 
 public class SceneLobby : BaseNetworkScene
 {
     // ステート
     public BaseEntityStateMachine<SceneLobby> stateMachine;
 
+    // ロビーのウィンドウ
+    public LobbyPlayerWindow hostWindow;
+    public LobbyPlayerWindow clientWindow;
+
+    // その他UI
+    public GameObject junbiOKButton;
+
     // ネットワーク
     public oulNetwork networkManager;
+    public NetworkClient client;
+    public NETWORK_TYPE networkType;
 
     // Use this for initialization
     void Start()
@@ -24,14 +35,28 @@ public class SceneLobby : BaseNetworkScene
         // ネットワークオブジェクト取得
         networkManager = GameObject.Find("NetworkManager").GetComponent<oulNetwork>();
 
+        networkType = SelectData.networkType;
+
         // ホストかクライアントかを起動
-        if(SelectData.networkType == NETWORK_TYPE.HOST)
+        if(networkType == NETWORK_TYPE.HOST)
         {
-            networkManager.StartHost();
+            // ホストウィンドウのプレイヤー名設定
+            hostWindow.SetPlayerName(PlayerDataManager.GetPlayerData().playerName);
+            // ホストウィンドウにプレイヤー表示
+            hostWindow.SetPlayerActive(true);
+
+            // ネットワーク開始
+            if(!networkManager.isNetworkActive)client = networkManager.StartHost();
         }
-        if(SelectData.networkType == NETWORK_TYPE.CLIENT)
+        if(networkType == NETWORK_TYPE.CLIENT)
         {
-            networkManager.StartClient2(PlayerDataManager.GetPlayerData().ip);
+            // クライアントウィンドウのプレイヤー名設定
+            clientWindow.SetPlayerName(PlayerDataManager.GetPlayerData().playerName);
+            // クライアントウィンドウにプレイヤー表示
+            clientWindow.SetPlayerActive(true);
+
+            // ネットワーク開始
+            if(!networkManager.isNetworkActive)client = networkManager.StartClient2(PlayerDataManager.GetPlayerData().ip);
         }
 
         // ステート初期化
@@ -47,6 +72,30 @@ public class SceneLobby : BaseNetworkScene
     {
         stateMachine.Update();
 	}
+
+    public void ClickBackButton()
+    {
+        // ホストかクライアントかを閉じる
+        if (SelectData.networkType == NETWORK_TYPE.HOST)
+        {
+            networkManager.StopHost();
+        }
+        if (SelectData.networkType == NETWORK_TYPE.CLIENT)
+        {
+            networkManager.StopClient();
+        }
+
+        SceneManager.LoadScene("Menu");
+    }
+
+    public void ClickOKButton()
+    {
+        // 押したので非表示
+        junbiOKButton.SetActive(false);
+
+        // メッセージ送信
+        MessageManager.Dispatch((int)networkType, MessageType.ClickJunbiOK, null);
+    }
 
     public override void HandleMessage(MessageInfo message)
     {

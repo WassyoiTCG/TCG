@@ -12,6 +12,9 @@ public enum MessageType
     /* Menu */
     ClickMenuButton,
     ClickSphereButton,
+    
+    /* NetworkLobby*/
+    ClickJunbiOK,
 
     /* Deck */
     ClickLineButton,
@@ -70,11 +73,18 @@ public struct ReMessageInfo
     public int messageNumber;
 }
 
+//[StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
 public struct SyncNameInfo
 {
-    //[MarshalAs(UnmanagedType.ByValArray, SizeConst = 64)]
+    //public int iconID;
+
+    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 64)]
     //public char[] cName;
-    public string playerName;
+    //public byte[] byName;
+    public int[] iName;
+
+    //[MarshalAs(UnmanagedType.LPStr)]
+    //public string playerName;
 }
 
 public struct SyncStateInfo

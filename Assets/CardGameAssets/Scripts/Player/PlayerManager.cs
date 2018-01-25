@@ -544,21 +544,21 @@ public class PlayerManager : MonoBehaviour
 
             return true;
         }
-        if(message.messageType == MessageType.SyncName)
-        {
-            if (message.exInfo == null)
-                return false;
+        //if(message.messageType == MessageType.SyncName)
+        //{
+        //    if (message.exInfo == null)
+        //        return false;
 
-            // 自分の名前なら同期する必要なし
-            //if (players[message.fromPlayerID].isMyPlayer) return true;
+        //    // 自分の名前なら同期する必要なし
+        //    //if (players[message.fromPlayerID].isMyPlayer) return true;
 
-            SyncNameInfo syncNameInfo = new SyncNameInfo();
-            //syncNameInfo.cName = new char[64];
-            message.GetExtraInfo<SyncNameInfo>(ref syncNameInfo);
+        //    SyncNameInfo syncNameInfo = new SyncNameInfo();
+        //    //syncNameInfo.cName = new char[64];
+        //    message.GetExtraInfo<SyncNameInfo>(ref syncNameInfo);
 
-            // プレイヤーの名前設定
-            players[message.fromPlayerID].playerName = syncNameInfo.playerName;//new string(syncNameInfo.cName);
-        }
+        //    // プレイヤーの名前設定
+        //    players[message.fromPlayerID].playerName = syncNameInfo.playerName;//new string(syncNameInfo.cName);
+        //}
         if(message.messageType == MessageType.SyncDeck)
         { 
             if (message.exInfo == null)

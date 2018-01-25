@@ -138,8 +138,8 @@ namespace SceneMainState
                     if(SelectData.isNetworkBattle)
                     {
                         //pMain.networkManager.Stop();
-                        //SceneManager.LoadScene("NetworkLobby");
-                        SceneManager.LoadScene("Menu");
+                        SceneManager.LoadScene("NetworkLobby");
+                        //SceneManager.LoadScene("Menu");
                     }
                     // メニューに戻る
                     else SceneManager.LoadScene("Menu");
@@ -1628,6 +1628,9 @@ namespace SceneMainState
             //  SE
             oulAudio.PlaySE("Win");
 
+            // 対人だったら、勝った回数カウント
+            if (SelectData.isNetworkBattle)
+                PlayerDataManager.GetPlayerData().winCount++;
         }
 
         public override void Execute(SceneMain pMain)

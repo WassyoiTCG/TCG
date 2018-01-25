@@ -156,6 +156,8 @@ public class oulNetwork : NetworkManager
 
     public override NetworkClient StartHost()
     {
+        Debug.Log("ホストを開始します。");
+
         return base.StartHost();
         //// サーバー開始
         //NetworkServer.Listen("127.0.0.1", 7000);
@@ -163,14 +165,16 @@ public class oulNetwork : NetworkManager
         //ConnectClient("127.0.0.1");
     }
 
-    public void StartClient2(string ip)
+    public NetworkClient StartClient2(string ip)
     {
         MessageManager.isServer = false;
         // 入力されたipアドレスを保存
         networkAddress = ip;
         // Unityちゃんにマルナゲータ
-        StartClient();
+        return StartClient();
         //ConnectClient(ipInput.text);
+
+        Debug.Log("クライアントを開始します。IP-" + ip);
     }
 
     //public void ConnectClient(string ip)

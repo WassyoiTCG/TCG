@@ -6,6 +6,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Text;
 using UnityEngine;
 
 public class PlayerDeckData
@@ -77,10 +78,11 @@ public class PlayerData
     PlayerDeckData[] deckDatas;
     public PlayerDeckData GetDeckData(int slotNo) { return deckDatas[slotNo]; }
 
-    public string playerName = "no_name";
-    public string ip = "127.0.0.1";
+    public string playerName;
+    public int iconNo = 0;
+    public string ip;
+    public uint winCount;           // 対人勝利回数
     public uint coin;
-    public uint playCount;
     public uint playTime;
 
     public PlayerData()
@@ -90,8 +92,9 @@ public class PlayerData
         {
             deckDatas[i] = new PlayerDeckData();
         }
+        playerName = "no_name";
+        ip = "127.0.0.1";
         coin = 0;
-        playCount = 0;
         playTime = 0;
     }
 }
@@ -101,6 +104,8 @@ public static class PlayerDataManager
     static PlayerData playerData = new PlayerData();
 
     public static PlayerData GetPlayerData() { return playerData; }
+
+    static System.Diagnostics.Stopwatch stopWatch = new System.Diagnostics.Stopwatch();
 
     static void LoadDeck()
     {
@@ -148,14 +153,17 @@ public static class PlayerDataManager
         playerData.playerName = loader.ReadDoubleQuotation();
         if (playerData.playerName == "") playerData.playerName = "NoName";
 
+        // アイコン番号
+        playerData.iconNo = loader.ReadInt();
+
         // IPアドレス
         playerData.ip = loader.ReadString();
 
+        // 対人勝利数
+        playerData.winCount = (uint)loader.ReadInt();
+
         // コイン
         playerData.coin = (uint)loader.ReadInt();
-
-        // プレイ回数
-        playerData.playCount = (uint)loader.ReadInt();
 
         // コイン
         playerData.playTime = (uint)loader.ReadInt();
@@ -165,6 +173,9 @@ public static class PlayerDataManager
     {
         LoadDeck();
         LoadPlayerData();
+
+        // 時間計測
+        stopWatch.Start();
     }
 
     public static void DeckSave(int slotNo, int[] ID15)
@@ -208,24 +219,34 @@ public static class PlayerDataManager
 
     public static void PlayerDataSave()
     {
+        Debug.Log("プレイヤーデータをセーブします");
+
+        // 開始からの時間からどれだけ経ったか
+        stopWatch.Stop();
+        int deltaMinutes = stopWatch.Elapsed.Minutes;
+        playerData.playTime += (uint)deltaMinutes;
+
         var directory = System.IO.Directory.GetParent(Application.dataPath).ToString() + "/SaveData";
         var path = directory + "/" + "save.txt";
 
-        using (StreamWriter writer = new StreamWriter(path, false, System.Text.Encoding.ASCII))
+        using (StreamWriter writer = new StreamWriter(path, false, Encoding.GetEncoding("shift_jis")))
         {
             // 名前
             writer.Write("\"" + playerData.playerName + "\"");
 
             // IPアドレス
+            writer.Write("\r\n" + playerData.iconNo.ToString());
+
+            // IPアドレス
             writer.Write("\r\n" + playerData.ip);
+
+            // 対人勝利数
+            writer.Write("\r\n" + playerData.winCount.ToString());
 
             // コイン
             writer.Write("\r\n" + playerData.coin.ToString());
 
-            // プレイ回数
-            writer.Write("\r\n" + playerData.playCount.ToString());
-
-            // プレイ回数
+            // プレイ時間
             writer.Write("\r\n" + playerData.playTime.ToString());
         }
     }

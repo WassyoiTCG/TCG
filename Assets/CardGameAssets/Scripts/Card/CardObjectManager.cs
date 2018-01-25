@@ -239,7 +239,7 @@ public class CardObjectManager : MonoBehaviour
                     {
                         // パワー制限に引っかかるかチェック
                         // リミット条件満たしていないなら選べなくする
-                        if (CheckLimitPower(card.cardData.power))
+                        if (!CheckLimitPower(card.cardData.power))
                         {
                             card.SetNotSelectFlag(true);
                             // ×発動
@@ -267,7 +267,7 @@ public class CardObjectManager : MonoBehaviour
                     {
                         // パワー制限に引っかかるかチェック
                         // リミット条件満たしていないなら選べなくする
-                        if (CheckLimitPower(card.cardData.power))
+                        if (!CheckLimitPower(card.cardData.power))
                         {
                             card.SetNotSelectFlag(true);
                             // ×発動
@@ -295,7 +295,7 @@ public class CardObjectManager : MonoBehaviour
                     {
                         // パワー制限に引っかかるかチェック
                         // リミット条件満たしていないなら選べなくする
-                        if (CheckLimitPower(card.cardData.power))
+                        if (!CheckLimitPower(card.cardData.power))
                         {
                             card.SetNotSelectFlag(true);
                             // ×発動

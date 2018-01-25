@@ -99,6 +99,12 @@ public class oulSystemObject : MonoBehaviour
         UpdateAspect();
 	}
 
+    void OnDestroy()
+    {
+        // データをセーブする
+        PlayerDataManager.PlayerDataSave();
+    }
+
     void UpdateAspect()
     {
         //float aspect = (float)Screen.height / (float)Screen.width;
