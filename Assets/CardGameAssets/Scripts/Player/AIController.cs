@@ -57,7 +57,7 @@ public class AIController : MonoBehaviour
         }
 
         // 手札からランダムでセットする
-        int r = /*Random.Range(0, myPlayer.deckManager.GetNumHand() - 1)*/ myPlayer.deckManager.GetHandNoRandomStriker();
+        int r = /*Random.Range(0, myPlayer.deckManager.GetNumHand() - 1)*/ myPlayer.cardObjectManager.GetHandNoRandomStriker();
 
         // ex構造体作成
         SelectCardIndexInfo exInfo = new SelectCardIndexInfo();

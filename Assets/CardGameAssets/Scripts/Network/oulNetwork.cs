@@ -53,6 +53,8 @@ public class oulNetwork : NetworkManager
             // クライアント終了
             StopClient();
         }
+
+        Restart();
     }
 
     public void Restart()
@@ -174,7 +176,7 @@ public class oulNetwork : NetworkManager
         return StartClient();
         //ConnectClient(ipInput.text);
 
-        Debug.Log("クライアントを開始します。IP-" + ip);
+        //Debug.Log("クライアントを開始します。IP-" + ip);
     }
 
     //public void ConnectClient(string ip)
@@ -187,7 +189,7 @@ public class oulNetwork : NetworkManager
     //    client.Connect(ipInput.text, 7000);
     //}
 
-    public void SendMessage(MessageInfo message)
+    public bool SendMessage(MessageInfo message)
     {
         var mes = new MyNetworkMessage();
         mes.myMessageInfo.fromPlayerID = message.fromPlayerID;
@@ -202,8 +204,12 @@ public class oulNetwork : NetworkManager
         // サーバーに届くまでMsg.Textを送り続ける
         for (int i = 0; ; i++)
         {
+            if (client == null) return false;
             if (client.Send(Msg.MyMessage, mes))
-                break;
+            {
+                return true;
+            }
+            
             // 114514回送っても返事が来ないので死んでどうぞ
             if (i > 114514)
             {
@@ -509,6 +515,7 @@ public static class MessageManager
 
     public static void Update()
     {
+        if (!oulNetwork.s_Singleton.isNetworkActive) return;
         // 処理待ち中は無視
         if (!messageSyoriSitemoii) return;
         // メッセージ何もなかったら

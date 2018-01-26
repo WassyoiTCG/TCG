@@ -497,18 +497,20 @@ public class DeckManager
     }
 
     // CPUが出す用
-    public int GetHandNoRandomStriker()
-    {
-        int[] randomArray = oulRandom.GetRandomArray(0, GetNumHand());
+    //public int GetHandNoRandomStriker()
+    //{
+    //    int[] randomArray = oulRandom.GetRandomArray(0, GetNumHand());
 
-        foreach(int r in randomArray)
-        {
-            if (!hand[r].isEventCard()) return r;
-        }
+    //    foreach(int r in randomArray)
+    //    {
+    //        if (hand[r].isEventCard()) continue;
+    //        if (hand[r].isNotSelect) continue;
+    //        return r;
+    //    }
 
-        // 持ってない
-        return (int)IDType.NONE;
-    }
+    //    // 持ってない
+    //    return (int)IDType.NONE;
+    //}
 
     // 山札から1枚吐き出す
     public Card DequeueYamahuda()

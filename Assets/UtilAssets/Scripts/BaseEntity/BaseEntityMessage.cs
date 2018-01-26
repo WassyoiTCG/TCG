@@ -91,6 +91,7 @@ public struct SyncStateInfo
 {
     [MarshalAs(UnmanagedType.ByValArray, SizeConst = 128)]
     public char[] cStateName;
+    //public byte[] byStateName;
 }
 
 public struct PointInfo

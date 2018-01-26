@@ -37,6 +37,7 @@ public class SceneLobby : BaseNetworkScene
 
         // ネットワークオブジェクト取得
         networkManager = GameObject.Find("NetworkManager").GetComponent<oulNetwork>();
+        networkManager.Restart();
 
         networkType = SelectData.networkType;
 
@@ -95,15 +96,16 @@ public class SceneLobby : BaseNetworkScene
 
     public void ClickBackButton()
     {
-        // ホストかクライアントかを閉じる
-        if (SelectData.networkType == NETWORK_TYPE.HOST)
-        {
-            networkManager.StopHost();
-        }
-        if (SelectData.networkType == NETWORK_TYPE.CLIENT)
-        {
-            networkManager.StopClient();
-        }
+        //// ホストかクライアントかを閉じる
+        //if (SelectData.networkType == NETWORK_TYPE.HOST)
+        //{
+        //    networkManager.StopHost();
+        //}
+        //if (SelectData.networkType == NETWORK_TYPE.CLIENT)
+        //{
+        //    networkManager.StopClient();
+        //}
+        networkManager.Stop();
 
         SceneManager.LoadScene("Menu");
     }

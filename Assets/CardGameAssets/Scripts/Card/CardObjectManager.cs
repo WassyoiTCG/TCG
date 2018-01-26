@@ -1081,6 +1081,23 @@ public class CardObjectManager : MonoBehaviour
         return false;
     }
 
+    // CPUが出す用
+    public int GetHandNoRandomStriker()
+    {
+        int[] randomArray = oulRandom.GetRandomArray(0, handCards.Count);
+
+        foreach (int r in randomArray)
+        {
+            if (handCards[r].cardData.isEventCard()) continue;
+            // 選択できないストライカーはスルーする
+            if (handCards[r].notSelectFlag) continue;
+            return r;
+        }
+
+        // 持ってない
+        return (int)IDType.NONE;
+    }
+
     //// カードエフェクト　止める
     //public void StopUseCard()
     //{
