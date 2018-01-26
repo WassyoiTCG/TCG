@@ -79,7 +79,7 @@ public class NumberSelectUIManager : MonoBehaviour
         foreach (Button numberButton in numberButtons)
         {
             numberButton.gameObject.SetActive(true);
-            //numberButton.interactable = false;
+            numberButton.interactable = true;
             numberButton.GetComponent<Image>().color = notSelectColor;
         }
 

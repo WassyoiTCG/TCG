@@ -50,6 +50,7 @@ public class SceneLobby : BaseNetworkScene
             hostWindow.SetPlayerActive(true);
             // IPアドレス表示
             TextIP.gameObject.SetActive(true);
+            TextIP.text = "";
             {
                 // ホスト名を取得する
                 string hostname = Dns.GetHostName();
@@ -61,7 +62,7 @@ public class SceneLobby : BaseNetworkScene
                     // IPv4 のみを追加する
                     if (address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
                     {
-                        TextIP.text = address.ToString();
+                        TextIP.text += address.ToString() + "\r\n";
                     }
                 }
             }

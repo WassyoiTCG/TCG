@@ -62,6 +62,9 @@ public class SceneMenu : MonoBehaviour {
     public GameObject Tips4;
     //public GameObject Tips5;
 
+    // プロフィール
+    public ProfileCanvas profile;
+
 
     // Use this for initialization
     void Start () {
@@ -211,6 +214,13 @@ public class SceneMenu : MonoBehaviour {
     public void ClickTipsButton()
     {
         m_pStateMachine.ChangeState(SceneMenuState.Tips.GetInstance());
+    }
+
+    // プロフィールボタン押したとき
+    public void ClickProfileCanvas()
+    {
+        // プロフィール表示
+        profile.Action();
     }
 
     // なんかのボタン達に触れた時

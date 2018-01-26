@@ -165,7 +165,7 @@ public static class PlayerDataManager
         // コイン
         playerData.coin = (uint)loader.ReadInt();
 
-        // コイン
+        // プレイ時間
         playerData.playTime = (uint)loader.ReadInt();
     }
 
