@@ -973,7 +973,6 @@ MonoBehaviour:
   Tips2: {fileID: 1144571092}
   Tips3: {fileID: 1411275615}
   Tips4: {fileID: 1647029050}
-  Tips5: {fileID: 321515903}
 --- !u!4 &431579625
 Transform:
   m_ObjectHideFlags: 0

@@ -150,6 +150,7 @@ public class Card : MonoBehaviour
                         cardFrameRenderer.materials[0].SetTexture("_MainTex", cardObjectManager.jokerFrame);
                 fighterPowerFrame.gameObject.SetActive(true);
                 powerNumber.SetNumber(0);
+                syuzokuText.text = "ジョーカーカード";
                 break;
 
             case CardType.Support:

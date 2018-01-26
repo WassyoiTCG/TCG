@@ -37,7 +37,7 @@ public class Player : MonoBehaviour
     public PlayerManager playerManager { get; private set; }     // プレイヤー管理する人の実体
 
     public static readonly int noSetStrikerPower = -1;
-    readonly int firstDrawCount = 6;                            // 最初のドローする枚数
+    readonly int firstDrawCount = 7;                            // 最初のドローする枚数
 
     public int playerID;    // ネット的なID
     public bool isMyPlayer; // 自分が操作しているプレイヤーかどうか

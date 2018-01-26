@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Net;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class SceneLobby : BaseNetworkScene
 {
@@ -16,6 +18,7 @@ public class SceneLobby : BaseNetworkScene
 
     // その他UI
     public GameObject junbiOKButton;
+    public Text TextIP;
 
     // ネットワーク
     public oulNetwork networkManager;
@@ -44,9 +47,26 @@ public class SceneLobby : BaseNetworkScene
             hostWindow.SetPlayerName(PlayerDataManager.GetPlayerData().playerName);
             // ホストウィンドウにプレイヤー表示
             hostWindow.SetPlayerActive(true);
+            // IPアドレス表示
+            TextIP.gameObject.SetActive(true);
+            {
+                // ホスト名を取得する
+                string hostname = Dns.GetHostName();
+
+                // ホスト名からIPアドレスを取得する
+                IPAddress[] adrList = Dns.GetHostAddresses(hostname);
+                foreach (IPAddress address in adrList)
+                {
+                    // IPv4 のみを追加する
+                    if (address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+                    {
+                        TextIP.text = address.ToString();
+                    }
+                }
+            }
 
             // ネットワーク開始
-            if(!networkManager.isNetworkActive)client = networkManager.StartHost();
+            if (!networkManager.isNetworkActive)client = networkManager.StartHost();
         }
         if(networkType == NETWORK_TYPE.CLIENT)
         {
