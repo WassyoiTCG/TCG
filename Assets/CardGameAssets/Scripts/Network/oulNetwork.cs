@@ -391,6 +391,30 @@ public class oulNetwork : NetworkManager
         Debug.Log("OnStopClient");
     }
 
+    public override void OnClientDisconnect(NetworkConnection conn)
+    {
+        base.OnClientDisconnect(conn);
+
+        if (clientConnections.Count > 0)
+            clientConnections.Remove(conn);
+
+        Debug.Log("OnClientDisconnect");
+
+        MessageManager.DispatchOffline(conn.connectionId, MessageType.ClientDisconnect, null);
+    }
+
+    public override void OnServerDisconnect(NetworkConnection conn)
+    {
+        base.OnServerDisconnect(conn);
+
+        if (serverConnections.Count > 0)
+            serverConnections.Remove(conn);
+
+        Debug.Log("OnServerDisconnect");
+
+        MessageManager.DispatchOffline(conn.connectionId, MessageType.ServerDisconnect, null);
+    }
+
     public void Spawn()
     {
         ClientScene.AddPlayer(0);

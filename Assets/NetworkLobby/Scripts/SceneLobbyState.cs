@@ -32,8 +32,50 @@ namespace SceneLobbyState
 
         public override bool OnMessage(SceneLobby e, MessageInfo message)
         {
-            switch(message.messageType)
+            switch (message.messageType)
             {
+                case MessageType.ServerDisconnect:
+                    // 自分と逆の方
+                    if (SelectData.networkType == NETWORK_TYPE.HOST)
+                    {
+                        e.clientWindow.SetJunbiOK(false);
+                        e.clientWindow.SetPlayerActive(false);
+                    }
+                    // 自分と逆の方
+                    if (SelectData.networkType == NETWORK_TYPE.CLIENT)
+                    {
+                        e.hostWindow.SetJunbiOK(false);
+                        e.hostWindow.SetPlayerActive(false);
+                    }
+                    // メッセージ初期化
+                    e.networkManager.Restart();
+                    MessageManager.Restart();
+                    // 接続待ちに戻る
+                    e.stateMachine.ChangeState(WaitConnection.GetInstance());
+                    break;
+
+                case MessageType.ClientDisconnect:
+                    // 自分と逆の方
+                    if (SelectData.networkType == NETWORK_TYPE.HOST)
+                    {
+                        e.clientWindow.SetJunbiOK(false);
+                        e.clientWindow.SetPlayerActive(false);
+                    }
+                    // 自分と逆の方
+                    if (SelectData.networkType == NETWORK_TYPE.CLIENT)
+                    {
+                        e.hostWindow.SetJunbiOK(false);
+                        e.hostWindow.SetPlayerActive(false);
+                    }
+                    // メッセージ初期化
+                    e.networkManager.Restart();
+                    MessageManager.Restart();
+                    // 接続待ちに戻る
+                    e.stateMachine.ChangeState(WaitConnection.GetInstance());
+                    // もっかいサーバー立てても無理だったのでエラーウィンドウを出していったん戻る
+                    e.errorWindow.Action();
+                    break;
+
                 case MessageType.SyncName:
                     {
                         // 自分から送られたならスルー
@@ -64,11 +106,11 @@ namespace SceneLobbyState
                     }
                     return true;
                 case MessageType.ClickJunbiOK:
-                    if((NETWORK_TYPE)message.fromPlayerID == NETWORK_TYPE.HOST)
+                    if ((NETWORK_TYPE)message.fromPlayerID == NETWORK_TYPE.HOST)
                     {
                         e.hostWindow.SetJunbiOK(true);
                     }
-                    if((NETWORK_TYPE)message.fromPlayerID == NETWORK_TYPE.CLIENT)
+                    if ((NETWORK_TYPE)message.fromPlayerID == NETWORK_TYPE.CLIENT)
                     {
                         e.clientWindow.SetJunbiOK(true);
                     }
@@ -90,7 +132,8 @@ namespace SceneLobbyState
 
         public override void Enter(SceneLobby e)
         {
-
+            // OKボタン非表示
+            e.junbiOKButton.SetActive(false);
         }
 
         public override void Execute(SceneLobby e)

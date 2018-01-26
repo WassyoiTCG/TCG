@@ -17,6 +17,7 @@ public class SceneLobby : BaseNetworkScene
     public LobbyPlayerWindow clientWindow;
 
     // その他UI
+    public NetworkErrorWindow errorWindow;
     public GameObject junbiOKButton;
     public Text TextIP;
 

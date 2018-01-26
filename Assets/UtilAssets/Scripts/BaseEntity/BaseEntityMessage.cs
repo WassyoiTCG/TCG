@@ -6,6 +6,9 @@ using UnityEngine;
 public enum MessageType
 {
     NoMessage,
+    /* Network */
+    ServerDisconnect,
+    ClientDisconnect,
 
     ClickBackButton,
     ClickAnyButton,  // なんか適当なボタン
