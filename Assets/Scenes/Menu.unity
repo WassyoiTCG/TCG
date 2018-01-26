@@ -971,8 +971,8 @@ MonoBehaviour:
   TipsGroup: {fileID: 655064428}
   Tips1: {fileID: 407271205}
   Tips2: {fileID: 1144571092}
-  Tips3: {fileID: 1411275615}
-  Tips4: {fileID: 1647029050}
+  Tips3: {fileID: 321515903}
+  Tips4: {fileID: 1411275615}
   profile: {fileID: 847969346}
 --- !u!4 &431579625
 Transform:
@@ -4178,7 +4178,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1522519172
 RectTransform:
   m_ObjectHideFlags: 0
