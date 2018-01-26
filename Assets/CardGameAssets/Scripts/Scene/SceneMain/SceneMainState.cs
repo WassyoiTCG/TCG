@@ -567,6 +567,16 @@ namespace SceneMainState
                 Debug.Log(" 出せるカードがなかった！ - SetStriker");
                 pMain.uiManager.EnableSetStrikerButton();
             }
+
+            if (pMain.playerManager.GetCPUPlayer().isHaveStrikerCard() == false)
+            {
+                pMain.uiManager.PassText.SetActive(true);
+            }
+            else 
+            {
+                pMain.uiManager.PassText.SetActive(false);
+            }
+
             // タイマーセット
             pMain.uiManager.SetTimer(setLimitTime);
 

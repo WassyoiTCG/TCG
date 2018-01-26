@@ -65,6 +65,9 @@ public class UIManager : MonoBehaviour
     public GameObject DamagePointText_My;
     public GameObject DamagePointText_Cpu;
 
+    public GameObject PassText;
+
+
     public void Restart()
     {
         //myHP = MaxHP;
