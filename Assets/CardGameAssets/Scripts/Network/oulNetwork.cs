@@ -24,8 +24,8 @@ public class oulNetwork : NetworkManager
 
     MessageInfo[] messageBuffer = new MessageInfo[2048];
 
-    List<NetworkConnection> clientConnections = new List<NetworkConnection>();
-    List<NetworkConnection> serverConnections = new List<NetworkConnection>();
+    public List<NetworkConnection> clientConnections = new List<NetworkConnection>();
+    public List<NetworkConnection> serverConnections = new List<NetworkConnection>();
 
     //class ClientMessageOKInfo
     //{
@@ -47,6 +47,7 @@ public class oulNetwork : NetworkManager
         {
             // ホスト終了
             StopHost();
+            MessageManager.isServer = false;
         }
         else
         {
@@ -384,6 +385,7 @@ public class oulNetwork : NetworkManager
     {
         base.OnStopClient();
 
+        clientConnections.Clear();
         serverConnections.Clear();
 
         Debug.Log("OnStopClient");
