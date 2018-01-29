@@ -73,7 +73,7 @@ public class SceneMenu : MonoBehaviour {
         oulSystem.Initialize();
 
         //  BGM
-        oulAudio.PlayBGM("tori", true);
+        oulAudio.PlayBGM("Select0", true);
 
         // ネットワークオブジェクト取得
         networkManager = GameObject.Find("NetworkManager").GetComponent<oulNetwork>();

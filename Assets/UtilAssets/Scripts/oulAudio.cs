@@ -116,6 +116,8 @@ public static class oulAudio
         //}
         LoadBGM("CollectionBGM", "BGM/Collect");
         LoadBGM("tori", "BGM/tori");
+        LoadBGM("Select0", "BGM/Select0");
+        LoadBGM("Select1", "BGM/Select1");
         LoadBGM("RisingWinter", "BGM/Rising Winter");
         // 定数
         //constant = GameObject.Find("Util").GetComponent<Constant>();

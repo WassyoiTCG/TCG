@@ -69,16 +69,18 @@ public class uGUICard : MonoBehaviour
 
     public void AbilityFullInfo_On()
     {
-        //if (isNotGrasp == false)
+        // [1/28] 一応掴めるようにする
+        ////if (isNotGrasp == false)
         {
-            isNotGrasp = true;
-            panel.GetComponent<Image>().color = new Color(0, 0, 0, 0.5f);
-            AbilityFullInfo.SetActive(true);
+            //isNotGrasp = true;
+            //panel.GetComponent<Image>().color = new Color(0, 0, 0, 0.5f);
+            //AbilityFullInfo.SetActive(true);
         }
     }
 
     public void AbilityFullInfo_Off()
     {
+
         isNotGrasp = false;
         panel.GetComponent<Image>().color = new Color(0, 0, 0, 0);
         AbilityFullInfo.SetActive(false);

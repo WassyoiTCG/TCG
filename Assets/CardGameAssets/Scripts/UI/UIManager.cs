@@ -66,6 +66,7 @@ public class UIManager : MonoBehaviour
     public GameObject DamagePointText_Cpu;
 
     public GameObject PassText;
+    public GameObject EFMonsterSummon;
 
 
     public void Restart()
@@ -92,7 +93,9 @@ public class UIManager : MonoBehaviour
             pos -= new Vector3(Screen.width / 2, Screen.height / 2, 0);
             ClickEffect.GetComponent<PanelAnim>().Action2D(pos/*, new Vector3(0, 0, 0)*/);
         }
-        
+
+        //
+        EFMonsterSummon.GetComponent<AlphaWave>().SelfUpdate();
 
         // HPへらす
         if (Input.GetKeyDown(KeyCode.Alpha1))

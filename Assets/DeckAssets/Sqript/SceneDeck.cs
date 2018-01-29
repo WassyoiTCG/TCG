@@ -56,6 +56,8 @@ public class SceneDeck : MonoBehaviour
     public GameObject SaveText;
     public GameObject DontSaveText;
 
+    public Text SeigenNoText;
+
     // Use this for initialization
     void Start()
     {
@@ -208,6 +210,7 @@ public class SceneDeck : MonoBehaviour
         // これより上に書かない。
         oulInput.Update();
 
+        SeigenNoTextUpdate();
         //GUI.Label(
         //new Rect(0.0f, 0.0f, Screen.width, Screen.height),
         //"マウスX: ");
@@ -698,8 +701,6 @@ public class SceneDeck : MonoBehaviour
     // ★★★デッキのセーブ
     public void DeckSave()
     {
-        // SE
-        oulAudio.PlaySE("edit_end");
 
 
         bool bCheak = true;
@@ -711,8 +712,28 @@ public class SceneDeck : MonoBehaviour
             }
         }
 
+
+        // 効果持ちカードの数値
+        int iAbilityStrikerNom = 0;// PlayerDeckData.numStriker + PlayerDeckData.numJoker;
+        for (int i = 0; i < PlayerDeckData.numStriker; i++)
+        {
+            // 空き枠を探す
+            if (m_aMyDeckCard[i].GetComponent<uGUICard>().cardData.cardType == CardType.AbilityFighter)
+            {
+                iAbilityStrikerNom++;
+            }
+
+        }// 効果
+        // 5マイ入ってらアウト
+        if (iAbilityStrikerNom >= 5)
+        {
+            bCheak = false;
+        }
+
         if (bCheak)
         {
+            // SE
+            oulAudio.PlaySE("edit_end");
 
 
             // まず15毎のIDを保存
@@ -887,6 +908,34 @@ public class SceneDeck : MonoBehaviour
     public bool HandleMessge(MessageInfo message)
     {
         return m_pStateMachine.HandleMessage(message);
+    }
+
+    public void SeigenNoTextUpdate()
+    {
+
+        // 効果持ちカードの数値
+        int iAbilityStrikerNom = 0;// PlayerDeckData.numStriker + PlayerDeckData.numJoker;
+        for (int i = 0; i < PlayerDeckData.numStriker; i++)
+        {
+            // 空き枠を探す
+            if (m_aMyDeckCard[i].GetComponent<uGUICard>().cardData.cardType == CardType.AbilityFighter)
+            {
+                iAbilityStrikerNom++;
+            }
+
+        }// 効果
+
+        SeigenNoText.text = iAbilityStrikerNom.ToString();
+        SeigenNoText.text += "/4";
+
+        if (iAbilityStrikerNom >= 5)
+        {
+            SeigenNoText.color = new Color(1, 0, 0, 1);
+        }
+        else {
+            SeigenNoText.color = new Color(1, 1, 1, 1);
+        }
+
     }
 
 }

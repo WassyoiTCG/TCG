@@ -853,6 +853,12 @@ namespace SceneMainState
                     {
                         pMain.PanelEffectMgr_Cpu.Action(PANEL_EFFECT_TYPE.ABILITY, CpuPos, CpuAngle);
                         pMain.PanelEffectMgr_My.Action(PANEL_EFFECT_TYPE.STAR, CpuPos, CpuAngle);
+
+
+                        // 効果持ち吹き出し
+                        pMain.uiManager.EFMonsterSummon.SetActive(true);
+                        pMain.uiManager.EFMonsterSummon.GetComponent<AlphaWave>().Action();
+
                     }
 
                     //pMain.UvEffectMgr.GetComponent<UVEffectManager>().Action(UV_EFFECT_TYPE.DOWN_STATUS, new Vector3(0, 0, 0), new Vector3(0, 0, 0));
