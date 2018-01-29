@@ -195,7 +195,7 @@ public class SceneMain : BaseNetworkScene
             offlinePlayers.SetActive(true);
             // プレイヤー初期化
             playerManager.Restart();
-            stateMachine.ChangeState(SceneMainState.SyncPlayerName.GetInstance());
+            stateMachine.ChangeState(SceneMainState.BattleStart.GetInstance());
         }
 
 

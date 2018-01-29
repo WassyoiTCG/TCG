@@ -93,16 +93,20 @@ namespace SceneLobbyState
                             charArray[i] = Convert.ToChar(info.iName[i]);
                         }
 
+                        string stringName = new string(charArray);
+
                         if ((NETWORK_TYPE)message.fromPlayerID == NETWORK_TYPE.HOST)
                         {
-                            e.hostWindow.SetPlayerName(new string(charArray));
+                            e.hostWindow.SetPlayerName(stringName);
                             e.hostWindow.SetPlayerActive(true);
                         }
                         if ((NETWORK_TYPE)message.fromPlayerID == NETWORK_TYPE.CLIENT)
                         {
-                            e.clientWindow.SetPlayerName(new string(charArray));
+                            e.clientWindow.SetPlayerName(stringName);
                             e.clientWindow.SetPlayerActive(true);
                         }
+                        // 相手の名前保存
+                        SelectData.cpuPlayerName = stringName;
                     }
                     return true;
                 case MessageType.ClickJunbiOK:

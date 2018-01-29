@@ -56,7 +56,7 @@ public class Player : MonoBehaviour
 
     public bool isPushedNextButton;
 
-    public string playerName = "";   // プレイヤー名
+    //public string playerName = "";   // プレイヤー名
     
     // ステートマシン用
     public int step;

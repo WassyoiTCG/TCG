@@ -22,7 +22,10 @@ public class BattleCardInfomation : MonoBehaviour
             frame.gameObject.SetActive(true);
             abilityText.text = data.abilityText;
         }
-
+        else
+        {
+            frame.gameObject.SetActive(false);
+        }
     }
 
     public void Stop()

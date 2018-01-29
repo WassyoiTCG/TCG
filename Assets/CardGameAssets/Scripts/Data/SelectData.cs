@@ -24,6 +24,8 @@ public static class SelectData
 
     public static int iMenuType = (int)(MENU_TYPE.TOTORIAL);
 
+    public static string cpuPlayerName;
+
     public static void Initialize()
     {
         isNetworkBattle = false;

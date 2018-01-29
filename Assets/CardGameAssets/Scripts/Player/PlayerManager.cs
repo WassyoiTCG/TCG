@@ -26,13 +26,13 @@ public class PlayerManager : MonoBehaviour
         return allOK;
     }
 
-    public bool isPlayerNameSync()
-    {
-        bool allOK = true;
-        foreach (Player player in players)
-            if (player.playerName == "") allOK = false;
-        return allOK;
-    }
+    //public bool isPlayerNameSync()
+    //{
+    //    bool allOK = true;
+    //    foreach (Player player in players)
+    //        if (player.playerName == "") allOK = false;
+    //    return allOK;
+    //}
 
     public bool isSyncDeckOK()
     {

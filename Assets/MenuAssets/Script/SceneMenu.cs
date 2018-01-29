@@ -315,6 +315,8 @@ public class SceneMenu : MonoBehaviour {
                 // 追加(SceneMainに飛ぶ)
                 m_bSceneChange = true;
                 SelectData.isNetworkBattle = false;
+                // CPU戦
+                SelectData.cpuPlayerName = "CPU";
                 SceneManager.LoadScene("Main");
                 break;
             case MENU_SPHERE_TYPE.NET_BATTLE:

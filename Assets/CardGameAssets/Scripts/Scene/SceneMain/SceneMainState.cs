@@ -193,7 +193,7 @@ namespace SceneMainState
                 pMain.playerManager.Restart();
 
                 // ステートチェンジ
-                pMain.ChangeState(SyncPlayerName.GetInstance());
+                pMain.ChangeState(BattleStart.GetInstance());
             }
         }
 
@@ -208,63 +208,63 @@ namespace SceneMainState
         }
     }
 
-    // 名前同期
-    public class SyncPlayerName : BaseEntityState<SceneMain>
-    {
-        static SyncPlayerName instance;
-        public static SyncPlayerName GetInstance() { if (instance == null) { instance = new SyncPlayerName(); } return instance; }
+    //// 名前同期
+    //public class SyncPlayerName : BaseEntityState<SceneMain>
+    //{
+    //    static SyncPlayerName instance;
+    //    public static SyncPlayerName GetInstance() { if (instance == null) { instance = new SyncPlayerName(); } return instance; }
 
-        public override void Enter(SceneMain pMain)
-        {
-            //// ★名前の設定と相手に名前を送る
-            //SyncNameInfo info = new SyncNameInfo();
-            ///*char[]*/ string playerName = PlayerDataManager.GetPlayerData().playerName/*.ToCharArray()*/;
-            ////info.cName = new char[64];
-            //if (playerName.Length >= 64)
-            //{
-            //    Debug.LogWarning("名前最大オーバー(64バイトまで)");
-            //    //info.cName[0] = 'N';
-            //    //info.cName[1] = 'o';
-            //    //info.cName[2] = 'N';
-            //    //info.cName[3] = 'a';
-            //    //info.cName[4] = 'm';
-            //    //info.cName[5] = 'e';
-            //    //info.cName[6] = '\0';
-            //    info.playerName = "NoName";
-            //}
-            //else
-            //{
-            //    //for (int i = 0; i < playerName.Length; i++)
-            //    //{
-            //    //    info.cName[i] = playerName[i];
-            //    //}
-            //    info.playerName = playerName;
-            //}
-            //MessageManager.Dispatch(pMain.playerManager.GetMyPlayerID(), MessageType.SyncName, info);
+    //    public override void Enter(SceneMain pMain)
+    //    {
+    //        //// ★名前の設定と相手に名前を送る
+    //        //SyncNameInfo info = new SyncNameInfo();
+    //        ///*char[]*/ string playerName = PlayerDataManager.GetPlayerData().playerName/*.ToCharArray()*/;
+    //        ////info.cName = new char[64];
+    //        //if (playerName.Length >= 64)
+    //        //{
+    //        //    Debug.LogWarning("名前最大オーバー(64バイトまで)");
+    //        //    //info.cName[0] = 'N';
+    //        //    //info.cName[1] = 'o';
+    //        //    //info.cName[2] = 'N';
+    //        //    //info.cName[3] = 'a';
+    //        //    //info.cName[4] = 'm';
+    //        //    //info.cName[5] = 'e';
+    //        //    //info.cName[6] = '\0';
+    //        //    info.playerName = "NoName";
+    //        //}
+    //        //else
+    //        //{
+    //        //    //for (int i = 0; i < playerName.Length; i++)
+    //        //    //{
+    //        //    //    info.cName[i] = playerName[i];
+    //        //    //}
+    //        //    info.playerName = playerName;
+    //        //}
+    //        //MessageManager.Dispatch(pMain.playerManager.GetMyPlayerID(), MessageType.SyncName, info);
 
-            pMain.playerManager.GetMyPlayer().playerName = "プレイヤー1";
-            pMain.playerManager.GetCPUPlayer().playerName = "プレイヤー2";
-        }
+    //        //pMain.playerManager.GetMyPlayer().playerName = PlayerDataManager.GetPlayerData().playerName;
+    //        //pMain.playerManager.GetCPUPlayer().playerName = "プレイヤー2";
+    //    }
 
-        public override void Execute(SceneMain pMain)
-        {
-            // 相手からの名前を受け取ったら終了
-            if (pMain.playerManager.isPlayerNameSync())
-            {
-                // ステートチェンジ
-                pMain.ChangeState(BattleStart.GetInstance());
-            }
-        }
+    //    public override void Execute(SceneMain pMain)
+    //    {
+    //        // 相手からの名前を受け取ったら終了
+    //        if (pMain.playerManager.isPlayerNameSync())
+    //        {
+    //            // ステートチェンジ
+    //            pMain.ChangeState(BattleStart.GetInstance());
+    //        }
+    //    }
 
-        public override void Exit(SceneMain pMain)
-        {
-        }
+    //    public override void Exit(SceneMain pMain)
+    //    {
+    //    }
 
-        public override bool OnMessage(SceneMain pMain, MessageInfo message)
-        {
-            return false;
-        }
-    }
+    //    public override bool OnMessage(SceneMain pMain, MessageInfo message)
+    //    {
+    //        return false;
+    //    }
+    //}
 
     // バトルスタートって出るステート
     public class BattleStart : BaseEntityState<SceneMain>
@@ -287,8 +287,8 @@ namespace SceneMainState
                 MessageManager.Dispatch(pMain.playerManager.GetMyPlayerID(), MessageType.SyncPoint, exInfo);
             }
             // プレイヤー名
-            pMain.turnEndEffect.nameText2.text = pMain.playerManager.GetMyPlayer().playerName;
-            pMain.turnEndEffect.nameText1.text = pMain.playerManager.GetCPUPlayer().playerName;
+            pMain.turnEndEffect.nameText2.text = PlayerDataManager.GetPlayerData().playerName;
+            pMain.turnEndEffect.nameText1.text = SelectData.cpuPlayerName;
             // バトルスタートエフェクト発動
             pMain.turnEndEffect.Action(PHASE_TYPE.BATTLE_START);
         }

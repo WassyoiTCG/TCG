@@ -10,7 +10,7 @@ public class AIController : MonoBehaviour
     void Start()
     {
         myPlayer = GetComponent<Player>();
-        myPlayer.playerName = "CPU";
+        //myPlayer.playerName = "CPU";
         Restart();
     }
 

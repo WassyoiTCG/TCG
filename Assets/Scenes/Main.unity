@@ -3050,7 +3050,6 @@ MonoBehaviour:
   isSyncDeck: 0
   isPushedJunbiKanryo: 0
   isPushedNextButton: 0
-  playerName: 
   step: 0
   isMarigan: 0
   waitTimer: 0
@@ -5527,7 +5526,6 @@ MonoBehaviour:
   isSyncDeck: 0
   isPushedJunbiKanryo: 0
   isPushedNextButton: 0
-  playerName: 
   step: 0
   isMarigan: 0
   waitTimer: 0
