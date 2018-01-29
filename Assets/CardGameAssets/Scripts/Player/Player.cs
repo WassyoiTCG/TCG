@@ -21,6 +21,13 @@ public class Player : MonoBehaviour
     }
     LimitPowerData limitPowerData = new LimitPowerData();
     public void SetLimitPowerData(LimitPowerData data) { limitPowerData = data; }
+    public void SetNoneLimitPower()
+    {
+        // ★リミット処理を解除
+        LimitPowerData data = new Player.LimitPowerData();
+        data.type = LimitPowerType.NoneLimit;
+        SetLimitPowerData(data);
+    }
     public LimitPowerData GetLimitPowerData() { return limitPowerData; }
 
     public float moveSpeed = 1;

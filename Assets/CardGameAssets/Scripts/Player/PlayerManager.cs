@@ -193,6 +193,12 @@ public class PlayerManager : MonoBehaviour
             player.AttackStriker();
     }
 
+    public void LimitReset()
+    {
+        foreach (Player player in players)
+            player.SetNoneLimitPower();
+    }
+
     public void ActionIntercept()
     {
         var card0 = players[0].GetFieldEventCard();

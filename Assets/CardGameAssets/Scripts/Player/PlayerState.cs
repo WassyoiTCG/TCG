@@ -328,10 +328,10 @@ namespace PlayerState
             // UI更新
             player.playerManager.uiManager.UpdateDeckUI(player.deckManager, player.isMyPlayer);
 
-            // ★リミット処理を解除
-            Player.LimitPowerData data = new Player.LimitPowerData();
-            data.type = Player.LimitPowerType.NoneLimit;
-            player.SetLimitPowerData(data);
+            //// ★リミット処理を解除
+            //Player.LimitPowerData data = new Player.LimitPowerData();
+            //data.type = Player.LimitPowerType.NoneLimit;
+            //player.SetLimitPowerData(data);
         }
 
         public override void Execute(Player player)

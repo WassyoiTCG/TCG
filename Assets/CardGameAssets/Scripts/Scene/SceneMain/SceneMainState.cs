@@ -729,6 +729,8 @@ namespace SceneMainState
 
             pMain.iWaitFrame = 0; // 初期化
 
+            // ★ここでプレイヤーのリミットを解除する
+            pMain.playerManager.LimitReset();
         }
 
         public override void Execute(SceneMain pMain)
