@@ -1082,8 +1082,31 @@ public class CardObjectManager : MonoBehaviour
     }
 
     // CPUが出す用
-    public int GetHandNoRandomStriker()
+    public int GetHandNoRandomStriker(AI_CARD_GRADE grade)
     {
+        Func<CardData, bool> check = (card) =>
+        {
+            switch (grade)
+            {
+                case AI_CARD_GRADE.LOW: // 1～3
+                    if (card.cardType == CardType.Joker) return false;
+                    return (card.power <= 3);
+                case AI_CARD_GRADE.MIDDLE:  // 4～7
+                    if (card.cardType == CardType.Joker) return false;
+                    return (card.power <= 7 && card.power >= 4);
+                case AI_CARD_GRADE.HIGH:    // ジョーカーor8～10
+                    if (card.cardType == CardType.Joker) return true;
+                    return (card.power <= 10 && card.power >= 8);
+                case AI_CARD_GRADE.RANDOM:  // 完全ランダム(従来)
+                    return true;
+                default:
+                    Debug.LogWarning("意図しない値 - CPUカードグレード");
+                    break;
+            }
+
+            return true;
+        };
+
         int[] randomArray = oulRandom.GetRandomArray(0, handCards.Count);
 
         foreach (int r in randomArray)
@@ -1091,8 +1114,14 @@ public class CardObjectManager : MonoBehaviour
             if (handCards[r].cardData.isEventCard()) continue;
             // 選択できないストライカーはスルーする
             if (handCards[r].notSelectFlag) continue;
+            // ★出てる点数カードによって若干絞り込む
+            if (!check(handCards[r].cardData)) continue;
             return r;
         }
+
+        // 対応するグレードのカードを持っていないので、完全ランダムで出す
+        if(grade != AI_CARD_GRADE.RANDOM)
+            return GetHandNoRandomStriker(AI_CARD_GRADE.RANDOM);
 
         // 持ってない
         return (int)IDType.NONE;

@@ -132,10 +132,12 @@ namespace SceneMainState
                     break;
 
                 case MessageType.EndGame:
+                    // 曲終了
+                    oulAudio.StopBGM();
                     //Application.Quit();
                     // ネットワーク終了
                     // 多分ここでサーバーを切っているから、向こうに届く前にこっちだけ終了してしまってる
-                    if(SelectData.isNetworkBattle)
+                    if (SelectData.isNetworkBattle)
                     {
                         //pMain.networkManager.Stop();
                         SceneManager.LoadScene("NetworkLobby");

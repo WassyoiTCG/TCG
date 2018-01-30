@@ -6,9 +6,11 @@ public class AIController : MonoBehaviour
 {
     Player myPlayer;                  // コントロールするプレイヤーの実体
     bool isMarigan;
+    PointCardManager pointManager;
 
     void Start()
     {
+        pointManager = GameObject.Find("GameMain").GetComponent<SceneMain>().pointManager;
         myPlayer = GetComponent<Player>();
         //myPlayer.playerName = "CPU";
         Restart();
@@ -31,7 +33,6 @@ public class AIController : MonoBehaviour
                 isMarigan = true;
             }
         }
-
         else if(myPlayer.stateMachine.isInState(PlayerState.SetStriker.GetInstance()))
         {
             SetStrikerUpdate();
@@ -46,7 +47,13 @@ public class AIController : MonoBehaviour
 
     void SetStrikerUpdate()
     {
-        if (myPlayer.isSetStriker()) return;
+        if (myPlayer.isSetStriker())
+        {
+            // サポートパス復活対策
+            if (!myPlayer.isPushedJunbiKanryo)
+                myPlayer.JunbiKanryoON();
+            return;
+        }
 
         // 手札にセットできるやつがいなかったらパス
         if(!myPlayer.isHaveStrikerCard())
@@ -56,8 +63,16 @@ public class AIController : MonoBehaviour
             return;
         }
 
-        // 手札からランダムでセットする
-        int r = /*Random.Range(0, myPlayer.deckManager.GetNumHand() - 1)*/ myPlayer.cardObjectManager.GetHandNoRandomStriker();
+        // 出てる点数カードに応じて、出すカードのグレードを設定する
+        AI_CARD_GRADE grade;
+        int currentPoint = pointManager.GetCurrentPoint();
+        if (currentPoint <= 30) grade = AI_CARD_GRADE.LOW;
+        else if (currentPoint <= 70) grade = AI_CARD_GRADE.MIDDLE;
+        else if (currentPoint <= 100) grade = AI_CARD_GRADE.HIGH;
+        else grade = AI_CARD_GRADE.RANDOM;
+
+        // 手札からグレードに対応するカードを取得
+        int r = myPlayer.cardObjectManager.GetHandNoRandomStriker(grade);
 
         // ex構造体作成
         SelectCardIndexInfo exInfo = new SelectCardIndexInfo();

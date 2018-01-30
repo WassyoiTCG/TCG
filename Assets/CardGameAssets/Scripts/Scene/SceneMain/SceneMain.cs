@@ -94,12 +94,12 @@ public class SceneMain : BaseNetworkScene
 	}
 
     // 終了時
-    void OnDisable()
-    {
-        //  BGM
-        oulAudio.StopBGM();
+    //void OnDisable()
+    //{
+    //    //  BGM
+    //    oulAudio.StopBGM();
 
-    }
+    //}
 
     // Update is called once per frame
     void Update ()
