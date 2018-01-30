@@ -20,6 +20,8 @@ public class CardObjectManager : MonoBehaviour
     public Vector3 handShift;           // カード位置補正
     public Vector3 handCardDir;         // カードの向き(法線的な)
 
+    public DeckManager deckManager;
+
     readonly Vector3 yamahudaField = new Vector3(15, 0, -7);      // 山札の位置
     readonly Vector3 strikerField = new Vector3(0, 0, -4);     // ストライカーカードをセットする位置
     readonly Vector3 eventField = new Vector3(-5, 0, -4);       // イベントカードをセットする位置
@@ -63,8 +65,10 @@ public class CardObjectManager : MonoBehaviour
     }
 
 
-    public void Restart()
+    public void Restart(DeckManager deckManager)
     {
+        this.deckManager = deckManager;
+
         // 共通処理なのでラムダ
         Func<Card, int> addYamahuda = (card) => 
         {

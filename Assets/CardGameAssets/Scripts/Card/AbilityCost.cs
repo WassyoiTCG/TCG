@@ -833,6 +833,14 @@ namespace Cost
                 JoukenOK(abilityData);
             else
                 JoukenNG(abilityData);
+        }
+
+        void JoukenOK(CardAbilityData abilityData)
+        {
+            // 成功時の効果に移行
+            abilityData.skillNumber = abilityData.c_value2;
+
+            // Ability列車 パワー条件成功時
 
             // [1216] ゴリ　効果がモンスターかイベントか知りたい 
             // Ability列車 仲間と共に発動した瞬間
@@ -846,16 +854,6 @@ namespace Cost
 
             // 効果発動SE
             oulAudio.PlaySE("action_ability");
-
-        }
-
-        void JoukenOK(CardAbilityData abilityData)
-        {
-            // 成功時の効果に移行
-            abilityData.skillNumber = abilityData.c_value2;
-
-            // Ability列車 パワー条件成功時
-
         }
         void JoukenNG(CardAbilityData abilityData)
         {
@@ -863,7 +861,9 @@ namespace Cost
             abilityData.skillNumber = abilityData.c_value3;
 
             // Ability列車 パワー条件失敗時
-
+            // 終了
+            endFlag = true;
+            abilityData.isJoukenOK = true;
         }
 
         public override void Execute(CardAbilityData abilityData)
@@ -898,7 +898,7 @@ namespace Cost
         public static PowerStriker GetInstance() { if (instance == null) { instance = new PowerStriker(); } return instance; }
 
         Card suteCard;
-        int selectHandIndex;
+        //int selectHandIndex;
 
         int iFrame = 0;
 
@@ -928,6 +928,29 @@ namespace Cost
             // (TODO)手札からドローする番号を決定(無造作)
             if (abilityData.isMyPlayer || !SelectData.isNetworkBattle)
             {
+                var deckManager = abilityData.myPlayer.deckManager;
+                var numHand = deckManager.GetNumHand();
+                var selectHandIndex = (int)IDType.NONE;
+                for (int i = 0; i < numHand; i++)
+                {
+                    var card = deckManager.GetHandCard(i);
+                    if (card.isEventCard()) continue;
+                    // 条件満たしたら
+                    if (CheckRange((PowerRange)abilityData.c_value1, card.power, abilityData.c_value0))
+                    {
+                        selectHandIndex = i;
+                        break;
+                    }
+                }
+
+                if(selectHandIndex == (int)IDType.NONE)
+                {
+                    Debug.LogWarning("炎の剣の捨て札で意図しない値");
+                    // 終了
+                    abilityData.isJoukenOK = true;
+                    endFlag = true;
+                }
+
                 SelectCardIndexInfo info = new SelectCardIndexInfo();
                 info.index = selectHandIndex;
                 // メッセージ送信
@@ -1018,7 +1041,7 @@ namespace Cost
                 // 条件満たしたら
                 if (CheckRange((PowerRange)abilityData.c_value1, card.power, abilityData.c_value0))
                 {
-                    selectHandIndex = i;
+                    //selectHandIndex = i;
                     return true;
                 }
             }

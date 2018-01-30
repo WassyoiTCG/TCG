@@ -541,11 +541,11 @@ public static class MessageManager
 
     public static void Update()
     {
-        if (!oulNetwork.s_Singleton.isNetworkActive) return;
         // 処理待ち中は無視
         if (!messageSyoriSitemoii) return;
         // メッセージ何もなかったら
         if (messageBox.Count == 0) return;
+        if (!oulNetwork.s_Singleton.isNetworkActive) return;
         // 一定間隔(Remessage送りすぎないように)
         //if ((timer += Time.deltaTime) < kankaku)
         //{

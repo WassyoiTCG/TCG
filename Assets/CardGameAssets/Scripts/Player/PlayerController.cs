@@ -85,6 +85,20 @@ public class PlayerController : NetworkBehaviour
         cardSetOK = false;
         holdHandNo = noHoldCard;
     }
+
+	public void InfomationOff()
+{
+            // 残りポイント閉じる
+            if (myPlayer.playerManager.uiManager.remainingPoints.gameObject.activeSelf)
+                myPlayer.playerManager.uiManager.remainingPoints.TouchEnded();
+            // 墓地情報閉じる
+            if (myPlayer.playerManager.uiManager.cemeteryInfoUIManager.gameObject.activeSelf)
+                myPlayer.playerManager.uiManager.cemeteryInfoUIManager.DisAppear();
+            // 墓地ホールドフラグOFF
+            isCemeteryHold = false;
+            // インフォメーション非表示
+            myPlayer.playerManager.uiManager.DisAppearBattleCardInfomation();
+}
 	
 	// Update is called once per frame
 	void Update ()
@@ -255,18 +269,9 @@ public class PlayerController : NetworkBehaviour
             }
         }
         // 離した瞬間
-        if(oulInput.GetTouchState() == oulInput.TouchState.Ended)
+        if (oulInput.GetTouchState() == oulInput.TouchState.Ended)
         {
-            // 残りポイント閉じる
-            if (myPlayer.playerManager.uiManager.remainingPoints.gameObject.activeSelf)
-                myPlayer.playerManager.uiManager.remainingPoints.TouchEnded();
-            // 墓地情報閉じる
-            if (myPlayer.playerManager.uiManager.cemeteryInfoUIManager.gameObject.activeSelf)
-                myPlayer.playerManager.uiManager.cemeteryInfoUIManager.DisAppear();
-            // 墓地ホールドフラグOFF
-            isCemeteryHold = false;
-            // インフォメーション非表示
-            myPlayer.playerManager.uiManager.DisAppearBattleCardInfomation();
+            InfomationOff();
         }
     }
 

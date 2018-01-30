@@ -105,7 +105,7 @@ namespace CardObjectState
             card.cacheTransform.localEulerAngles = card.startAngle;
 
             // 大丈夫だと思うが一応表状態にしとく
-            card.SetUraomote(true);
+            card.SetUraomote(false);
         }
 
         public override void Execute(Card card)
@@ -131,7 +131,7 @@ namespace CardObjectState
             card.cacheTransform.localEulerAngles = angle;
 
             // 半分過ぎたらとりあえずて感じで(相手サイドのときは表にする必要なし)
-            if (card.isMyPlayerSide) if (rate > 0.5f) card.SetUraomote(true);
+            //if (card.isMyPlayerSide) if (rate > 0.5f) card.SetUraomote(true);
         }
         public override void Exit(Card card)
         {
@@ -349,7 +349,8 @@ namespace CardObjectState
                     abilityManager.PushAbility(ability, card.isMyPlayerSide);
                 }
                 // ステートチェンジ
-                card.MoveToCemetery();
+                //card.MoveToCemetery();
+                card.cardObjectManager.deckManager.AddBochi(card);
                 return;
             }
 

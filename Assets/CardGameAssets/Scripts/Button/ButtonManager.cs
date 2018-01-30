@@ -45,7 +45,8 @@ public class ButtonManager : MonoBehaviour
         // SE
         oulAudio.PlaySE("decide2");
 
-        uiManager.cemeteryInfoUIManager.ShowExplusionInfo();
+        Debug.LogWarning("この関数は使用してはいけない");
+        //uiManager.cemeteryInfoUIManager.ShowExplusionInfo();
     }
 
     //public void OnClickHostGame()

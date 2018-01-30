@@ -250,6 +250,7 @@ MonoBehaviour:
   DeckSetInfo: {fileID: 1574702068488760}
   EventFullInfo: {fileID: 1656292795181074}
   AbilityFullInfo: {fileID: 1536858921873304}
+  canvasGroup: {fileID: 225740441608935302}
 --- !u!114 &114099162342899920
 MonoBehaviour:
   m_ObjectHideFlags: 1

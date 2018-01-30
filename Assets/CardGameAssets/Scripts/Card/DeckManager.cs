@@ -15,7 +15,7 @@ public class DeckManager
     List<CardData> hand = new List<CardData>();                         // 手札
     List<CardData> yamahuda = new List<CardData>();                     // 山札
     List<CardData> cemetery = new List<CardData>();                     // 墓地
-    Queue<CardData> expulsion = new Queue<CardData>();                  // 追放
+    List<CardData> expulsion = new List<CardData>();                  // 追放
 
     private List<CardData> haveAbilityCards = new List<CardData>();     // 所持効果持ちモンスター
 
@@ -103,7 +103,7 @@ public class DeckManager
 
         fieldStrikerCard = null;
         fieldEventCard = null;
-        cardObjectManager.Restart();
+        cardObjectManager.Restart(this);
     }
 
     public void SetDeckData(PlayerDeckData deckData, bool updateCardObject = true)
@@ -282,7 +282,7 @@ public class DeckManager
 
     public void AddExpulsion(Card card)
     {
-        expulsion.Enqueue(card.cardData);
+        expulsion.Add(card.cardData);
         cardObjectManager.AddExpulsion(card);
     }
 
@@ -329,12 +329,9 @@ public class DeckManager
 
     public List<CardData> GetCemeteryCards() { return cemetery; }
 
-    public CardData GetExpulsionCard(int tuihouNo)
-    {
-        return expulsion.ToArray()[tuihouNo];
-    }
+    public CardData GetExpulsionCard(int tuihouNo){ return expulsion[tuihouNo]; }
 
-    public CardData[] GetExpulsionCards() { return expulsion.ToArray(); }
+    public List<CardData> GetExpulsionCards() { return expulsion; }
 
     public List<CardData> GetHaveAbilityCards() { return haveAbilityCards; }
 

@@ -15,6 +15,7 @@ public class uGUICard : MonoBehaviour
     public GameObject DeckSetInfo;
     public GameObject EventFullInfo;
     public GameObject AbilityFullInfo;
+    public CanvasGroup canvasGroup;     // α設定用
 
     public CardData cardData;// (TODO)カードデータの情報いれるよ
 

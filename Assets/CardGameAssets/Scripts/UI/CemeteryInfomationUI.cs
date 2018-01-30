@@ -20,7 +20,7 @@ public class CemeteryInfomationUI : MonoBehaviour
 
     uGUICard[] uguiCards = new uGUICard[15];
     List<CardData> cemeteryCards;
-    CardData[] expulsionCards;
+    List<CardData> expulsionCards;
 
     const float offsetX = -380;
     const float offsetY = 40;
@@ -53,7 +53,7 @@ public class CemeteryInfomationUI : MonoBehaviour
         }
     }
 
-    public void Appear(List<CardData> cemetery, CardData[] expulsion)
+    public void Appear(List<CardData> cemetery, List<CardData> expulsion)
     {
         gameObject.SetActive(true);
         cemeteryCards = cemetery;
@@ -64,7 +64,7 @@ public class CemeteryInfomationUI : MonoBehaviour
     public void ShowCemeteryInfo()
     {
         // 墓地データセット
-        SetDatas(cemeteryCards);
+        SetDatas(cemeteryCards, expulsionCards);
 
         cemeteryInfoFrame.sprite = spriteCemeteryFrame;
 
@@ -73,75 +73,84 @@ public class CemeteryInfomationUI : MonoBehaviour
         expulsionButton.transform.SetSiblingIndex(1);
         expulsionButton.GetComponent<Image>().sprite = spriteExpulsionOFF;
     }
-    public void ShowExplusionInfo()
-    {
-        // 追放データセット
-        SetDatas(expulsionCards);
+    //public void ShowExplusionInfo()
+    //{
+    //    // 追放データセット
+    //    SetDatas(expulsionCards);
 
-        cemeteryInfoFrame.sprite = spriteExpulsionFrame;
+    //    cemeteryInfoFrame.sprite = spriteExpulsionFrame;
 
-        cemeteryButton.GetComponent<Image>().sprite = spriteCemeteryOFF;
-        // 描画順変更
-        cemeteryButton.transform.SetSiblingIndex(1);
-        expulsionButton.GetComponent<Image>().sprite = spriteExpulsionON;
-    }
+    //    cemeteryButton.GetComponent<Image>().sprite = spriteCemeteryOFF;
+    //    // 描画順変更
+    //    cemeteryButton.transform.SetSiblingIndex(1);
+    //    expulsionButton.GetComponent<Image>().sprite = spriteExpulsionON;
+    //}
 
     public void DisAppear()
     {
         gameObject.SetActive(false);
     }
 
-    public void SetDatas(CardData[] datas)
-    {
-        // パワー順にソートする
-        List<CardData> list = new List<CardData>();
-        //foreach (CardData card in datas) list.Add(card);
-        list.AddRange(datas);
-        //list.Sort(((a, b) => a.power - b.power));
+    //public void SetDatas(CardData[] cemeteryDatas, CardData[] expulsionDatas)
+    //{
+    //    // パワー順にソートする
+    //    List<CardData> list = new List<CardData>();
+    //    //foreach (CardData card in datas) list.Add(card);
+    //    list.AddRange(cemeteryDatas);
+    //    //list.Sort(((a, b) => a.power - b.power));
 
-        //for (int i = 0; i < list.Count - 1; i++)
-        //{
-        //    for (int j = i + 1; j < list.Count; j++)
-        //    {
-        //        if (!list[j].isStrikerCard()) continue;
-        //        if(list[i].power > list[j].power)
-        //        {
-        //            list.Sort();
-        //        }
-        //    }
+    //    //for (int i = 0; i < list.Count - 1; i++)
+    //    //{
+    //    //    for (int j = i + 1; j < list.Count; j++)
+    //    //    {
+    //    //        if (!list[j].isStrikerCard()) continue;
+    //    //        if(list[i].power > list[j].power)
+    //    //        {
+    //    //            list.Sort();
+    //    //        }
+    //    //    }
 
-        //}
+    //    //}
 
-        for (int i = 0; i < 15; i++)
-        {
-            if (i >= list.Count)
-            {
-                uguiCards[i].gameObject.SetActive(false);
-            }
-            else
-            {
-                uguiCards[i].SetCardData(list[i]);
-                uguiCards[i].gameObject.SetActive(true);
-            }
-        }
-    }
+    //    for (int i = 0; i < 15; i++)
+    //    {
+    //        if (i >= list.Count)
+    //        {
+    //            uguiCards[i].gameObject.SetActive(false);
+    //        }
+    //        else
+    //        {
+    //            uguiCards[i].SetCardData(list[i]);
+    //            uguiCards[i].gameObject.SetActive(true);
+    //        }
+    //    }
+    //}
 
-    public void SetDatas(List<CardData> datas)
+    public void SetDatas(List<CardData> cemeteryDatas, List<CardData> expulsionDatas)
     {
         // パワー順にソートする
         //datas.Sort(((a, b) => a.power - b.power));
 
         for (int i = 0; i < 15; i++)
         {
-            if (i >= datas.Count)
+            if (i >= cemeteryDatas.Count)
             {
                 uguiCards[i].gameObject.SetActive(false);
             }
             else
             {
-                uguiCards[i].SetCardData(datas[i]);
+                uguiCards[i].SetCardData(cemeteryDatas[i]);
+                uguiCards[i].canvasGroup.alpha = 1.0f;
                 uguiCards[i].gameObject.SetActive(true);
             }
+        }
+        for (int i = cemeteryDatas.Count; i < cemeteryDatas.Count + expulsionCards.Count; i++)
+        {
+            var expulsionData = expulsionDatas[i - cemeteryDatas.Count];
+            uguiCards[i].SetCardData(expulsionData);
+            // α値を若干下げる
+            uguiCards[i].canvasGroup.alpha = 0.5f;
+            uguiCards[i].gameObject.SetActive(true);
         }
     }
 

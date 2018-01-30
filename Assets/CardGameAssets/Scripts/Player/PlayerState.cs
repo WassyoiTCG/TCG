@@ -160,6 +160,12 @@ namespace PlayerState
             //Player.LimitPowerData data = new Player.LimitPowerData();
             //data.type = Player.LimitPowerType.NoneLimit;
             //player.SetLimitPowerData(data);
+
+            // 情報を閉じる
+            if (player.isMyPlayer)
+            {
+                player.GetComponent<PlayerController>().InfomationOff();
+            }
         }
 
         public override bool OnMessage(Player player, MessageInfo message)
@@ -225,6 +231,12 @@ namespace PlayerState
         public override void Exit(Player player)
         {
             player.playerManager.uiManager.DisAppearWaitYouUI();
+
+		// 情報を閉じる
+            if (player.isMyPlayer)
+            {
+                player.GetComponent<PlayerController>().InfomationOff();
+            }
         }
 
         public override bool OnMessage(Player player, MessageInfo message)

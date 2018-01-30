@@ -1097,10 +1097,6 @@ Prefab:
       propertyPath: m_Pivot.y
       value: 0.5
       objectReference: {fileID: 0}
-    - target: {fileID: 1002418693592858, guid: ec2077b4d30b3d34fbffa5a50b7283a9, type: 2}
-      propertyPath: m_IsActive
-      value: 1
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: ec2077b4d30b3d34fbffa5a50b7283a9, type: 2}
   m_IsPrefabParent: 0
@@ -3420,6 +3416,7 @@ MonoBehaviour:
   DeckSetInfo: {fileID: 1446494565}
   EventFullInfo: {fileID: 663297224}
   AbilityFullInfo: {fileID: 0}
+  canvasGroup: {fileID: 0}
 --- !u!114 &1661492131
 MonoBehaviour:
   m_ObjectHideFlags: 0
