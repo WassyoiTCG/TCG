@@ -537,6 +537,106 @@ namespace SceneMainState
             if (pMain.playerManager.isStateEnd())
             {
                 // ステートチェンジ
+                pMain.ChangeState(KeptCreate.GetInstance());
+            }
+        }
+
+        public override void Exit(SceneMain pMain)
+        { }
+
+        public override bool OnMessage(SceneMain pMain, MessageInfo message)
+        {
+            return false;
+        }
+    }
+
+    // とどめを生成するステート
+    public class KeptCreate : BaseEntityState<SceneMain>
+    {
+        // Singleton.
+        static KeptCreate instance;
+        public static KeptCreate GetInstance() { if (instance == null) { instance = new KeptCreate(); } return instance; }
+
+        public override void Enter(SceneMain pMain)
+        {
+            // 自分のHPが表示されている点数以下なら
+            if(pMain.uiManager.myLP.iLP <= pMain.pointManager.GetCurrentPoint())
+            {
+                Player cpuPlayer = pMain.playerManager.GetCPUPlayer();
+                KEPTCARD_TYPE keptType = (KEPTCARD_TYPE)cpuPlayer.iKeptCardType;
+
+                // とどめ最終段階までいってないなら
+                if (keptType != KEPTCARD_TYPE.END)
+                {
+                    // 相手にとどめカードを生成する
+                    CardAbilityData ability = new CardAbilityData();
+                    ability.abilityTriggerType = AbilityTriggerType.EventCard;
+                    ability.cost = new Cost.NoneLimit();
+                    ability.costType = CostType.NoneLimit;
+                    ability.numSkill = 1;
+                    ability.skillDatas = new CardAbilityData.SkillData[1];
+                    ability.skillDatas[0] = new CardAbilityData.SkillData();
+                    ability.skillDatas[0].nextSkillNumber = -1;
+                    ability.skillDatas[0].skill = new Skill.CardMove();
+                    ability.skillDatas[0].s_iValue0 = 4;    // 生成
+                    ability.skillDatas[0].s_iValue1 = 0;    // 自分
+                    ability.skillDatas[0].s_iValue2 = (int)cpuPlayer.iKeptCardType;  // 生成カードID  
+                    ability.skillDatas[0].s_iValue3 = 0;    // 手札に
+                    ability.skillDatas[0].s_iValue4 = 0;    // 自分
+
+                    // 生成アビリティ発動
+                    pMain.abilityManager.PushAbility(ability, cpuPlayer.isMyPlayer);
+
+                    // 次のとどめLv
+                    cpuPlayer.iKeptCardType++;
+                }
+            }
+
+            // 相手のHPが表示されている点数以下なら
+            if (pMain.uiManager.cpuLP.iLP <= pMain.pointManager.GetCurrentPoint())
+            {
+                Player myPlayer = pMain.playerManager.GetMyPlayer();
+
+                KEPTCARD_TYPE keptType = (KEPTCARD_TYPE)myPlayer.iKeptCardType;
+
+                // とどめ最終段階までいってないなら
+                if (keptType != KEPTCARD_TYPE.END)
+                {
+                    // 自分にとどめカードを生成する
+                    CardAbilityData ability = new CardAbilityData();
+                    ability.abilityTriggerType = AbilityTriggerType.EventCard;
+                    ability.cost = new Cost.NoneLimit();
+                    ability.costType = CostType.NoneLimit;
+                    ability.numSkill = 1;
+                    ability.skillDatas = new CardAbilityData.SkillData[1];
+                    ability.skillDatas[0] = new CardAbilityData.SkillData();
+                    ability.skillDatas[0].nextSkillNumber = -1;
+                    ability.skillDatas[0].skill = new Skill.CardMove();
+                    ability.skillDatas[0].s_iValue0 = 4;    // 生成
+                    ability.skillDatas[0].s_iValue1 = 0;    // 自分
+                    ability.skillDatas[0].s_iValue2 = (int)myPlayer.iKeptCardType;  // 生成カードID  
+                    ability.skillDatas[0].s_iValue3 = 0;    // 手札に
+                    ability.skillDatas[0].s_iValue4 = 0;    // 自分
+
+                    // 生成アビリティ発動
+                    pMain.abilityManager.PushAbility(ability, myPlayer.isMyPlayer);
+
+                    // 次のとどめLv
+                    myPlayer.iKeptCardType++;
+                }
+            }
+        }
+
+        public override void Execute(SceneMain pMain)
+        {
+            // ごりくんをかくのはたのしい(カードが動いている状態(サポートを出す時の)だったらまだ処理扱い)
+            if (pMain.playerManager.GetMyPlayer().cardObjectManager.isInMovingState()) return;
+            if (pMain.playerManager.GetCPUPlayer().cardObjectManager.isInMovingState()) return;
+
+            // 効果の処理が終わったら
+            if (pMain.abilityManager.isAbilityEnd())
+            {
+                // 前のステートに戻る
                 pMain.ChangeState(SetStriker.GetInstance());
             }
         }

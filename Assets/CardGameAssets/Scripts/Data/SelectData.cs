@@ -14,6 +14,14 @@ enum CHANGE_LINE_TYPE { BACK,NEXT, END };
 
 public enum NETWORK_TYPE { HOST,CLIENT };
 
+public enum KEPTCARD_TYPE
+{
+    FIRST,      // ファーストカーズ
+    SECOND,     // セカンドカーズ
+    FINAL,      // ファイナルカーズ
+    END
+}
+
 
 public static class SelectData
 {

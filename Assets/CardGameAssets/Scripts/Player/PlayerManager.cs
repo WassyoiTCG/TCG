@@ -338,12 +338,12 @@ public class PlayerManager : MonoBehaviour
             // パワーどっちも同じだった
             else
             {
-                // 体力が低い人から発動する
-                if(uiManager.myLP.iLP < uiManager.cpuLP.iLP)
+                // 体力が高い人から発動する
+                if(uiManager.myLP.iLP > uiManager.cpuLP.iLP)
                 {
                     myPlayerFirst();
                 }
-                else if(uiManager.cpuLP.iLP < uiManager.myLP.iLP)
+                else if(uiManager.cpuLP.iLP > uiManager.myLP.iLP)
                 {
                     cpuPlayerFirst();
                 }

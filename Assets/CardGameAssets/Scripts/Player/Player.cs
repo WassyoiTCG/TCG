@@ -64,6 +64,9 @@ public class Player : MonoBehaviour
     public int step;
     public bool isMarigan;
 
+    // とどめの一撃カウント用
+    public int iKeptCardType;
+
 
 
     public void JunbiKanryoON()
@@ -217,6 +220,7 @@ public class Player : MonoBehaviour
         isSyncDeck = false;
         isPushedJunbiKanryo = false;
         limitPowerData.type = LimitPowerType.NoneLimit;
+        iKeptCardType = (int)KEPTCARD_TYPE.FIRST;
     }
 	
 	// Update is called once per frame

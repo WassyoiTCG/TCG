@@ -238,11 +238,13 @@ public enum CardMoveFlag
 
 public static class CardDataBase
 {
-    static CardData[] cardDatas;
+    static Queue<CardData> cardDatas;
+    static Queue<CardData> createOnlyCardDatas;
     static CardData[] sortedCardDatas;
     static CardData missingCard;    // 欠番用のカード
+    //static CardData[] keptCards;       // とどめの一撃カード
 
-    public static CardData[] GetCardList() { return cardDatas; }
+    public static CardData[] GetCardList() { return cardDatas.ToArray(); }
     public static CardData[] GetDeckSortedCardData()
     {
         // デッキセレクト用のソートを作成
@@ -263,17 +265,19 @@ public static class CardDataBase
         //}
 
         // けつばん
-        if(id < 0 || id >= cardDatas.Length)
+        if(id < 0 || id >= cardDatas.Count)
         {
             return missingCard;
         }
-        return cardDatas[id];
+        return cardDatas.ToArray()[id];
     }
+
+    public static CardData GetCreateOnlyCardData(int id) { return createOnlyCardDatas.ToArray()[id]; }
 
     public static CardData GetSortedCardData(int id)
     {
         // けつばん
-        if (id < 0 || id >= cardDatas.Length)
+        if (id < 0 || id >= cardDatas.Count)
         {
             return missingCard;
         }
@@ -325,6 +329,39 @@ public static class CardDataBase
         missingCard.flavorText = "宝箱から全てが始まった。";
         missingCard.cardName = "欠番ニキ";
         missingCard.image = Resources.Load<Sprite>("Sprites/MissingImage")/*.texture*/;
+
+        //// ファーストカーズ
+        //keptCards[(int)KEPTCARD_TYPE.FIRST] = new CardData();
+        //keptCards[(int)KEPTCARD_TYPE.FIRST].id = 0;
+        //keptCards[(int)KEPTCARD_TYPE.FIRST].cardType = CardType.Intercept;
+        //keptCards[(int)KEPTCARD_TYPE.FIRST].power = 0;
+        //keptCards[(int)KEPTCARD_TYPE.FIRST].abilityText = "自分のモンスターのパワーを1上げる。";
+        //keptCards[(int)KEPTCARD_TYPE.FIRST].flavorText = "ファーストカーズ";
+        //keptCards[(int)KEPTCARD_TYPE.FIRST].cardName = "とどめの一撃 Lv1";
+        //keptCards[(int)KEPTCARD_TYPE.FIRST].image = Resources.Load<Sprite>("Sprites/MissingImage");
+        //keptCards[(int)KEPTCARD_TYPE.FIRST].interceptCard = new InterceptCard();
+        //keptCards[(int)KEPTCARD_TYPE.FIRST].interceptCard.abilityDatas = new CardAbilityData[1];
+        //keptCards[(int)KEPTCARD_TYPE.FIRST].interceptCard.abilityDatas[0].;
+
+        //// セカンドカーズ
+        //keptCards[(int)KEPTCARD_TYPE.FIRST] = new CardData();
+        //keptCards[(int)KEPTCARD_TYPE.FIRST].id = 1;
+        //keptCards[(int)KEPTCARD_TYPE.FIRST].cardType = CardType.Intercept;
+        //keptCards[(int)KEPTCARD_TYPE.FIRST].power = 0;
+        //keptCards[(int)KEPTCARD_TYPE.FIRST].abilityText = "自分のモンスターのパワーを3上げる。";
+        //keptCards[(int)KEPTCARD_TYPE.FIRST].flavorText = "セカンドカーズ";
+        //keptCards[(int)KEPTCARD_TYPE.FIRST].cardName = "とどめの一撃 Lv2";
+        //keptCards[(int)KEPTCARD_TYPE.FIRST].image = Resources.Load<Sprite>("Sprites/MissingImage");
+
+        //// ファイナルカーズ
+        //keptCards[(int)KEPTCARD_TYPE.FIRST] = new CardData();
+        //keptCards[(int)KEPTCARD_TYPE.FIRST].id = 2;
+        //keptCards[(int)KEPTCARD_TYPE.FIRST].cardType = CardType.Intercept;
+        //keptCards[(int)KEPTCARD_TYPE.FIRST].power = 0;
+        //keptCards[(int)KEPTCARD_TYPE.FIRST].abilityText = "自分のモンスターのパワーを5上げる。";
+        //keptCards[(int)KEPTCARD_TYPE.FIRST].flavorText = "ファイナルカーズ";
+        //keptCards[(int)KEPTCARD_TYPE.FIRST].cardName = "とどめの一撃 Lv3";
+        //keptCards[(int)KEPTCARD_TYPE.FIRST].image = Resources.Load<Sprite>("Sprites/MissingImage");
 
         // ビットマスク初期化
         sortBitMask = new BitVector32(0);
@@ -428,12 +465,16 @@ public static class CardDataBase
         string[] subFolders = oulFile.EnumDirectory(directory);
 
         // 曲の分の配列確保
-        cardDatas = new CardData[subFolders.Length];
+        //cardDatas = new CardData[subFolders.Length];
+        cardDatas = new Queue<CardData>();
+        createOnlyCardDatas = new Queue<CardData>();
+
+        int deckCardNo = 0;
+        int createCardNo = 0;
 
         for (int i = 0; i < subFolders.Length; i++)
         {
-            cardDatas[i] = new CardData();
-            cardDatas[i].id = i;
+            var cardData = new CardData();
 
             var folderName = subFolders[i];
 
@@ -458,6 +499,21 @@ public static class CardDataBase
                 // 読み飛ばし用
                 string skip;
 
+                // 生成専用かどうか分岐
+                skip = loader.ReadString();
+                Debug.Assert(skip == "[CREATE_ONLY]", "生成専用テキストがない");
+                skip = loader.ReadString();
+                if(skip == "ON")
+                {
+                    cardData.id = createCardNo++;
+                    createOnlyCardDatas.Enqueue(cardData);
+                }
+                else
+                {
+                    cardData.id = deckCardNo++;
+                    cardDatas.Enqueue(cardData);
+                }
+
                 // カードタイプ(ファイターor効果ファイターorイベント)
                 skip = loader.ReadString();
                 Debug.Assert(skip == "[TYPE]", "カードID" + i  +"のテキストずれてるクマ");
@@ -465,27 +521,27 @@ public static class CardDataBase
                 switch (cardType)
                 {
                     case CardType.Fighter:
-                        cardDatas[i].fighterCard = new FighterCard();
+                        cardData.fighterCard = new FighterCard();
                         break;
 
                     case CardType.AbilityFighter:
-                        cardDatas[i].abilityFighterCard = new AbilityFighterCard();
+                        cardData.abilityFighterCard = new AbilityFighterCard();
                         break;
 
                     case CardType.Joker:
-                        cardDatas[i].jokerCard = new JokerCard();
+                        cardData.jokerCard = new JokerCard();
                         break;
 
                     case CardType.Support:
-                        cardDatas[i].supportCard = new SupportCard();
+                        cardData.supportCard = new SupportCard();
                         break;
 
                     case CardType.Connect:
-                        cardDatas[i].connectCard = new ConnectCard();
+                        cardData.connectCard = new ConnectCard();
                         break;
 
                     case CardType.Intercept:
-                        cardDatas[i].interceptCard = new InterceptCard();
+                        cardData.interceptCard = new InterceptCard();
                         break;
 
                     default:
@@ -493,17 +549,17 @@ public static class CardDataBase
                         break;
                 }
 
-                cardDatas[i].cardType = cardType;
+                cardData.cardType = cardType;
 
                 // カード名
                 skip = loader.ReadString();
                 Debug.Assert(skip == "[NAME]", "カードID" + i + "のテキストずれてるクマ");
-                cardDatas[i].cardName = loader.ReadString();
+                cardData.cardName = loader.ReadString();
 
                 // レア度
                 skip = loader.ReadString();
                 Debug.Assert(skip == "[RARE]", "カードID" + i + "のテキストずれてるクマ");
-                cardDatas[i].rarelity = (Rarelity)loader.ReadInt();
+                cardData.rarelity = (Rarelity)loader.ReadInt();
 
                 // 効果テキスト
                 skip = loader.ReadString();
@@ -512,9 +568,9 @@ public static class CardDataBase
                 {
                     var str = loader.ReadLine();
                     if (str == "") continue;
-                    if (str.ToCharArray()[0] == '[') break;
+                    if (str == "[F_TEXT]") break;
 
-                    cardDatas[i].abilityText += str + "\r\n";
+                    cardData.abilityText += str + "\r\n";
                 }
 
                 // フレーバーテキスト
@@ -525,12 +581,12 @@ public static class CardDataBase
                     if (str == "") continue;
                     if (str.ToCharArray()[0] == '[') break;
 
-                    cardDatas[i].flavorText += str + "\r\n";
+                    cardData.flavorText += str + "\r\n";
                 }
 
                 // パワー
                 //skip = loader.ReadString();
-                cardDatas[i].power = loader.ReadInt();
+                cardData.power = loader.ReadInt();
 
                 // タイプによって分岐
                 switch (cardType)
@@ -541,16 +597,16 @@ public static class CardDataBase
                             skip = loader.ReadLine();
                             // 種族の個数
                             int numSyuzoku = loader.ReadInt();
-                            cardDatas[i].fighterCard.syuzokus = new Syuzoku[numSyuzoku];
+                            cardData.fighterCard.syuzokus = new Syuzoku[numSyuzoku];
                             // 個数に応じて読み込み
                             for (int j = 0; j < numSyuzoku; j++)
-                                cardDatas[i].fighterCard.syuzokus[j] = (Syuzoku)loader.ReadInt();
+                                cardData.fighterCard.syuzokus[j] = (Syuzoku)loader.ReadInt();
                         }
                         break;
 
                     case CardType.AbilityFighter:
                         {
-                            var abilityFighterCard = cardDatas[i].abilityFighterCard;
+                            var abilityFighterCard = cardData.abilityFighterCard;
 
                             // 種族
                             skip = loader.ReadLine();
@@ -577,7 +633,7 @@ public static class CardDataBase
                     case CardType.Joker:
                         // 効果
                         {
-                            var jokerCard = cardDatas[i].GetJokerCard();
+                            var jokerCard = cardData.GetJokerCard();
 
                             // [NEW] 今は種族考慮せず
                             //// 種族
@@ -605,7 +661,7 @@ public static class CardDataBase
                     case CardType.Connect:
                     case CardType.Intercept:
                         {
-                            var eventCard = cardDatas[i].GetEventCard();
+                            var eventCard = cardData.GetEventCard();
 
                             // 効果
                             var numAbility = loader.ReadInt();
@@ -623,7 +679,7 @@ public static class CardDataBase
 
             // キャラ画像
             var texture = PngLoader.LoadPNG(path + "/image.png");
-            if (texture) cardDatas[i].image = /*texture;*/  Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
+            if (texture) cardData.image = /*texture;*/  Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
 
             //Debug.Log("カードID" + i + "番の読み込みが完了");
         }
@@ -648,51 +704,52 @@ public static class CardDataBase
         Queue<CardData> bufIntercept = new Queue<CardData>();
         //buf.AddRange(cardDatas);
         //buf.Sort(SortFunction);
-        for (int i = 0; i < cardDatas.Length; i++)
+        for (int i = 0; i < cardDatas.Count; i++)
         {
+            var cardData = cardDatas.ToArray()[i];
             // イベントじゃない
-            if (!cardDatas[i].isEventCard())
+            if (!cardData.isEventCard())
             {
                 // ジョーカーカード
-                if (cardDatas[i].cardType == CardType.Joker)
+                if (cardData.cardType == CardType.Joker)
                 {
-                    bufJoker.Enqueue(cardDatas[i]);
+                    bufJoker.Enqueue(cardData);
                 }
                 // ストライカーカード
                 else
                 {
                     // パワーで分岐
-                    switch (cardDatas[i].power)
+                    switch (cardData.power)
                     {
                         case 1:
-                            bufPower1.Enqueue(cardDatas[i]);
+                            bufPower1.Enqueue(cardData);
                             break;
                         case 2:
-                            bufPower2.Enqueue(cardDatas[i]);
+                            bufPower2.Enqueue(cardData);
                             break;
                         case 3:
-                            bufPower3.Enqueue(cardDatas[i]);
+                            bufPower3.Enqueue(cardData);
                             break;
                         case 4:
-                            bufPower4.Enqueue(cardDatas[i]);
+                            bufPower4.Enqueue(cardData);
                             break;
                         case 5:
-                            bufPower5.Enqueue(cardDatas[i]);
+                            bufPower5.Enqueue(cardData);
                             break;
                         case 6:
-                            bufPower6.Enqueue(cardDatas[i]);
+                            bufPower6.Enqueue(cardData);
                             break;
                         case 7:
-                            bufPower7.Enqueue(cardDatas[i]);
+                            bufPower7.Enqueue(cardData);
                             break;
                         case 8:
-                            bufPower8.Enqueue(cardDatas[i]);
+                            bufPower8.Enqueue(cardData);
                             break;
                         case 9:
-                            bufPower9.Enqueue(cardDatas[i]);
+                            bufPower9.Enqueue(cardData);
                             break;
                         case 10:
-                            bufPower10.Enqueue(cardDatas[i]);
+                            bufPower10.Enqueue(cardData);
                             break;
                     }
 
@@ -701,10 +758,10 @@ public static class CardDataBase
             else
             {
                 // イベントカード追加
-                if (cardDatas[i].cardType == CardType.Support)
-                    bufSupport.Enqueue(cardDatas[i]);
-                if (cardDatas[i].cardType == CardType.Intercept)
-                    bufIntercept.Enqueue(cardDatas[i]);
+                if (cardData.cardType == CardType.Support)
+                    bufSupport.Enqueue(cardData);
+                if (cardData.cardType == CardType.Intercept)
+                    bufIntercept.Enqueue(cardData);
             }
         }
         // 順番にリストに格納

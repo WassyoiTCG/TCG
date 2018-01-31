@@ -1,3 +1,6 @@
+[CREATE_ONLY]
+OFF
+
 [TYPE]
 1
 

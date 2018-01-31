@@ -593,7 +593,7 @@ namespace Skill
             // もふりとか、生成系の処理
             if (fromPlace == From.NewCreate)
             {
-                CardData createCardData = CardDataBase.GetCardData(skillData.s_iValue2);
+                CardData createCardData = CardDataBase.GetCreateOnlyCardData(skillData.s_iValue2);
                 // 生成
                 drawCard = toPlayer.cardObjectManager.CreateCardObject(createCardData, toPlayer.isMyPlayer);
                 drawCard.ShowDraw(0.75f, false);
