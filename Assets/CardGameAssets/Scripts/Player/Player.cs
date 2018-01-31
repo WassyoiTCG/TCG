@@ -24,9 +24,11 @@ public class Player : MonoBehaviour
     public void SetNoneLimitPower()
     {
         // ★リミット処理を解除
-        LimitPowerData data = new Player.LimitPowerData();
+        LimitPowerData data = new LimitPowerData();
         data.type = LimitPowerType.NoneLimit;
         SetLimitPowerData(data);
+        // カード選択から解除
+        cardObjectManager.SetLimitPower(0, LimitPowerType.NoneLimit);
     }
     public LimitPowerData GetLimitPowerData() { return limitPowerData; }
 

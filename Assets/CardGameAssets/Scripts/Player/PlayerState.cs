@@ -197,7 +197,15 @@ namespace PlayerState
 
         public override void Exit(Player player)
         {
-
+            if(player.isMyPlayer)
+            {
+                // サポートでドローした後のカードにも制限を適用
+                var limitData = player.GetLimitPowerData();
+                if(limitData.type != Player.LimitPowerType.NoneLimit)
+                {
+                    player.cardObjectManager.SetLimitPower(limitData.value, limitData.type);
+                }
+            }
         }
 
         public override bool OnMessage(Player player, MessageInfo message)

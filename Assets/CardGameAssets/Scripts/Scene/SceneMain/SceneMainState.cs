@@ -684,6 +684,9 @@ namespace SceneMainState
         {
             Debug.Log("サポートカードステート開始");
             waitTimer = 1.0f;
+
+            // プレイヤーもサポート待ちにする
+            pMain.playerManager.SetState(PlayerState.SupportWait.GetInstance());
         }
 
         public override void Execute(SceneMain pMain)
@@ -730,9 +733,6 @@ namespace SceneMainState
         {
 
             pMain.iWaitFrame = 0; // 初期化
-
-            // ★ここでプレイヤーのリミットを解除する
-            pMain.playerManager.LimitReset();
         }
 
         public override void Execute(SceneMain pMain)
@@ -772,6 +772,9 @@ namespace SceneMainState
         {
             // バトルフェーズエフェクト発動
             pMain.turnEndEffect.Action(PHASE_TYPE.BATTLE);
+
+            // ★ここでプレイヤーのリミットを解除する
+            pMain.playerManager.LimitReset();
         }
 
         public override void Execute(SceneMain pMain)

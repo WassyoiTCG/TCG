@@ -200,30 +200,29 @@ public class CardObjectManager : MonoBehaviour
         return draw;
     }
 
-    // 手札をストライカーセット状態にする(コネクトとインターセプトを選択不可に)
-    public void ChangeHandSetStrikerMode(Player player)
+    public void SetLimitPower(int power, Player.LimitPowerType type)
     {
         // 0123 パワー制限制限
         Func<int, bool> CheckLimitPower = null;
-        int limitValue = player.GetLimitPowerData().value;
+        int limitValue = power;
         bool isLimit = true;
         // ラムダ関数登録
-        switch(player.GetLimitPowerData().type)
+        switch (type)
         {
             case Player.LimitPowerType.Ika:
-                CheckLimitPower = (power) => { return (power <= limitValue); };
+                CheckLimitPower = (p) => { return (p <= limitValue); };
                 break;
 
             case Player.LimitPowerType.Ijou:
-                CheckLimitPower = (power) => { return (power >= limitValue); };
+                CheckLimitPower = (p) => { return (p >= limitValue); };
                 break;
 
             case Player.LimitPowerType.Kisuu:
-                CheckLimitPower = (power) => { return (power % 2 == 1); };
+                CheckLimitPower = (p) => { return (p % 2 == 1); };
                 break;
 
             case Player.LimitPowerType.Guusuu:
-                CheckLimitPower = (power) => { return (power % 2 == 0); };
+                CheckLimitPower = (p) => { return (p % 2 == 0); };
                 break;
 
             case Player.LimitPowerType.NoneLimit:
@@ -232,9 +231,9 @@ public class CardObjectManager : MonoBehaviour
                 break;
         }
 
-        foreach(Card card in handCards)
+        foreach (Card card in handCards)
         {
-            switch(card.cardData.cardType)
+            switch (card.cardData.cardType)
             {
                 // ストライカー系は無条件で選択可能
                 case CardType.Fighter:
@@ -245,22 +244,19 @@ public class CardObjectManager : MonoBehaviour
                         // リミット条件満たしていないなら選べなくする
                         if (!CheckLimitPower(card.cardData.power))
                         {
-                            card.SetNotSelectFlag(true);
                             // ×発動
                             card.banEffect.gameObject.SetActive(true);
                             card.banEffect.Action();
                         }
                         else
                         {
-                            card.SetNotSelectFlag(false);
                             // ×を消す
                             card.banEffect.gameObject.SetActive(false);
                         }
                     }
-                    // 制限がない状態なら、選べるようにする
+                    // 制限がない状態なら
                     else
                     {
-                        card.SetNotSelectFlag(false);
                         // ×を消す
                         card.banEffect.gameObject.SetActive(false);
                     }
@@ -273,22 +269,19 @@ public class CardObjectManager : MonoBehaviour
                         // リミット条件満たしていないなら選べなくする
                         if (!CheckLimitPower(card.cardData.power))
                         {
-                            card.SetNotSelectFlag(true);
                             // ×発動
                             card.banEffect.gameObject.SetActive(true);
                             card.banEffect.Action();
                         }
                         else
                         {
-                            card.SetNotSelectFlag(false);
                             // ×を消す
                             card.banEffect.gameObject.SetActive(false);
                         }
                     }
-                    // 制限がない状態なら、選べるようにする
+                    // 制限がない状態なら
                     else
                     {
-                        card.SetNotSelectFlag(false);
                         // ×を消す
                         card.banEffect.gameObject.SetActive(false);
                     }
@@ -301,17 +294,142 @@ public class CardObjectManager : MonoBehaviour
                         // リミット条件満たしていないなら選べなくする
                         if (!CheckLimitPower(card.cardData.power))
                         {
-                            card.SetNotSelectFlag(true);
                             // ×発動
                             card.banEffect.gameObject.SetActive(true);
                             card.banEffect.Action();
                         }
                         else
                         {
-                            card.SetNotSelectFlag(false);
                             // ×を消す
                             card.banEffect.gameObject.SetActive(false);
                         }
+                    }
+                    // 制限がない状態なら
+                    else
+                    {
+                        // ×を消す
+                        card.banEffect.gameObject.SetActive(false);
+                    }
+                    break;
+            }
+        }
+    }
+
+    // 手札をストライカーセット状態にする(コネクトとインターセプトを選択不可に)
+    public void ChangeHandSetStrikerMode(Player player)
+    {
+        //// 0123 パワー制限制限
+        //Func<int, bool> CheckLimitPower = null;
+        //int limitValue = player.GetLimitPowerData().value;
+        //bool isLimit = true;
+        //// ラムダ関数登録
+        //switch(player.GetLimitPowerData().type)
+        //{
+        //    case Player.LimitPowerType.Ika:
+        //        CheckLimitPower = (power) => { return (power <= limitValue); };
+        //        break;
+
+        //    case Player.LimitPowerType.Ijou:
+        //        CheckLimitPower = (power) => { return (power >= limitValue); };
+        //        break;
+
+        //    case Player.LimitPowerType.Kisuu:
+        //        CheckLimitPower = (power) => { return (power % 2 == 1); };
+        //        break;
+
+        //    case Player.LimitPowerType.Guusuu:
+        //        CheckLimitPower = (power) => { return (power % 2 == 0); };
+        //        break;
+
+        //    case Player.LimitPowerType.NoneLimit:
+        //    default:
+        //        isLimit = false;
+        //        break;
+        //}
+
+        foreach(Card card in handCards)
+        {
+            switch(card.cardData.cardType)
+            {
+                // ストライカー系は無条件で選択可能
+                case CardType.Fighter:
+                    // パワー制限がある場合
+                    //if (isLimit)
+                    if(card.banEffect.gameObject.activeSelf)
+                    {
+                        //// パワー制限に引っかかるかチェック
+                        //// リミット条件満たしていないなら選べなくする
+                        //if (!CheckLimitPower(card.cardData.power))
+                        //{
+                            card.SetNotSelectFlag(true);
+                            //// ×発動
+                            //card.banEffect.gameObject.SetActive(true);
+                            //card.banEffect.Action();
+                        //}
+                        //else
+                        //{
+                        //    card.SetNotSelectFlag(false);
+                        //    // ×を消す
+                        //    card.banEffect.gameObject.SetActive(false);
+                        //}
+                    }
+                    // 制限がない状態なら、選べるようにする
+                    else
+                    {
+                        card.SetNotSelectFlag(false);
+                        // ×を消す
+                        card.banEffect.gameObject.SetActive(false);
+                    }
+                    break;
+                case CardType.AbilityFighter:
+                    // パワー制限がある場合
+                    //if (isLimit)
+                    if(card.banEffect.gameObject.activeSelf)
+                    {
+                        //// パワー制限に引っかかるかチェック
+                        //// リミット条件満たしていないなら選べなくする
+                        //if (!CheckLimitPower(card.cardData.power))
+                        //{
+                            card.SetNotSelectFlag(true);
+                        //    // ×発動
+                        //    card.banEffect.gameObject.SetActive(true);
+                        //    card.banEffect.Action();
+                        //}
+                        //else
+                        //{
+                        //    card.SetNotSelectFlag(false);
+                        //    // ×を消す
+                        //    card.banEffect.gameObject.SetActive(false);
+                        //}
+                    }
+                    // 制限がない状態なら、選べるようにする
+                    else
+                    {
+                        card.SetNotSelectFlag(false);
+                        // ×を消す
+                        card.banEffect.gameObject.SetActive(false);
+                    }
+                    break;
+                case CardType.Joker:
+                    // パワー制限がある場合
+                    //if (isLimit)
+                    if (card.banEffect.gameObject.activeSelf)
+                    {
+                        //// パワー制限に引っかかるかチェック
+                        //// リミット条件満たしていないなら選べなくする
+                        //if (!CheckLimitPower(card.cardData.power))
+                        //{
+                            card.SetNotSelectFlag(true);
+                        //    // ×発動
+                        //    card.banEffect.gameObject.SetActive(true);
+                        //    card.banEffect.Action();
+                        //}
+                        //else
+                        //{
+                        //    card.SetNotSelectFlag(false);
+                        //    // ×を消す
+                        //    card.banEffect.gameObject.SetActive(false);
+                        //}
                     }
                     // 制限がない状態なら、選べるようにする
                     else

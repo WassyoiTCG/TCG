@@ -199,83 +199,87 @@ public class PlayerManager : MonoBehaviour
             player.SetNoneLimitPower();
     }
 
+    void ActionAbility(Player player, CardData card)
+    {
+        var abilityManager = GameObject.Find("GameMain/AbilityManager").GetComponent<CardAbilityManager>();
+
+        CardAbilityData[] abilityes;
+
+        // [NEW] JOKERにインターセプトを適用したので分岐がいる
+        if (card.cardType == CardType.Joker)
+        {
+            abilityes = card.jokerCard.abilityDatas;
+        }
+        else if (card.cardType == CardType.Intercept)
+        {
+            abilityes = card.interceptCard.abilityDatas;
+        }
+        else
+        {
+            Debug.LogWarning("INTERCEPT・JOKER以外の何かが来た");
+            return;
+        }
+        foreach (CardAbilityData ability in abilityes)
+        {
+            // 効果の条件を満たしているかどうか(爪痕とかのチェック)
+            if (!ability.HatsudouOK(player)) return;
+            // 効果発動!
+            abilityManager.PushAbility(ability, player.isMyPlayer);
+        }
+    }
+
     public void ActionIntercept()
     {
-        var card0 = players[0].GetFieldEventCard();
-        var card1 = players[1].GetFieldEventCard();
-        var abilityManager = GameObject.Find("GameMain/AbilityManager").GetComponent<CardAbilityManager>();
-        if (card0 == null)
+        var myPlayer = GetMyPlayer();
+        var cpuPlayer = GetCPUPlayer();
+        var myCard = myPlayer.GetFieldEventCard();
+        var cpuCard = cpuPlayer.GetFieldEventCard();
+        if (myCard == null)
         {
-            if (card1 == null)
+            if (cpuCard == null)
             {
             // どっちもいべんとつかってない
 
                 return;
             }
 
-            // [NEW] JOKERにインターセプトを適用したので分岐がいる
-            if (card1.cardType == CardType.Joker)
-            {
+            ActionAbility(cpuPlayer, cpuCard);
 
-                var abilityes = card1.jokerCard.abilityDatas;
-                foreach (CardAbilityData ability in abilityes)
-                {
-                    // 効果の条件を満たしているかどうか(爪痕とかのチェック)
-                    if (!ability.HatsudouOK(players[1])) return;
-                    // 効果発動!
-                    abilityManager.PushAbility(ability, players[1].isMyPlayer);
-                }
-            }
-            else if (card1.cardType == CardType.Intercept)
-            {
-
-                var abilityes = card1.interceptCard.abilityDatas;
-                foreach (CardAbilityData ability in abilityes)
-                {
-                    // 効果の条件を満たしているかどうか(爪痕とかのチェック)
-                    if (!ability.HatsudouOK(players[1])) return;
-                    // 効果発動!
-                    abilityManager.PushAbility(ability, players[1].isMyPlayer);
-                }
-            }
-            else
-            {
-                Debug.LogWarning("INTERCEPT・JOKER以外の何かが来た");
-            } 
+            //// [NEW] JOKERにインターセプトを適用したので分岐がいる
+            //if (cpuCard.cardType == CardType.Joker)
+            //{
+            //    ActionAbility(cpuPlayer, cpuCard);
+            //}
+            //else if (cpuCard.cardType == CardType.Intercept)
+            //{
+            //    ActionAbility(cpuPlayer, cpuCard);
+            //}
+            //else
+            //{
+            //    Debug.LogWarning("INTERCEPT・JOKER以外の何かが来た");
+            //} 
             
 
         }
-        else if(card1 == null)
+        else if(cpuCard == null)
         {
-            // [NEW] JOKERにインターセプトを適用したので分岐がいる
+            ActionAbility(myPlayer, myCard);
 
-            if (card0.cardType == CardType.Joker)
-            {
-                var abilityes = card0.jokerCard.abilityDatas;
-                foreach (CardAbilityData ability in abilityes)
-                {
-                    // 効果の条件を満たしているかどうか(爪痕とかのチェック)
-                    if (!ability.HatsudouOK(players[0])) return;
-                    // 効果発動!
-                    abilityManager.PushAbility(ability, players[0].isMyPlayer);
-                }
-            }
-            else if (card0.cardType == CardType.Intercept)
-            {
-                var abilityes = card0.interceptCard.abilityDatas;
-                foreach (CardAbilityData ability in abilityes)
-                {
-                    // 効果の条件を満たしているかどうか(爪痕とかのチェック)
-                    if (!ability.HatsudouOK(players[0])) return;
-                    // 効果発動!
-                    abilityManager.PushAbility(ability, players[0].isMyPlayer);
-                }
-            }
-            else
-            {
-                Debug.LogWarning("INTERCEPT・JOKER以外の何かが来た");
-            }
+            // [NEW] JOKERにインターセプトを適用したので分岐がいる
+            //if (myCard.cardType == CardType.Joker)
+            //{
+            //    ActionAbility(myPlayer, myCard);
+            //}
+            //else if (myCard.cardType == CardType.Intercept)
+            //{
+            //    ActionAbility(myPlayer, myCard);
+            //}
+            //else
+            //{
+            //    Debug.LogWarning("INTERCEPT・JOKER以外の何かが来た");
+            //}
         }
+        // 両方発動
         else
         {
             // 相殺処理
@@ -299,66 +303,98 @@ public class PlayerManager : MonoBehaviour
             //        abilityManager.PushAbility(ability, players[1].isMyPlayer);
             //}
 
+            // どっちが先に発動するか決める
+            Player firstPlayer = new Player(), secondPlayer = new Player();
+            CardData firstCard = new CardData(), secondCard = new CardData();
 
-            //+---------------------------------------------------
-            // [NEW] JOKERにインターセプトを適用したので分岐がいる
-            if (card0.cardType == CardType.Joker)
+            // こっち側が先
+            Func<int> myPlayerFirst = () =>
             {
-                var abilityes = card0.jokerCard.abilityDatas;
-                foreach (CardAbilityData ability in abilityes)
-                {
-                    // 効果の条件を満たしているかどうか(爪痕とかのチェック)
-                    if (!ability.HatsudouOK(players[0])) return;
-                    // 効果発動!
-                    abilityManager.PushAbility(ability, players[0].isMyPlayer);
-                }
-            }
-            else if (card0.cardType == CardType.Intercept)
+                firstPlayer = myPlayer;
+                firstCard = myCard;
+                secondPlayer = cpuPlayer;
+                secondCard = cpuCard;
+                return 0;
+            };
+            // 向こう側が先
+            Func<int> cpuPlayerFirst = () =>
             {
-                var abilityes = card0.interceptCard.abilityDatas;
-                foreach (CardAbilityData ability in abilityes)
-                {
-                    // 効果の条件を満たしているかどうか(爪痕とかのチェック)
-                    if (!ability.HatsudouOK(players[0])) return;
-                    // 効果発動!
-                    abilityManager.PushAbility(ability, players[0].isMyPlayer);
-                }
+                firstPlayer = cpuPlayer;
+                firstCard = cpuCard;
+                secondPlayer = myPlayer;
+                secondCard = myCard;
+                return 0;
+            };
+
+            // ストライカーのパワーが高い順
+            if (myPlayer.jissainoPower > cpuPlayer.jissainoPower)
+            {
+                myPlayerFirst();
             }
+            else if(cpuPlayer.jissainoPower > myPlayer.jissainoPower)
+            {
+                cpuPlayerFirst();
+            }
+            // パワーどっちも同じだった
             else
             {
-                Debug.LogWarning("INTERCEPT・JOKER以外の何かが来た");
-            }
-
-            //+---------------------------------------------------
-            // [NEW] JOKERにインターセプトを適用したので分岐がいる
-            if (card1.cardType == CardType.Joker)
-            {
-
-                var abilityes = card1.jokerCard.abilityDatas;
-                foreach (CardAbilityData ability in abilityes)
+                // 体力が低い人から発動する
+                if(uiManager.myLP.iLP < uiManager.cpuLP.iLP)
                 {
-                    // 効果の条件を満たしているかどうか(爪痕とかのチェック)
-                    if (!ability.HatsudouOK(players[1])) return;
-                    // 効果発動!
-                    abilityManager.PushAbility(ability, players[1].isMyPlayer);
+                    myPlayerFirst();
+                }
+                else if(uiManager.cpuLP.iLP < uiManager.myLP.iLP)
+                {
+                    cpuPlayerFirst();
+                }
+                // 体力どっちも同じだったので、ランダム
+                else
+                {
+                    if (UnityEngine.Random.Range(0, 1) == 0)
+                    {
+                        myPlayerFirst();
+                    }
+                    else
+                    {
+                        cpuPlayerFirst();
+                    }
                 }
             }
-            else if (card1.cardType == CardType.Intercept)
-            {
 
-                var abilityes = card1.interceptCard.abilityDatas;
-                foreach (CardAbilityData ability in abilityes)
-                {
-                    // 効果の条件を満たしているかどうか(爪痕とかのチェック)
-                    if (!ability.HatsudouOK(players[1])) return;
-                    // 効果発動!
-                    abilityManager.PushAbility(ability, players[1].isMyPlayer);
-                }
-            }
-            else
-            {
-                Debug.LogWarning("INTERCEPT・JOKER以外の何かが来た");
-            }
+            // 先に発動する効果を発動
+            ActionAbility(firstPlayer, firstCard);
+            // 後に発動する効果を発動
+            ActionAbility(secondPlayer, secondCard);
+
+            ////+---------------------------------------------------
+            //// [NEW] JOKERにインターセプトを適用したので分岐がいる
+            //if (firstCard.cardType == CardType.Joker)
+            //{
+            //    ActionAbility(firstPlayer, firstCard);
+            //}
+            //else if (firstCard.cardType == CardType.Intercept)
+            //{
+            //    ActionAbility(firstPlayer, firstCard);
+            //}
+            //else
+            //{
+            //    Debug.LogWarning("INTERCEPT・JOKER以外の何かが来た");
+            //}
+
+            ////+---------------------------------------------------
+            //// [NEW] JOKERにインターセプトを適用したので分岐がいる
+            //if (secondCard.cardType == CardType.Joker)
+            //{
+            //    ActionAbility(secondPlayer, secondCard);
+            //}
+            //else if (secondCard.cardType == CardType.Intercept)
+            //{
+            //    ActionAbility(secondPlayer, secondCard);
+            //}
+            //else
+            //{
+            //    Debug.LogWarning("INTERCEPT・JOKER以外の何かが来た");
+            //}
 
             //if (!ability0.HatsudouOK(players[0]))
             //{

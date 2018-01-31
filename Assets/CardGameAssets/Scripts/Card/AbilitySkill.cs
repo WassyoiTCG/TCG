@@ -1202,6 +1202,9 @@ namespace Skill
             Player targetPlayer = abilityData.GetPlayerByAbilitiTarget(target);
             // 対象プレイヤーに制限セット
             targetPlayer.SetLimitPowerData(limitPowerData);
+
+            // バツを表示
+            targetPlayer.cardObjectManager.SetLimitPower(limitPowerData.value, limitPowerData.type);
         }
 
         public override Result Execute(CardAbilityData abilityData)
