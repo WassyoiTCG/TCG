@@ -1205,6 +1205,46 @@ namespace Skill
 
             // バツを表示
             targetPlayer.cardObjectManager.SetLimitPower(limitPowerData.value, limitPowerData.type);
+
+            // エフェクト発動！
+            //+-------------------------------------------
+            // 演出
+            // Ability列車
+            ActionEffectUVInfo info = new ActionEffectUVInfo();
+            info.iEffectType = (int)UV_EFFECT_TYPE.RESTRAIN;
+            Vector3 vPos = targetPlayer.GetFieldStrikerCard().cacheTransform.localPosition;
+
+            Card strikerCard = targetPlayer.GetFieldStrikerCard();
+            
+            // もし相手のフィールドにストライカーが居なかったら
+            if (strikerCard == null)
+            {
+
+            }
+            // フィールドにストライカーがいた時
+            else
+            {
+                // 相手と味方でZ値変える
+                if (targetPlayer.isMyPlayer == true)
+                {
+                    vPos.z -= strikerCard.rootTransform.localPosition.z;
+                }
+                else
+                {
+                    vPos.z += strikerCard.rootTransform.localPosition.z;
+                }
+            }
+
+            //const int AbjustY = 10;
+            info.fPosX = vPos.x;
+            info.fPosY = vPos.y + 1.0f;
+            info.fPosZ = vPos.z;
+
+            MessageManager.DispatchOffline(CardAbilityData.playerManager.GetPlayerID(targetPlayer.isMyPlayer),
+             MessageType.ActionEffectUV, info);
+            // SE
+            oulAudio.PlaySE("Heal");
+
         }
 
         public override Result Execute(CardAbilityData abilityData)

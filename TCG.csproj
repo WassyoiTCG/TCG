@@ -118,6 +118,7 @@
     <Compile Include="Assets\CardGameAssets\Scripts\UI\CemeteryInfomationUI.cs" />
     <Compile Include="Assets\CardGameAssets\Scripts\UI\CpuWatchCard.cs" />
     <Compile Include="Assets\CardGameAssets\Scripts\UI\LifePoint.cs" />
+    <Compile Include="Assets\CardGameAssets\Scripts\UI\NetworkErrorWindow.cs" />
     <Compile Include="Assets\CardGameAssets\Scripts\UI\NumberSelectUIManager.cs" />
     <Compile Include="Assets\CardGameAssets\Scripts\UI\RemainingPoints.cs" />
     <Compile Include="Assets\CardGameAssets\Scripts\UI\TextAnimation.cs" />

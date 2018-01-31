@@ -5,7 +5,7 @@ using UnityEngine;
 
 public enum UV_EFFECT_TYPE
 {
-    SUMMON, UP_STATUS, DOWN_STATUS,SKILL_WIN, SKILL_LOSE,BIG_DAMAGE,
+    SUMMON, UP_STATUS, DOWN_STATUS,SKILL_WIN, SKILL_LOSE,BIG_DAMAGE, RESTRAIN,
     END
 }
 
@@ -33,6 +33,8 @@ public class UVEffectManager : MonoBehaviour {
     public GameObject SkiilWin;
     public GameObject SkiilLose;
     public GameObject BigDamage;
+
+    public GameObject Restrain;
 
     //+------------------------------------------
     //      
@@ -91,6 +93,11 @@ public class UVEffectManager : MonoBehaviour {
             case UV_EFFECT_TYPE.BIG_DAMAGE:
                 BigDamage.SetActive(true);
                 BigDamage.GetComponent<UVScroll>().Action(vPos, vVec, vVec, iDelay);
+
+                break;
+            case UV_EFFECT_TYPE.RESTRAIN:
+                Restrain.SetActive(true);
+                Restrain.GetComponent<UVScroll>().Action(vPos, vVec, vVec, iDelay);
 
                 break;
             case UV_EFFECT_TYPE.END:

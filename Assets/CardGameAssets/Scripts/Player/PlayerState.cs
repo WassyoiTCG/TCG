@@ -133,7 +133,7 @@ namespace PlayerState
 
         public override void Enter(Player player)
         {
-            if(player.isMyPlayer)
+            //if(player.isMyPlayer)
             {
                 // インターセプトを選択不可能に
                 player.cardObjectManager.ChangeHandSetStrikerMode(player);
