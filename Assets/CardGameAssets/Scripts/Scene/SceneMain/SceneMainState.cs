@@ -537,7 +537,7 @@ namespace SceneMainState
             if (pMain.playerManager.isStateEnd())
             {
                 // ステートチェンジ
-                pMain.ChangeState(KeptCreate.GetInstance());
+                pMain.ChangeState(SetStriker.GetInstance());
             }
         }
 
@@ -560,35 +560,41 @@ namespace SceneMainState
         public override void Enter(SceneMain pMain)
         {
             // 自分のHPが表示されている点数以下なら
-            if(pMain.uiManager.myLP.iLP <= pMain.pointManager.GetCurrentPoint())
+            if (pMain.uiManager.myLP.iLP <= pMain.pointManager.GetCurrentPoint())
             {
                 Player cpuPlayer = pMain.playerManager.GetCPUPlayer();
                 KEPTCARD_TYPE keptType = (KEPTCARD_TYPE)cpuPlayer.iKeptCardType;
 
-                // とどめ最終段階までいってないなら
-                if (keptType != KEPTCARD_TYPE.END)
+                // 手札にとどめカードがあるかどうか
+                CardData keptCard = cpuPlayer.deckManager.GetKeptCard();
+
+                if (keptCard == null)
                 {
-                    // 相手にとどめカードを生成する
-                    CardAbilityData ability = new CardAbilityData();
-                    ability.abilityTriggerType = AbilityTriggerType.EventCard;
-                    ability.cost = new Cost.NoneLimit();
-                    ability.costType = CostType.NoneLimit;
-                    ability.numSkill = 1;
-                    ability.skillDatas = new CardAbilityData.SkillData[1];
-                    ability.skillDatas[0] = new CardAbilityData.SkillData();
-                    ability.skillDatas[0].nextSkillNumber = -1;
-                    ability.skillDatas[0].skill = new Skill.CardMove();
-                    ability.skillDatas[0].s_iValue0 = 4;    // 生成
-                    ability.skillDatas[0].s_iValue1 = 0;    // 自分
-                    ability.skillDatas[0].s_iValue2 = (int)cpuPlayer.iKeptCardType;  // 生成カードID  
-                    ability.skillDatas[0].s_iValue3 = 0;    // 手札に
-                    ability.skillDatas[0].s_iValue4 = 0;    // 自分
+                    // とどめ最終段階までいってないなら
+                    if (keptType != KEPTCARD_TYPE.END)
+                    {
+                        // 相手にとどめカードを生成する
+                        CardAbilityData ability = new CardAbilityData();
+                        ability.abilityTriggerType = AbilityTriggerType.EventCard;
+                        ability.cost = new Cost.NoneLimit();
+                        ability.costType = CostType.NoneLimit;
+                        ability.numSkill = 1;
+                        ability.skillDatas = new CardAbilityData.SkillData[1];
+                        ability.skillDatas[0] = new CardAbilityData.SkillData();
+                        ability.skillDatas[0].nextSkillNumber = -1;
+                        ability.skillDatas[0].skill = new Skill.CardMove();
+                        ability.skillDatas[0].s_iValue0 = 4;    // 生成
+                        ability.skillDatas[0].s_iValue1 = 0;    // 自分
+                        ability.skillDatas[0].s_iValue2 = (int)KEPTCARD_TYPE.FIRST;/*cpuPlayer.iKeptCardType;*/  // 生成カードID  
+                        ability.skillDatas[0].s_iValue3 = 0;    // 手札に
+                        ability.skillDatas[0].s_iValue4 = 0;    // 自分
 
-                    // 生成アビリティ発動
-                    pMain.abilityManager.PushAbility(ability, cpuPlayer.isMyPlayer);
+                        // 生成アビリティ発動
+                        pMain.abilityManager.PushAbility(ability, cpuPlayer.isMyPlayer);
 
-                    // 次のとどめLv
-                    cpuPlayer.iKeptCardType++;
+                        // 次のとどめLv
+                        cpuPlayer.iKeptCardType++;
+                    }
                 }
             }
 
@@ -599,30 +605,36 @@ namespace SceneMainState
 
                 KEPTCARD_TYPE keptType = (KEPTCARD_TYPE)myPlayer.iKeptCardType;
 
-                // とどめ最終段階までいってないなら
-                if (keptType != KEPTCARD_TYPE.END)
+                // 手札にとどめカードがあるかどうか
+                CardData keptCard = myPlayer.deckManager.GetKeptCard();
+
+                if (keptCard == null)
                 {
-                    // 自分にとどめカードを生成する
-                    CardAbilityData ability = new CardAbilityData();
-                    ability.abilityTriggerType = AbilityTriggerType.EventCard;
-                    ability.cost = new Cost.NoneLimit();
-                    ability.costType = CostType.NoneLimit;
-                    ability.numSkill = 1;
-                    ability.skillDatas = new CardAbilityData.SkillData[1];
-                    ability.skillDatas[0] = new CardAbilityData.SkillData();
-                    ability.skillDatas[0].nextSkillNumber = -1;
-                    ability.skillDatas[0].skill = new Skill.CardMove();
-                    ability.skillDatas[0].s_iValue0 = 4;    // 生成
-                    ability.skillDatas[0].s_iValue1 = 0;    // 自分
-                    ability.skillDatas[0].s_iValue2 = (int)myPlayer.iKeptCardType;  // 生成カードID  
-                    ability.skillDatas[0].s_iValue3 = 0;    // 手札に
-                    ability.skillDatas[0].s_iValue4 = 0;    // 自分
+                    // とどめ最終段階までいってないなら
+                    if (keptType != KEPTCARD_TYPE.END)
+                    {
+                        // 自分にとどめカードを生成する
+                        CardAbilityData ability = new CardAbilityData();
+                        ability.abilityTriggerType = AbilityTriggerType.EventCard;
+                        ability.cost = new Cost.NoneLimit();
+                        ability.costType = CostType.NoneLimit;
+                        ability.numSkill = 1;
+                        ability.skillDatas = new CardAbilityData.SkillData[1];
+                        ability.skillDatas[0] = new CardAbilityData.SkillData();
+                        ability.skillDatas[0].nextSkillNumber = -1;
+                        ability.skillDatas[0].skill = new Skill.CardMove();
+                        ability.skillDatas[0].s_iValue0 = 4;    // 生成
+                        ability.skillDatas[0].s_iValue1 = 0;    // 自分
+                        ability.skillDatas[0].s_iValue2 = (int)KEPTCARD_TYPE.FIRST;/*cpuPlayer.iKeptCardType;*/  // 生成カードID  
+                        ability.skillDatas[0].s_iValue3 = 0;    // 手札に
+                        ability.skillDatas[0].s_iValue4 = 0;    // 自分
 
-                    // 生成アビリティ発動
-                    pMain.abilityManager.PushAbility(ability, myPlayer.isMyPlayer);
+                        // 生成アビリティ発動
+                        pMain.abilityManager.PushAbility(ability, myPlayer.isMyPlayer);
 
-                    // 次のとどめLv
-                    myPlayer.iKeptCardType++;
+                        // 次のとどめLv
+                        myPlayer.iKeptCardType++;
+                    }
                 }
             }
         }

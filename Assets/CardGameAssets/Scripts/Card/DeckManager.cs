@@ -597,4 +597,19 @@ public class DeckManager
     //    }
     //    return false;
     //}
+
+    // とどめカードを取得
+    public CardData GetKeptCard()
+    {
+        foreach(CardData card in hand)
+        {
+            if(card.cardName.Substring(0, 6) == "とどめの一撃")
+            {
+                return card;
+            }
+        }
+
+        // 見つからなかった
+        return null;
+    }
 }
