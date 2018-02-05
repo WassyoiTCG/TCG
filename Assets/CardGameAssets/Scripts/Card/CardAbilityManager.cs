@@ -44,6 +44,7 @@ public class CardAbilityData
 
     public const int RefValueFlag = 256;
     public const int HalfHPCostFlag = 256;
+    public const int QuatarHPCostFlag = 257;
 
     // structにするとvarに格納して処理したときに無駄になってしまう
     public class SkillData
@@ -149,6 +150,14 @@ public class CardAbilityData
                         if (lifeCost == HalfHPCostFlag)
                         {
                             lifeCost = uiManager.GetScore(isMyPlayer) / 2;
+                            // 切り捨て処理
+                            lifeCost = (lifeCost / 10) * 10;
+                        }
+                        if(lifeCost == QuatarHPCostFlag)
+                        {
+                            lifeCost = uiManager.GetScore(isMyPlayer) / 4;
+                            // 切り捨て処理
+                            lifeCost = (lifeCost / 10) * 10;
                         }
                         uiManager.Damage(isMyPlayer, lifeCost);
                     }
@@ -242,7 +251,9 @@ public class CardAbilityData
         // [1210] 宝箱にも設定している？
         // ライフがコスト以下だと発動できない
         var life = uiManager.GetScore(isMyPlayer);
-        if (lifeCost != HalfHPCostFlag)
+        // 割合ダメージ系のコストでないなら
+        if (lifeCost != HalfHPCostFlag && lifeCost != QuatarHPCostFlag)
+            // 体力がコスト以下なら発動できない
             if (life <= lifeCost) return false;
 
         return cost.HatsudouCheck(this, player);

@@ -21,6 +21,52 @@ namespace Skill
         public abstract bool OnMessage(CardAbilityData abilityData, MessageInfo message);
         // 終了チェック
         public bool EndCheck() { return endFlag; }
+
+        public void ActionUVEffect(Card card, UV_EFFECT_TYPE type, bool isMyPlayer)
+        {
+            // エフェクト発動！
+            //+-------------------------------------------
+            // 演出
+            // Ability列車
+            ActionEffectUVInfo info = new ActionEffectUVInfo();
+            info.iEffectType = (int)type;
+            Vector3 vPos = Vector3.zero;/* = targetPlayer.GetFieldStrikerCard().cacheTransform.localPosition*/;
+
+            // もし相手のフィールドにストライカーが居なかったら
+            if (card == null)
+            {
+                // 定数からとってくる
+                vPos = CardObjectManager.strikerField;
+
+                // 逆サイド
+                if (!isMyPlayer) vPos.z = -vPos.z;
+            }
+            // フィールドにストライカーがいた時
+            else
+            {
+                vPos = card.cacheTransform.localPosition;
+
+                // 相手と味方でZ値変える
+                if (isMyPlayer == true)
+                {
+                    vPos.z -= card.rootTransform.localPosition.z;
+                }
+                else
+                {
+                    vPos.z += card.rootTransform.localPosition.z;
+                }
+            }
+
+            //const int AbjustY = 10;
+            info.fPosX = vPos.x;
+            info.fPosY = vPos.y + 1.0f;
+            info.fPosZ = vPos.z;
+
+            MessageManager.DispatchOffline(CardAbilityData.playerManager.GetPlayerID(isMyPlayer),
+             MessageType.ActionEffectUV, info);
+            // SE
+            oulAudio.PlaySE("Heal");
+        }
     }
 
     // 効果なし
@@ -356,92 +402,95 @@ namespace Skill
                 switch (arithmetic)
                 {
                     case Arithmetic.Addition:
-                        // パワー加算エフェクト
-                        //+-------------------------------------------
-                        // 演出
-                        // Ability列車
-                        ActionEffectUVInfo info = new ActionEffectUVInfo();
-                        info.iEffectType = (int)UV_EFFECT_TYPE.UP_STATUS;
-                        Vector3 vPos = player.GetFieldStrikerCard().cacheTransform.localPosition;
-                        // 相手と味方でZ値変える
-                        if (player.isMyPlayer == true)
-                        {
-                            vPos.z -= strikerCard.rootTransform.localPosition.z;
-                        }
-                        else
-                        {
-                            vPos.z += strikerCard.rootTransform.localPosition.z;
-                        }
+                        //// パワー加算エフェクト
+                        ////+-------------------------------------------
+                        base.ActionUVEffect(player.GetFieldStrikerCard(), UV_EFFECT_TYPE.UP_STATUS, player.isMyPlayer);
+                        //// 演出
+                        //// Ability列車
+                        //ActionEffectUVInfo info = new ActionEffectUVInfo();
+                        //info.iEffectType = (int)UV_EFFECT_TYPE.UP_STATUS;
+                        //Vector3 vPos = player.GetFieldStrikerCard().cacheTransform.localPosition;
+                        //// 相手と味方でZ値変える
+                        //if (player.isMyPlayer == true)
+                        //{
+                        //    vPos.z -= strikerCard.rootTransform.localPosition.z;
+                        //}
+                        //else
+                        //{
+                        //    vPos.z += strikerCard.rootTransform.localPosition.z;
+                        //}
 
-                        //const int AbjustY = 10;
-                        info.fPosX = vPos.x;
-                        info.fPosY = vPos.y;
-                        info.fPosZ = vPos.z;
+                        ////const int AbjustY = 10;
+                        //info.fPosX = vPos.x;
+                        //info.fPosY = vPos.y;
+                        //info.fPosZ = vPos.z;
 
-                        MessageManager.DispatchOffline(CardAbilityData.playerManager.GetPlayerID(player.isMyPlayer),
-                         MessageType.ActionEffectUV, info);
-                        // SE
-                        oulAudio.PlaySE("Heal");
+                        //MessageManager.DispatchOffline(CardAbilityData.playerManager.GetPlayerID(player.isMyPlayer),
+                        // MessageType.ActionEffectUV, info);
+                        //// SE
+                        //oulAudio.PlaySE("Heal");
 
                         break;
 
                     case Arithmetic.Subtraction:
-                        // パワー減算エフェクト
-                        //+-------------------------------------------
-                        // 演出
-                        // Ability列車
-                        ActionEffectUVInfo info2 = new ActionEffectUVInfo();
-                        info2.iEffectType = (int)UV_EFFECT_TYPE.DOWN_STATUS;
-                        Vector3 vPos2 = player.GetFieldStrikerCard().cacheTransform.localPosition;
-                        // 相手と味方でZ値変える
-                        if (player.isMyPlayer == true)
-                        {
-                            vPos2.z -= strikerCard.rootTransform.localPosition.z;
-                        }
-                        else
-                        {
-                            vPos2.z += strikerCard.rootTransform.localPosition.z;
-                        }
-                      
+                        //// パワー減算エフェクト
+                        ////+-------------------------------------------
+                        base.ActionUVEffect(player.GetFieldStrikerCard(), UV_EFFECT_TYPE.DOWN_STATUS, player.isMyPlayer);
+                        //// 演出
+                        //// Ability列車
+                        //ActionEffectUVInfo info2 = new ActionEffectUVInfo();
+                        //info2.iEffectType = (int)UV_EFFECT_TYPE.DOWN_STATUS;
+                        //Vector3 vPos2 = player.GetFieldStrikerCard().cacheTransform.localPosition;
+                        //// 相手と味方でZ値変える
+                        //if (player.isMyPlayer == true)
+                        //{
+                        //    vPos2.z -= strikerCard.rootTransform.localPosition.z;
+                        //}
+                        //else
+                        //{
+                        //    vPos2.z += strikerCard.rootTransform.localPosition.z;
+                        //}
 
-                        info2.fPosX = vPos2.x;
-                        info2.fPosY = vPos2.y;
-                        info2.fPosZ = vPos2.z;
 
-                        MessageManager.DispatchOffline(CardAbilityData.playerManager.GetPlayerID(player.isMyPlayer),
-                         MessageType.ActionEffectUV, info2);
-                        // SE
-                        oulAudio.PlaySE("Heal");
+                        //info2.fPosX = vPos2.x;
+                        //info2.fPosY = vPos2.y;
+                        //info2.fPosZ = vPos2.z;
+
+                        //MessageManager.DispatchOffline(CardAbilityData.playerManager.GetPlayerID(player.isMyPlayer),
+                        // MessageType.ActionEffectUV, info2);
+                        //// SE
+                        //oulAudio.PlaySE("Heal");
 
                         break;
 
                     case Arithmetic.Multiplication:
-                        // 掛け算(パワー0にするだったらvalueが0になってる)
-                        //+-------------------------------------------
-                        // 演出
-                        // Ability列車
-                        ActionEffectUVInfo info3 = new ActionEffectUVInfo();
-                        info3.iEffectType = (int)UV_EFFECT_TYPE.UP_STATUS;
-                        Vector3 vPos3 = player.GetFieldStrikerCard().cacheTransform.localPosition;
-                        // 相手と味方でZ値変える
-                        if (player.isMyPlayer == true)
-                        {
-                            vPos3.z -= strikerCard.rootTransform.localPosition.z;
-                        }
-                        else
-                        {
-                            vPos3.z += strikerCard.rootTransform.localPosition.z;
-                        }
+                        //// 掛け算(パワー0にするだったらvalueが0になってる)
+                        ////+-------------------------------------------
+                        base.ActionUVEffect(player.GetFieldStrikerCard(), UV_EFFECT_TYPE.UP_STATUS, player.isMyPlayer);
+                        //// 演出
+                        //// Ability列車
+                        //ActionEffectUVInfo info3 = new ActionEffectUVInfo();
+                        //info3.iEffectType = (int)UV_EFFECT_TYPE.UP_STATUS;
+                        //Vector3 vPos3 = player.GetFieldStrikerCard().cacheTransform.localPosition;
+                        //// 相手と味方でZ値変える
+                        //if (player.isMyPlayer == true)
+                        //{
+                        //    vPos3.z -= strikerCard.rootTransform.localPosition.z;
+                        //}
+                        //else
+                        //{
+                        //    vPos3.z += strikerCard.rootTransform.localPosition.z;
+                        //}
 
-                        //const int AbjustY = 10;
-                        info3.fPosX = vPos3.x;
-                        info3.fPosY = vPos3.y;
-                        info3.fPosZ = vPos3.z;
+                        ////const int AbjustY = 10;
+                        //info3.fPosX = vPos3.x;
+                        //info3.fPosY = vPos3.y;
+                        //info3.fPosZ = vPos3.z;
 
-                        MessageManager.DispatchOffline(CardAbilityData.playerManager.GetPlayerID(player.isMyPlayer),
-                         MessageType.ActionEffectUV, info3);
-                        // SE
-                        oulAudio.PlaySE("Heal");
+                        //MessageManager.DispatchOffline(CardAbilityData.playerManager.GetPlayerID(player.isMyPlayer),
+                        // MessageType.ActionEffectUV, info3);
+                        //// SE
+                        //oulAudio.PlaySE("Heal");
 
 
                         break;
@@ -1206,44 +1255,48 @@ namespace Skill
             // バツを表示
             targetPlayer.cardObjectManager.SetLimitPower(limitPowerData.value, limitPowerData.type);
 
-            // エフェクト発動！
-            //+-------------------------------------------
-            // 演出
-            // Ability列車
-            ActionEffectUVInfo info = new ActionEffectUVInfo();
-            info.iEffectType = (int)UV_EFFECT_TYPE.RESTRAIN;
-            Vector3 vPos = targetPlayer.GetFieldStrikerCard().cacheTransform.localPosition;
+            //// エフェクト発動！
+            base.ActionUVEffect(targetPlayer.GetFieldStrikerCard(), UV_EFFECT_TYPE.RESTRAIN, targetPlayer.isMyPlayer);
 
-            Card strikerCard = targetPlayer.GetFieldStrikerCard();
+            ////+-------------------------------------------
+            //// 演出
+            //// Ability列車
+            //ActionEffectUVInfo info = new ActionEffectUVInfo();
+            //info.iEffectType = (int)UV_EFFECT_TYPE.RESTRAIN;
+            //Vector3 vPos = Vector3.zero;/* = targetPlayer.GetFieldStrikerCard().cacheTransform.localPosition*/;
+
+            //Card strikerCard = targetPlayer.GetFieldStrikerCard();
             
-            // もし相手のフィールドにストライカーが居なかったら
-            if (strikerCard == null)
-            {
+            //// もし相手のフィールドにストライカーが居なかったら
+            //if (strikerCard == null)
+            //{
 
-            }
-            // フィールドにストライカーがいた時
-            else
-            {
-                // 相手と味方でZ値変える
-                if (targetPlayer.isMyPlayer == true)
-                {
-                    vPos.z -= strikerCard.rootTransform.localPosition.z;
-                }
-                else
-                {
-                    vPos.z += strikerCard.rootTransform.localPosition.z;
-                }
-            }
+            //}
+            //// フィールドにストライカーがいた時
+            //else
+            //{
+            //    vPos = targetPlayer.GetFieldStrikerCard().cacheTransform.localPosition;
 
-            //const int AbjustY = 10;
-            info.fPosX = vPos.x;
-            info.fPosY = vPos.y + 1.0f;
-            info.fPosZ = vPos.z;
+            //    // 相手と味方でZ値変える
+            //    if (targetPlayer.isMyPlayer == true)
+            //    {
+            //        vPos.z -= strikerCard.rootTransform.localPosition.z;
+            //    }
+            //    else
+            //    {
+            //        vPos.z += strikerCard.rootTransform.localPosition.z;
+            //    }
+            //}
 
-            MessageManager.DispatchOffline(CardAbilityData.playerManager.GetPlayerID(targetPlayer.isMyPlayer),
-             MessageType.ActionEffectUV, info);
-            // SE
-            oulAudio.PlaySE("Heal");
+            ////const int AbjustY = 10;
+            //info.fPosX = vPos.x;
+            //info.fPosY = vPos.y + 1.0f;
+            //info.fPosZ = vPos.z;
+
+            //MessageManager.DispatchOffline(CardAbilityData.playerManager.GetPlayerID(targetPlayer.isMyPlayer),
+            // MessageType.ActionEffectUV, info);
+            //// SE
+            //oulAudio.PlaySE("Heal");
 
         }
 

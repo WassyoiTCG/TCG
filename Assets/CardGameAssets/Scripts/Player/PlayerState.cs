@@ -226,7 +226,7 @@ namespace PlayerState
             player.isPushedJunbiKanryo = false;
             player.isPushedNextButton= false;
 
-            if (player.isMyPlayer)
+            //if (player.isMyPlayer)
             {
                 // インターセプトを選択可能に
                 player.cardObjectManager.ChangeHandSetInterceptMode(player);

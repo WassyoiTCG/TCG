@@ -11,7 +11,7 @@ OFF
 1
 
 [A_TEXT]
-Œø‰Ê‚È‚µ
+Œø‰Ê‚È‚µ ƒQƒXƒgŠG
 
 [F_TEXT]
 ‚Â‚æ‚¢
